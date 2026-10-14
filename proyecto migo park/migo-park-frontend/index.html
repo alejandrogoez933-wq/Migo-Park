@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Migo Park - Ingresar</title>
+
+<style>
+  :root {
+    --verde: #2E9E4F;
+    --naranja: #F5893A;
+    --negro: #111111;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #fff;
+    color: var(--negro);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .card {
+    width: 340px;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .password-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .password-container input {
+    width: 100%;
+    padding: 10px 42px 10px 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .password-container input:focus {
+    outline: none;
+    border-color: var(--verde);
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-60%);
+    width: auto;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: #555;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .toggle-password:hover {
+    opacity: 1;
+  }
+
+  input:not(.password-container input) {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--verde);
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--verde);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  button[type="submit"]:hover {
+    opacity: 0.9;
+  }
+
+  .toggle {
+    text-align: center;
+    margin-top: 14px;
+    color: var(--naranja);
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  #mensaje {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .error {
+    color: #c0392b;
+  }
+
+  .ok {
+    color: var(--verde);
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>Migo Park</h1>
+
+  <!-- LOGIN -->
+  <form id="formLogin">
+
+    <input
+      type="email"
+      id="loginCorreo"
+      placeholder="Correo"
+      required
+    >
+
+    <div class="password-container">
+
+      <input
+        type="password"
+        id="loginContrasena"
+        placeholder="Contraseña"
+        required
+      >
+
+      <button
+        type="button"
+        class="toggle-password"
+        onclick="alternarContrasena('loginContrasena', this)"
+      >
+        ✔️
+      </button>
+
+    </div>
+
+    <button type="submit">
+      Ingresar
+    </button>
+
+    <div class="toggle" onclick="mostrarRecuperar()" style="margin-top:8px;">
+      ¿Olvidaste tu contraseña?
+    </div>
+
+  </form>
+
+
+  <!-- REGISTRO -->
+  <form id="formRegistro" style="display:none;">
+
+    <input
+      type="text"
+      id="regNombre"
+      placeholder="Nombre completo"
+      required
+    >
+
+    <input
+      type="email"
+      id="regCorreo"
+      placeholder="Correo"
+      required
+    >
+
+    <div class="password-container">
+
+      <input
+        type="password"
+        id="regContrasena"
+        placeholder="Contraseña"
+        required
+      >
+
+      <button
+        type="button"
+        class="toggle-password"
+        onclick="alternarContrasena('regContrasena', this)"
+      >
+        ✔️
+      </button>
+
+    </div>
+
+    <input
+      type="text"
+      id="regTelefono"
+      placeholder="Teléfono (opcional)"
+    >
+
+    <button type="submit">
+      Crear cuenta
+    </button>
+
+  </form>
+
+
+  <!-- RECUPERAR CONTRASEÑA -->
+  <div id="vistaRecuperar" style="display:none;">
+
+    <form id="formRecuperarPaso1">
+      <p style="font-size:14px;color:#555;margin:0 0 10px;">
+        Escribe tu correo y te enviaremos un código para cambiar tu contraseña.
+      </p>
+      <input type="email" id="recCorreo" placeholder="Correo" autocomplete="off" required>
+      <button type="submit" id="btnEnviarCodigo">Enviar código</button>
+    </form>
+
+    <form id="formRecuperarPaso2" style="display:none;">
+      <p style="font-size:14px;color:#555;margin:0 0 10px;">
+        Escribe el código que recibiste y tu nueva contraseña.
+      </p>
+      <input type="text" id="recToken" placeholder="Código recibido" autocomplete="one-time-code" required>
+      <div class="password-container">
+        <input type="password" id="recContrasena" placeholder="Nueva contraseña (mínimo 8 caracteres)" autocomplete="new-password" required>
+        <button type="button" class="toggle-password" onclick="alternarContrasena('recContrasena', this)">✔️</button>
+      </div>
+      <button type="submit" id="btnRestablecer">Cambiar contraseña</button>
+    </form>
+
+    <div class="toggle" onclick="volverALogin()">
+      ¿Ya tienes el código? Volver a iniciar sesión
+    </div>
+
+  </div>
+
+
+  <div
+    class="toggle"
+    id="toggleTexto"
+    onclick="cambiarModo()"
+  >
+    ¿No tienes cuenta? Crear cuenta
+  </div>
+
+  <div id="mensaje"></div>
+
+</div>
+
+
+<script>
+
+  const API_URL = 'http://localhost:4000/api';
+
+  let modoRegistro = false;
+
+
+
+  // MOSTRAR / OCULTAR CONTRASEÑA
+ 
+  function alternarContrasena(id, boton) {
+
+    const campo = document.getElementById(id);
+
+    if (!campo) {
+      return;
+    }
+
+    if (campo.type === 'password') {
+
+      campo.type = 'text';
+
+      boton.textContent = '❌';
+
+    } else {
+
+      campo.type = 'password';
+
+      boton.textContent = '✔️';
+
+    }
+  }
+
+
+
+  // CAMBIAR ENTRE LOGIN Y REGISTRO
+
+
+  function cambiarModo() {
+
+    modoRegistro = !modoRegistro;
+
+    document.getElementById('formLogin').style.display =
+      modoRegistro ? 'none' : 'block';
+
+    document.getElementById('formRegistro').style.display =
+      modoRegistro ? 'block' : 'none';
+
+    document.getElementById('toggleTexto').textContent =
+      modoRegistro
+        ? '¿Ya tienes cuenta? Ingresar'
+        : '¿No tienes cuenta? Crear cuenta';
+
+    document.getElementById('mensaje').textContent = '';
+  }
+
+
+
+  // MOSTRAR MENSAJE
+
+
+  function mostrarMensaje(texto, esError) {
+
+    const el = document.getElementById('mensaje');
+
+    el.textContent = texto;
+
+    el.className = esError
+      ? 'error'
+      : 'ok';
+  }
+
+
+  // RECUPERAR CONTRASEÑA
+
+
+  function limpiarRecuperar() {
+    document.getElementById('formRecuperarPaso1').reset();
+    document.getElementById('formRecuperarPaso2').reset();
+
+    // Dejar la contraseña oculta de nuevo
+    const campo = document.getElementById('recContrasena');
+    campo.type = 'password';
+    document
+      .querySelector('#formRecuperarPaso2 .toggle-password')
+      .textContent = '✔️';
+
+    document.getElementById('btnEnviarCodigo').disabled = false;
+    document.getElementById('btnRestablecer').disabled = false;
+  }
+
+  function mostrarRecuperar() {
+    limpiarRecuperar();
+    document.getElementById('formLogin').style.display = 'none';
+    document.getElementById('formRegistro').style.display = 'none';
+    document.getElementById('toggleTexto').style.display = 'none';
+    document.getElementById('vistaRecuperar').style.display = 'block';
+    document.getElementById('formRecuperarPaso1').style.display = 'block';
+    document.getElementById('formRecuperarPaso2').style.display = 'none';
+    document.getElementById('mensaje').textContent = '';
+  }
+
+  function volverALogin() {
+    limpiarRecuperar();
+    modoRegistro = false;
+    document.getElementById('vistaRecuperar').style.display = 'none';
+    document.getElementById('formLogin').style.display = 'block';
+    document.getElementById('formRegistro').style.display = 'none';
+    document.getElementById('toggleTexto').style.display = 'block';
+    document.getElementById('toggleTexto').textContent = '¿No tienes cuenta? Crear cuenta';
+    document.getElementById('mensaje').textContent = '';
+  }
+
+  document
+    .getElementById('formRecuperarPaso1')
+    .addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const correo = document.getElementById('recCorreo').value;
+      const btn = document.getElementById('btnEnviarCodigo');
+      btn.disabled = true;
+      try {
+        const resp = await fetch(`${API_URL}/auth/olvide-contrasena`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ correo }),
+        });
+        const data = await resp.json();
+        mostrarMensaje(data.mensaje || data.error || 'Solicitud enviada.', !resp.ok);
+        if (resp.ok) {
+          document.getElementById('formRecuperarPaso1').style.display = 'none';
+          document.getElementById('formRecuperarPaso2').style.display = 'block';
+        }
+      } catch (err) {
+        mostrarMensaje('No se pudo conectar con el servidor.', true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+  document
+    .getElementById('formRecuperarPaso2')
+    .addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = document.getElementById('recToken').value.trim();
+      const contrasena = document.getElementById('recContrasena').value;
+      const btn = document.getElementById('btnRestablecer');
+      btn.disabled = true;
+      try {
+        const resp = await fetch(`${API_URL}/auth/restablecer-contrasena`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, contrasena }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          mostrarMensaje(data.error || 'No se pudo restablecer', true);
+          btn.disabled = false;
+          return;
+        }
+        mostrarMensaje('Contraseña actualizada. Ya puedes iniciar sesión.', false);
+        setTimeout(volverALogin, 1200);
+      } catch (err) {
+        mostrarMensaje('No se pudo conectar con el servidor.', true);
+        btn.disabled = false;
+      }
+    });
+
+
+
+  // LOGIN
+
+  document
+    .getElementById('formLogin')
+    .addEventListener('submit', async (e) => {
+
+      e.preventDefault();
+
+      const correo =
+        document.getElementById('loginCorreo').value;
+
+      const contrasena =
+        document.getElementById('loginContrasena').value;
+
+
+      try {
+
+        const resp = await fetch(
+          `${API_URL}/auth/login`,
+          {
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+              correo,
+              contrasena
+            })
+          }
+        );
+
+
+        const data = await resp.json();
+
+
+        if (!resp.ok) {
+
+          mostrarMensaje(
+            data.error || 'Error al iniciar sesión',
+            true
+          );
+
+          return;
+        }
+
+
+        sessionStorage.setItem(
+          'token',
+          data.token
+        );
+
+        sessionStorage.setItem(
+          'usuario',
+          JSON.stringify(data.usuario)
+        );
+
+
+        mostrarMensaje(
+          '¡Bienvenido, ' +
+          data.usuario.nombre +
+          '!',
+          false
+        );
+
+
+        const destino =
+          (
+            data.usuario.rol === 'administrador' ||
+            data.usuario.rol === 'soporte'
+          )
+            ? 'admin.html'
+            : 'home.html';
+
+
+        setTimeout(() => {
+
+          window.location.href = destino;
+
+        }, 800);
+
+
+      } catch (err) {
+
+        mostrarMensaje(
+          'No se pudo conectar con el servidor. ¿Está corriendo node src/server.js?',
+          true
+        );
+      }
+
+    });
+
+
+  // ==========================================
+  // REGISTRO
+  // ==========================================
+
+  document
+    .getElementById('formRegistro')
+    .addEventListener('submit', async (e) => {
+
+      e.preventDefault();
+
+
+      const nombre =
+        document.getElementById('regNombre').value;
+
+      const correo =
+        document.getElementById('regCorreo').value;
+
+      const contrasena =
+        document.getElementById('regContrasena').value;
+
+      const telefono =
+        document.getElementById('regTelefono').value;
+
+
+      try {
+
+        const resp = await fetch(
+          `${API_URL}/auth/registro`,
+          {
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+              nombre,
+              correo,
+              contrasena,
+              telefono
+            })
+          }
+        );
+
+
+        const data = await resp.json();
+
+
+        if (!resp.ok) {
+
+          mostrarMensaje(
+            data.error || 'Error al registrar',
+            true
+          );
+
+          return;
+        }
+
+
+        sessionStorage.setItem(
+          'token',
+          data.token
+        );
+
+        sessionStorage.setItem(
+          'usuario',
+          JSON.stringify(data.usuario)
+        );
+
+
+        mostrarMensaje(
+          'Cuenta creada. Entrando...',
+          false
+        );
+
+
+        setTimeout(() => {
+
+          window.location.href = 'home.html';
+
+        }, 800);
+
+
+      } catch (err) {
+
+        mostrarMensaje(
+          'No se pudo conectar con el servidor. ¿Está corriendo node src/server.js?',
+          true
+        );
+      }
+
+    });
+
+</script>
+
+</body>
+</html>

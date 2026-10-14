@@ -1,0 +1,1198 @@
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+const pool = require('../db');
+const { verificarToken, requiereRol } = require('../middlewares/auth.middleware');
+
+const router = express.Router();
+
+const idValido = (id) =>
+  /^\d+$/.test(String(id)) &&
+  Number(id) <= 2147483647;
+
+const MAX_FOTOS = 6;
+
+const UPLOAD_DIR = path.join(
+  __dirname,
+  '..',
+  '..',
+  'uploads',
+  'espacios'
+);
+
+fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) =>
+    cb(null, UPLOAD_DIR),
+
+  filename: (req, file, cb) => {
+    const ext = {
+      'image/jpeg': '.jpg',
+      'image/png': '.png',
+      'image/webp': '.webp'
+    }[file.mimetype] || '';
+
+    cb(
+      null,
+      `espacio${req.params.id}_${Date.now()}_${Math.round(Math.random() * 1e9)}${ext}`
+    );
+  },
+});
+
+const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: MAX_FOTOS
+  },
+
+  fileFilter: (req, file, cb) => {
+    if (
+      ![
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+      ].includes(file.mimetype)
+    ) {
+      return cb(
+        new Error(
+          'Solo se permiten imágenes JPG, PNG o WEBP'
+        )
+      );
+    }
+
+    cb(null, true);
+  },
+});
+
+
+async function espacioDelDueno(id, usuarioId) {
+
+  if (!idValido(id)) {
+    return null;
+  }
+
+  const r = await pool.query(
+    `
+    SELECT *
+    FROM espacios_parqueo
+    WHERE id = $1
+      AND arrendador_id = $2
+    `,
+    [id, usuarioId]
+  );
+
+  return r.rows[0] || null;
+}
+
+
+const SUBCONSULTA_MEDIA = `
+  COALESCE((
+    SELECT json_agg(
+      json_build_object(
+        'id', m.id,
+        'url', m.url
+      )
+      ORDER BY m.orden, m.id
+    )
+    FROM espacio_media m
+    WHERE m.espacio_id = e.id
+  ), '[]') AS fotos
+`;
+
+
+const SUBCONSULTA_RATING = `
+  COALESCE(
+    (
+      SELECT ROUND(
+        AVG(c.puntuacion)::numeric,
+        1
+      )
+      FROM calificaciones c
+      WHERE c.espacio_id = e.id
+    ),
+    0
+  ) AS promedio_calificacion,
+
+  COALESCE(
+    (
+      SELECT COUNT(*)::int
+      FROM calificaciones c
+      WHERE c.espacio_id = e.id
+    ),
+    0
+  ) AS total_calificaciones
+`;
+
+
+// ======================================================
+// POST /api/espacios
+// Un cliente publica un espacio
+// ======================================================
+
+router.post(
+  '/',
+  verificarToken,
+  requiereRol('cliente'),
+  async (req, res) => {
+
+    const {
+      titulo,
+      descripcion,
+      direccion,
+      latitud,
+      longitud,
+      precio_hora,
+      tiene_camara,
+      tiene_porton,
+      tiene_iluminacion
+    } = req.body;
+
+    if (
+      !titulo ||
+      !direccion ||
+      latitud == null ||
+      longitud == null ||
+      !precio_hora
+    ) {
+      return res.status(400).json({
+        error: 'Faltan campos obligatorios del espacio'
+      });
+    }
+
+    const lat = Number(latitud);
+    const lng = Number(longitud);
+    const precio = Number(precio_hora);
+
+    if (
+      isNaN(lat) ||
+      lat < -90 ||
+      lat > 90 ||
+      isNaN(lng) ||
+      lng < -180 ||
+      lng > 180
+    ) {
+      return res.status(400).json({
+        error: 'Latitud o longitud fuera de rango'
+      });
+    }
+
+    if (
+      isNaN(precio) ||
+      precio <= 0
+    ) {
+      return res.status(400).json({
+        error: 'El precio por hora debe ser mayor a 0'
+      });
+    }
+
+    try {
+
+      const resultado = await pool.query(
+        `
+        INSERT INTO espacios_parqueo
+        (
+          arrendador_id,
+          titulo,
+          descripcion,
+          direccion,
+          latitud,
+          longitud,
+          precio_hora,
+          tiene_camara,
+          tiene_porton,
+          tiene_iluminacion
+        )
+        VALUES
+        (
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6,
+          $7,
+          $8,
+          $9,
+          $10
+        )
+        RETURNING *
+        `,
+        [
+          req.usuario.id,
+          titulo,
+          descripcion || null,
+          direccion,
+          lat,
+          lng,
+          precio,
+          !!tiene_camara,
+          !!tiene_porton,
+          !!tiene_iluminacion
+        ]
+      );
+
+      res.status(201).json(
+        resultado.rows[0]
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: 'Error al publicar el espacio'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// GET /api/espacios
+// Lista pública de espacios verificados y disponibles
+// ======================================================
+
+router.get('/', async (req, res) => {
+
+  try {
+
+    const resultado = await pool.query(
+      `
+      SELECT
+        e.*,
+        ${SUBCONSULTA_MEDIA},
+        ${SUBCONSULTA_RATING}
+
+      FROM espacios_parqueo e
+
+      WHERE e.verificado = TRUE
+        AND e.estado = 'disponible'
+
+      ORDER BY e.fecha_creacion DESC
+      `
+    );
+
+    res.json(resultado.rows);
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: 'Error al consultar espacios'
+    });
+  }
+});
+
+
+// ======================================================
+// GET /api/espacios/mios
+// Espacios del cliente que inició sesión
+// ======================================================
+
+router.get(
+  '/mios',
+  verificarToken,
+  requiereRol('cliente'),
+  async (req, res) => {
+
+    try {
+
+      const resultado = await pool.query(
+        `
+        SELECT
+          e.*,
+          ${SUBCONSULTA_MEDIA},
+          ${SUBCONSULTA_RATING}
+
+        FROM espacios_parqueo e
+
+        WHERE e.arrendador_id = $1
+
+        ORDER BY e.fecha_creacion DESC
+        `,
+        [req.usuario.id]
+      );
+
+      res.json(resultado.rows);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: 'Error al consultar tus espacios'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// GET /api/espacios/pendientes
+// Cola de verificación
+// No incluye espacios ya rechazados
+// ======================================================
+
+router.get(
+  '/pendientes',
+  verificarToken,
+  requiereRol('administrador', 'soporte'),
+  async (req, res) => {
+
+    try {
+
+      const resultado = await pool.query(
+        `
+        SELECT
+          e.*,
+          u.nombre AS arrendador_nombre,
+          u.correo AS arrendador_correo
+
+        FROM espacios_parqueo e
+
+        JOIN usuarios u
+          ON u.id = e.arrendador_id
+
+        WHERE e.verificado = FALSE
+          AND e.motivo_rechazo IS NULL
+
+        ORDER BY e.fecha_creacion ASC
+        `
+      );
+
+      res.json(resultado.rows);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: 'Error al consultar espacios pendientes'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// PUT /api/espacios/:id/verificar
+// Aprobar espacio
+// ======================================================
+
+router.put(
+  '/:id/verificar',
+  verificarToken,
+  requiereRol('administrador', 'soporte'),
+  async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+
+      const resultado = await pool.query(
+        `
+        UPDATE espacios_parqueo
+
+        SET
+          verificado = TRUE,
+          verificado_por = $1,
+          fecha_verificacion = NOW(),
+          motivo_rechazo = NULL,
+          fecha_rechazo = NULL
+
+        WHERE id = $2
+
+        RETURNING *
+        `,
+        [
+          req.usuario.id,
+          id
+        ]
+      );
+
+      if (resultado.rows.length === 0) {
+
+        return res.status(404).json({
+          error: 'Espacio no encontrado'
+        });
+      }
+
+      const espacio = resultado.rows[0];
+
+      await pool.query(
+        `
+        INSERT INTO notificaciones
+        (
+          usuario_id,
+          tipo,
+          mensaje
+        )
+        VALUES
+        (
+          $1,
+          'espacio_aprobado',
+          $2
+        )
+        `,
+        [
+          espacio.arrendador_id,
+          `Tu espacio "${espacio.titulo}" fue aprobado y ya es visible para los conductores.`
+        ]
+      );
+
+      res.json(espacio);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: 'Error al verificar el espacio'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// PUT /api/espacios/:id/rechazar
+// Rechazar espacio con motivo
+// ======================================================
+
+router.put(
+  '/:id/rechazar',
+  verificarToken,
+  requiereRol('administrador', 'soporte'),
+  async (req, res) => {
+
+    const { id } = req.params;
+
+    const motivo =
+      String(req.body.motivo || '').trim();
+
+    if (motivo.length < 5) {
+
+      return res.status(400).json({
+        error:
+          'Escribe el motivo del rechazo (mínimo 5 caracteres)'
+      });
+    }
+
+    try {
+
+      const resultado = await pool.query(
+        `
+        UPDATE espacios_parqueo
+
+        SET
+          motivo_rechazo = $1,
+          fecha_rechazo = NOW()
+
+        WHERE id = $2
+          AND verificado = FALSE
+
+        RETURNING *
+        `,
+        [
+          motivo,
+          id
+        ]
+      );
+
+      if (resultado.rows.length === 0) {
+
+        return res.status(404).json({
+          error:
+            'Espacio no encontrado o ya está verificado'
+        });
+      }
+
+      const espacio = resultado.rows[0];
+
+      await pool.query(
+        `
+        INSERT INTO notificaciones
+        (
+          usuario_id,
+          tipo,
+          mensaje
+        )
+        VALUES
+        (
+          $1,
+          'espacio_rechazado',
+          $2
+        )
+        `,
+        [
+          espacio.arrendador_id,
+          `Tu espacio "${espacio.titulo}" fue rechazado. Motivo: ${motivo}`
+        ]
+      );
+
+      res.json(espacio);
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: 'Error al rechazar el espacio'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// PUT /api/espacios/:id
+// Editar espacio rechazado
+// y volverlo a enviar a revisión
+// ======================================================
+
+router.put(
+  '/:id',
+  verificarToken,
+  requiereRol('cliente'),
+  async (req, res) => {
+
+    try {
+
+      const usuarioId = req.usuario.id;
+      const espacioId = req.params.id;
+
+      if (!idValido(espacioId)) {
+
+        return res.status(400).json({
+          error: 'ID de espacio inválido'
+        });
+      }
+
+      const {
+        titulo,
+        descripcion,
+        direccion,
+        latitud,
+        longitud,
+        precio_hora,
+        tiene_camara,
+        tiene_porton,
+        tiene_iluminacion
+      } = req.body;
+
+      if (
+        !titulo ||
+        !direccion ||
+        latitud == null ||
+        longitud == null ||
+        precio_hora == null
+      ) {
+
+        return res.status(400).json({
+          error: 'Faltan campos obligatorios del espacio'
+        });
+      }
+
+      const lat = Number(latitud);
+      const lng = Number(longitud);
+      const precio = Number(precio_hora);
+
+      if (
+        isNaN(lat) ||
+        lat < -90 ||
+        lat > 90 ||
+        isNaN(lng) ||
+        lng < -180 ||
+        lng > 180
+      ) {
+
+        return res.status(400).json({
+          error: 'Latitud o longitud fuera de rango'
+        });
+      }
+
+      if (
+        isNaN(precio) ||
+        precio <= 0
+      ) {
+
+        return res.status(400).json({
+          error:
+            'El precio por hora debe ser mayor a 0'
+        });
+      }
+
+      // Verificar que el espacio exista
+      // y pertenezca al cliente
+      const espacio = await pool.query(
+        `
+        SELECT *
+        FROM espacios_parqueo
+
+        WHERE id = $1
+          AND arrendador_id = $2
+        `,
+        [
+          espacioId,
+          usuarioId
+        ]
+      );
+
+      if (espacio.rows.length === 0) {
+
+        return res.status(404).json({
+          error:
+            'Espacio no encontrado o no te pertenece'
+        });
+      }
+
+      // Solo se puede corregir un espacio rechazado
+      if (!espacio.rows[0].motivo_rechazo) {
+
+        return res.status(400).json({
+          error:
+            'Este espacio no está rechazado.'
+        });
+      }
+
+      const resultado = await pool.query(
+        `
+        UPDATE espacios_parqueo
+
+        SET
+          titulo = $1,
+          descripcion = $2,
+          direccion = $3,
+          latitud = $4,
+          longitud = $5,
+          precio_hora = $6,
+          tiene_camara = $7,
+          tiene_porton = $8,
+          tiene_iluminacion = $9,
+
+          verificado = FALSE,
+          verificado_por = NULL,
+          fecha_verificacion = NULL,
+
+          motivo_rechazo = NULL,
+          fecha_rechazo = NULL
+
+        WHERE id = $10
+          AND arrendador_id = $11
+
+        RETURNING *
+        `,
+        [
+          titulo.trim(),
+          descripcion
+            ? descripcion.trim()
+            : null,
+          direccion.trim(),
+          lat,
+          lng,
+          precio,
+          !!tiene_camara,
+          !!tiene_porton,
+          !!tiene_iluminacion,
+          espacioId,
+          usuarioId
+        ]
+      );
+
+      res.json({
+        ok: true,
+        mensaje:
+          'Espacio corregido y enviado nuevamente a revisión.',
+        espacio:
+          resultado.rows[0]
+      });
+
+    } catch (err) {
+
+      console.error(
+        'Error al editar espacio rechazado:',
+        err
+      );
+
+      res.status(500).json({
+        error:
+          'Error al editar el espacio rechazado'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// POST /api/espacios/:id/media
+// Subir hasta 6 fotos
+// ======================================================
+
+router.post(
+  '/:id/media',
+  verificarToken,
+  requiereRol('cliente'),
+  (req, res) => {
+
+    upload.array(
+      'fotos',
+      MAX_FOTOS
+    )(req, res, async (err) => {
+
+      if (err) {
+
+        return res.status(400).json({
+          error:
+            err.message ||
+            'Error al subir las fotos'
+        });
+      }
+
+      try {
+
+        const espacio =
+          await espacioDelDueno(
+            req.params.id,
+            req.usuario.id
+          );
+
+        if (!espacio) {
+
+          (req.files || []).forEach(
+            f => fs.unlink(
+              f.path,
+              () => {}
+            )
+          );
+
+          return res.status(404).json({
+            error:
+              'Espacio no encontrado o no te pertenece'
+          });
+        }
+
+        if (
+          !req.files ||
+          req.files.length === 0
+        ) {
+
+          return res.status(400).json({
+            error:
+              'No se recibió ninguna foto'
+          });
+        }
+
+        const actuales =
+          await pool.query(
+            `
+            SELECT COUNT(*)::int AS n
+            FROM espacio_media
+            WHERE espacio_id = $1
+            `,
+            [espacio.id]
+          );
+
+        if (
+          actuales.rows[0].n +
+          req.files.length >
+          MAX_FOTOS
+        ) {
+
+          req.files.forEach(
+            f => fs.unlink(
+              f.path,
+              () => {}
+            )
+          );
+
+          return res.status(400).json({
+            error:
+              `Un espacio admite máximo ${MAX_FOTOS} fotos (ya tienes ${actuales.rows[0].n})`
+          });
+        }
+
+        const insertadas = [];
+
+        for (
+          let i = 0;
+          i < req.files.length;
+          i++
+        ) {
+
+          const url =
+            `/uploads/espacios/${req.files[i].filename}`;
+
+          const r =
+            await pool.query(
+              `
+              INSERT INTO espacio_media
+              (
+                espacio_id,
+                url,
+                tipo,
+                orden
+              )
+              VALUES
+              (
+                $1,
+                $2,
+                'foto',
+                $3
+              )
+
+              RETURNING id, url
+              `,
+              [
+                espacio.id,
+                url,
+                actuales.rows[0].n + i
+              ]
+            );
+
+          insertadas.push(
+            r.rows[0]
+          );
+        }
+
+        res.status(201).json(
+          insertadas
+        );
+
+      } catch (err2) {
+
+        (req.files || []).forEach(
+          f => fs.unlink(
+            f.path,
+            () => {}
+          )
+        );
+
+        console.error(err2);
+
+        res.status(500).json({
+          error:
+            'Error al guardar las fotos'
+        });
+      }
+    });
+  }
+);
+
+
+// ======================================================
+// DELETE /api/espacios/:id/media/:mediaId
+// Borrar una foto
+// ======================================================
+
+router.delete(
+  '/:id/media/:mediaId',
+  verificarToken,
+  requiereRol('cliente'),
+  async (req, res) => {
+
+    try {
+
+      const espacio =
+        await espacioDelDueno(
+          req.params.id,
+          req.usuario.id
+        );
+
+      if (!espacio) {
+
+        return res.status(404).json({
+          error:
+            'Espacio no encontrado o no te pertenece'
+        });
+      }
+
+      if (
+        !idValido(req.params.mediaId)
+      ) {
+
+        return res.status(404).json({
+          error:
+            'Foto no encontrada'
+        });
+      }
+
+      const r = await pool.query(
+        `
+        DELETE FROM espacio_media
+
+        WHERE id = $1
+          AND espacio_id = $2
+
+        RETURNING url
+        `,
+        [
+          req.params.mediaId,
+          espacio.id
+        ]
+      );
+
+      if (r.rows.length === 0) {
+
+        return res.status(404).json({
+          error:
+            'Foto no encontrada'
+        });
+      }
+
+      fs.unlink(
+        path.join(
+          UPLOAD_DIR,
+          path.basename(
+            r.rows[0].url
+          )
+        ),
+        () => {}
+      );
+
+      res.json({
+        ok: true
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error:
+          'Error al borrar la foto'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// GET /api/espacios/:id/disponibilidad
+// Fechas bloqueadas futuras
+// ======================================================
+
+router.get(
+  '/:id/disponibilidad',
+  verificarToken,
+  requiereRol('cliente'),
+  async (req, res) => {
+
+    try {
+
+      const espacio =
+        await espacioDelDueno(
+          req.params.id,
+          req.usuario.id
+        );
+
+      if (!espacio) {
+
+        return res.status(404).json({
+          error:
+            'Espacio no encontrado o no te pertenece'
+        });
+      }
+
+      const r =
+        await pool.query(
+          `
+          SELECT fecha
+
+          FROM disponibilidad_espacio
+
+          WHERE espacio_id = $1
+            AND habilitado = FALSE
+            AND fecha >= CURRENT_DATE
+
+          ORDER BY fecha ASC
+          `,
+          [espacio.id]
+        );
+
+      res.json(
+        r.rows.map(
+          f => f.fecha
+        )
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error:
+          'Error al consultar el calendario'
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// PUT /api/espacios/:id/disponibilidad
+// Bloquear o desbloquear un día
+// ======================================================
+
+router.put(
+  '/:id/disponibilidad',
+  verificarToken,
+  requiereRol('cliente'),
+  async (req, res) => {
+
+    const { fecha } = req.body;
+
+    const habilitado =
+      !!req.body.habilitado;
+
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(
+        fecha || ''
+      )
+    ) {
+
+      return res.status(400).json({
+        error:
+          'Fecha inválida'
+      });
+    }
+
+    if (
+      new Date(
+        fecha + 'T00:00:00'
+      ) <
+      new Date(
+        new Date().toDateString()
+      )
+    ) {
+
+      return res.status(400).json({
+        error:
+          'No puedes cambiar un día que ya pasó'
+      });
+    }
+
+    try {
+
+      const espacio =
+        await espacioDelDueno(
+          req.params.id,
+          req.usuario.id
+        );
+
+      if (!espacio) {
+
+        return res.status(404).json({
+          error:
+            'Espacio no encontrado o no te pertenece'
+        });
+      }
+
+      if (habilitado) {
+
+        await pool.query(
+          `
+          DELETE FROM disponibilidad_espacio
+
+          WHERE espacio_id = $1
+            AND fecha = $2
+          `,
+          [
+            espacio.id,
+            fecha
+          ]
+        );
+
+        return res.json({
+          fecha,
+          habilitado: true
+        });
+      }
+
+      const choque =
+        await pool.query(
+          `
+          SELECT 1
+          FROM reservas
+
+          WHERE espacio_id = $1
+            AND estado IN (
+              'pendiente',
+              'en_proceso',
+              'confirmada'
+            )
+
+            AND $2::date <
+              fecha_fin::date + 1
+
+            AND $2::date >=
+              fecha_inicio::date
+
+          LIMIT 1
+          `,
+          [
+            espacio.id,
+            fecha
+          ]
+        );
+
+      if (choque.rows.length > 0) {
+
+        return res.status(409).json({
+          error:
+            'Ese día ya tiene una reserva activa y no se puede bloquear'
+        });
+      }
+
+      await pool.query(
+        `
+        INSERT INTO disponibilidad_espacio
+        (
+          espacio_id,
+          fecha,
+          habilitado
+        )
+        VALUES
+        (
+          $1,
+          $2,
+          FALSE
+        )
+
+        ON CONFLICT (
+          espacio_id,
+          fecha
+        )
+
+        DO UPDATE SET
+          habilitado = FALSE
+        `,
+        [
+          espacio.id,
+          fecha
+        ]
+      );
+
+      res.json({
+        fecha,
+        habilitado: false
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error:
+          'Error al actualizar el calendario'
+      });
+    }
+  }
+);
+
+
+module.exports = router;

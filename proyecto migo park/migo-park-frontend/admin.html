@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migo Park - Panel</title>
+<style>
+  :root {
+    --verde: #2E9E4F;
+    --naranja: #F5893A;
+    --negro: #111111;
+    --rojo: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f7f7f7;
+    color: var(--negro);
+    margin: 0;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Menú lateral negro */
+  .sidebar {
+    width: 220px;
+    background: var(--negro);
+    color: white;
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .sidebar .logo { font-size: 20px; font-weight: bold; margin-bottom: 2px; }
+  .sidebar .quien { font-size: 12px; color: #aaa; margin-bottom: 18px; word-break: break-word; }
+  .sidebar .item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .insignia {
+    background: var(--naranja); color: white; font-size: 11px; font-weight: bold;
+    min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .sidebar .item:hover { background: #222; }
+  .sidebar .item.activo { background: var(--verde); color: white; font-weight: bold; }
+  .sidebar .salir {
+    margin-top: auto;
+    background: var(--naranja);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .contenido { flex: 1; padding: 24px; max-width: 900px; min-width: 0; }
+  h2 { font-size: 20px; margin: 0 0 14px 0; }
+  h3.seccion { font-size: 16px; margin: 26px 0 10px; }
+
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card .info { min-width: 0; flex: 1; }
+  .card .info h4 { margin: 0 0 4px 0; font-size: 15px; }
+  .card .info p { margin: 2px 0; font-size: 13px; color: #555; }
+  .card .acciones { display: flex; gap: 8px; }
+  .card.bloque { display: block; }
+
+  .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    color: white;
+  }
+  .btn.verde { background: var(--verde); }
+  .btn.rojo { background: var(--rojo); }
+  .btn.naranja { background: var(--naranja); }
+  .btn.gris { background: #e5e5e5; color: var(--negro); }
+  .btn.ancho { width: 100%; margin-top: 8px; padding: 11px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .etiqueta { font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 12px; white-space: nowrap; display: inline-block; }
+  .etiqueta.verde { background: #e3f4e8; color: var(--verde); }
+  .etiqueta.naranja { background: #fdeadb; color: #c25f10; }
+  .etiqueta.gris { background: #e5e5e5; color: var(--negro); }
+  .etiqueta.rojo { background: #f8dcd8; color: var(--rojo); }
+  .etiqueta.negro { background: var(--negro); color: white; }
+
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .filtros input, .filtros select, form.form input, form.form select {
+    padding: 9px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .filtros input[type=text] { flex: 1; min-width: 180px; }
+  form.form input, form.form select { width: 100%; margin-bottom: 10px; }
+  .filtros input:focus, .filtros select:focus, form.form input:focus, form.form select:focus,
+  .modal textarea:focus { outline: none; border-color: var(--verde); }
+  form.form label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-bottom: 8px; }
+  .tile { background: white; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .tile .num { font-size: 22px; font-weight: bold; color: var(--verde); }
+  .tile .num.naranja { color: var(--naranja); }
+  .tile .num.negro { color: var(--negro); }
+  .tile .txt { font-size: 13px; color: #555; margin-top: 2px; }
+  .tabla { background: white; border-radius: 14px; padding: 6px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .tabla .fila { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+  .tabla .fila:last-child { border-bottom: none; }
+
+  #mensajeStaff, #mensajeUsuarios, #mensajeChat { margin: 10px 0; font-size: 14px; }
+  .check { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; }
+  .card.clic { cursor: pointer; }
+  .card.clic:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.14); }
+  .encabezado { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .aviso-escalado { border-left: 4px solid var(--naranja); background: #fdf3ea; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 13px; }
+  .solucion { background: #e3f4e8; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 13px; }
+  .acciones-caso { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .btn-texto { background: none; border: none; color: var(--naranja); font-weight: bold; cursor: pointer; font-size: 13px; padding: 9px 6px; }
+  .hilo { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; max-height: 50vh; overflow-y: auto; padding: 4px; }
+  .msg { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: 14px; white-space: pre-wrap; word-break: break-word; }
+  .msg.usuario { align-self: flex-start; background: #e3f4e8; }
+  .msg.staff { align-self: flex-end; background: white; border: 1px solid var(--negro); }
+  .msg .quien { font-size: 11px; color: #666; margin-bottom: 2px; font-weight: bold; }
+  .msg .hora { font-size: 11px; color: #888; margin-top: 4px; }
+  textarea.area {
+    width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
+    font-family: inherit; font-size: 14px; margin-bottom: 8px; resize: vertical;
+  }
+  textarea.area:focus { outline: none; border-color: var(--verde); }
+  .error { color: var(--rojo); }
+  .ok { color: var(--verde); }
+  .vacio { color: #777; text-align: center; margin: 24px 0; }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 40px 12px; z-index: 10;
+  }
+  .modal { background: white; border-radius: 16px; padding: 22px; width: 100%; max-width: 420px; }
+  .modal h3 { margin: 0 0 6px 0; }
+  .modal p { margin: 0 0 12px 0; font-size: 14px; color: #555; }
+  .modal textarea {
+    width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
+    font-family: inherit; font-size: 14px; margin-bottom: 8px;
+  }
+
+  @media (max-width: 720px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; }
+    .sidebar .quien { width: 100%; margin-bottom: 4px; }
+    .sidebar .salir { margin-top: 0; margin-left: auto; }
+    .contenido { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">Migo Park</div>
+    <div class="quien" id="quien"></div>
+    <div id="menu" style="display:contents;"></div>
+    <button class="salir" onclick="cerrarSesion()">Salir</button>
+  </aside>
+
+  <main class="contenido">
+
+    <!-- MÉTRICAS (solo administrador) -->
+    <div id="vista-metricas" style="display:none;">
+      <h2>Métricas</h2>
+      <div id="contenidoMetricas">Cargando...</div>
+    </div>
+
+    <!-- VERIFICACIONES -->
+    <div id="vista-verificaciones" style="display:none;">
+      <h2>Verificaciones pendientes</h2>
+      <h3 class="seccion" style="margin-top:0;">Espacios</h3>
+      <div id="listaEspaciosPendientes"></div>
+      <h3 class="seccion">Vehículos</h3>
+      <div id="listaVehiculosPendientes"></div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div id="vista-reservas" style="display:none;">
+      <h2>Reservas</h2>
+      <form class="filtros" id="formFiltroReservas">
+        <input type="text" id="resQ" placeholder="Buscar por conductor (nombre/correo) o espacio">
+        <select id="resEstado">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en_proceso">En proceso</option>
+          <option value="confirmada">Confirmada</option>
+          <option value="completada">Completada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+        <input type="date" id="resDesde" title="Desde (fecha de inicio de la reserva)">
+        <input type="date" id="resHasta" title="Hasta (fecha de inicio de la reserva)">
+        <button type="submit" class="btn verde">Buscar</button>
+        <button type="button" class="btn gris" onclick="limpiarFiltroReservas()">Limpiar</button>
+      </form>
+      <div id="listaReservas"></div>
+    </div>
+
+    <!-- SOPORTE -->
+    <div id="vista-soporte" style="display:none;">
+
+      <!-- Lista de casos -->
+      <div id="soporteLista">
+        <h2>Centro de soporte</h2>
+        <div class="tiles" id="resumenSoporte"></div>
+        <form class="filtros" id="formFiltroCasos">
+          <input type="text" id="casoQ" placeholder="Buscar por usuario, correo, categoría o texto">
+          <select id="casoEstado">
+            <option value="">Todos los estados</option>
+            <option value="abierto">Abierto</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="resuelto">Resuelto</option>
+          </select>
+          <select id="casoCategoria">
+            <option value="">Todas las categorías</option>
+            <option>Pago o reembolso</option>
+            <option>Reserva</option>
+            <option>Espacio</option>
+            <option>Vehículo</option>
+            <option>Cuenta</option>
+            <option>Otro</option>
+          </select>
+          <input type="date" id="casoDesde" title="Creado desde">
+          <input type="date" id="casoHasta" title="Creado hasta">
+          <label class="check"><input type="checkbox" id="casoEsperando"> Esperando respuesta</label>
+          <label class="check"><input type="checkbox" id="casoEscalado"> Escalados</label>
+          <button type="submit" class="btn verde">Buscar</button>
+          <button type="button" class="btn gris" onclick="limpiarFiltroCasos()">Limpiar</button>
+        </form>
+        <div id="listaCasos"></div>
+      </div>
+
+      <!-- Conversación de un caso -->
+      <div id="soporteChat" style="display:none;">
+        <button class="btn gris" onclick="cerrarChat(); cargarSoporte();">&larr; Volver a los casos</button>
+        <div class="card bloque" style="margin-top:12px;">
+          <div class="encabezado">
+            <h4 id="chatTitulo" style="margin:0;font-size:16px;"></h4>
+            <span class="etiqueta" id="chatEstado"></span>
+          </div>
+          <p id="chatMeta" style="font-size:13px;color:#555;margin:6px 0 0;"></p>
+          <div id="chatEscalado"></div>
+          <div id="chatSolucion"></div>
+          <div class="acciones-caso" id="chatAcciones"></div>
+        </div>
+        <div class="hilo" id="chatHilo"></div>
+        <div id="chatEntrada">
+          <textarea class="area" id="chatTexto" rows="2" placeholder="Escribe tu respuesta al usuario..."></textarea>
+          <button class="btn verde ancho" id="btnEnviarMensaje">Enviar respuesta</button>
+        </div>
+        <div id="mensajeChat"></div>
+      </div>
+
+    </div>
+
+    <!-- USUARIOS (solo administrador) -->
+    <div id="vista-usuarios" style="display:none;">
+      <h2>Usuarios</h2>
+      <form class="filtros" id="formFiltroUsuarios">
+        <input type="text" id="usrQ" placeholder="Buscar por nombre o correo">
+        <select id="usrRol">
+          <option value="">Todos los roles</option>
+          <option value="cliente">Clientes</option>
+          <option value="soporte">Soporte</option>
+          <option value="administrador">Administradores</option>
+        </select>
+        <button type="submit" class="btn verde">Buscar</button>
+      </form>
+      <div id="mensajeUsuarios"></div>
+      <div id="listaUsuarios"></div>
+    </div>
+
+    <!-- CREAR STAFF (solo administrador) -->
+    <div id="vista-staff" style="display:none;">
+      <h2>Crear cuenta de staff</h2>
+      <div class="card bloque">
+        <form class="form" id="formStaff">
+          <label for="stNombre">Nombre completo</label>
+          <input type="text" id="stNombre" required>
+          <label for="stCorreo">Correo</label>
+          <input type="email" id="stCorreo" required>
+          <label for="stContrasena">Contraseña (mínimo 8 caracteres)</label>
+          <input type="password" id="stContrasena" minlength="8" required>
+          <label for="stTelefono">Teléfono (opcional)</label>
+          <input type="text" id="stTelefono">
+          <label for="stRol">Rol</label>
+          <select id="stRol">
+            <option value="soporte">Soporte</option>
+            <option value="administrador">Administrador</option>
+          </select>
+          <button type="submit" class="btn verde ancho">Crear cuenta</button>
+        </form>
+        <div id="mensajeStaff"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Ventana genérica para pedir un texto (motivo de rechazo, solución, motivo de escalamiento) -->
+<div class="overlay" id="modalTexto" style="display:none;">
+  <div class="modal">
+    <h3 id="textoTitulo"></h3>
+    <p id="textoDetalle"></p>
+    <textarea id="textoArea" rows="3"></textarea>
+    <div id="textoMensaje"></div>
+    <button class="btn rojo ancho" id="btnConfirmarTexto">Confirmar</button>
+    <button class="btn gris ancho" onclick="cerrarTexto()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:4000/api';
+  const token = sessionStorage.getItem('token');
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || 'null');
+
+  // Sin sesión -> login | cliente -> su pantalla | administrador o soporte -> se queda
+  let sesionValida = false;
+  if (!token || !usuario) {
+    window.location.href = 'index.html';
+  } else if (usuario.rol !== 'administrador' && usuario.rol !== 'soporte') {
+    window.location.href = 'home.html';
+  } else {
+    sesionValida = true;
+  }
+  const esAdmin = !!usuario && usuario.rol === 'administrador';
+
+  // ---------- utilidades ----------
+  function esc(t) {
+    return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function dinero(n) { return '$' + Number(n).toLocaleString('es-CO'); }
+  function fechaCorta(f) { return new Date(f).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' }); }
+  function mostrar(el, texto, esError) {
+    el.textContent = texto;
+    el.className = esError ? 'error' : 'ok';
+  }
+  async function api(ruta, opciones = {}) {
+    const resp = await fetch(`${API_URL}${ruta}`, {
+      ...opciones,
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    });
+    if (resp.status === 401) cerrarSesion();   // token vencido o cuenta bloqueada
+    return resp;
+  }
+  function cerrarSesion() {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+    window.location.href = 'index.html';
+  }
+
+  // ---------- menú lateral (depende del rol) ----------
+  const VISTAS = [
+    { id: 'metricas',       nombre: 'Métricas',        soloAdmin: true, cargar: () => cargarMetricas() },
+    { id: 'verificaciones', nombre: 'Verificaciones',                   cargar: () => cargarVerificaciones() },
+    { id: 'reservas',       nombre: 'Reservas',                         cargar: () => cargarReservas() },
+    { id: 'soporte',        nombre: 'Soporte',                          cargar: () => cargarSoporte() },
+    { id: 'usuarios',       nombre: 'Usuarios',        soloAdmin: true, cargar: () => cargarUsuarios() },
+    { id: 'staff',          nombre: 'Crear staff',     soloAdmin: true, cargar: () => {} },
+  ];
+
+  function vistasPermitidas() {
+    return VISTAS.filter(v => !v.soloAdmin || esAdmin);
+  }
+
+  function mostrarVista(id) {
+    if (id !== 'soporte') detenerChat();
+    VISTAS.forEach(v => {
+      document.getElementById('vista-' + v.id).style.display = v.id === id ? 'block' : 'none';
+    });
+    document.querySelectorAll('#menu .item').forEach(el => el.classList.toggle('activo', el.dataset.vista === id));
+    const vista = vistasPermitidas().find(v => v.id === id);
+    if (vista) vista.cargar();
+  }
+
+  // ---------- MÉTRICAS ----------
+  async function cargarMetricas() {
+    const cont = document.getElementById('contenidoMetricas');
+    cont.innerHTML = 'Cargando...';
+    try {
+      const resp = await api('/admin/metricas');
+      const m = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(m.error || 'Error')}</p>`; return; }
+
+      const fila = (a, b) => `<div class="fila"><span>${a}</span><b>${b}</b></div>`;
+      const ETQ = { cliente: 'Clientes', soporte: 'Soporte', administrador: 'Administradores' };
+      const EST = { pendiente: 'Pendientes de pago', en_proceso: 'En proceso de pago', confirmada: 'Confirmadas', completada: 'Completadas', cancelada: 'Canceladas' };
+
+      cont.innerHTML = `
+        <div class="tiles">
+          <div class="tile"><div class="num">${dinero(m.dinero.ingresos_brutos)}</div><div class="txt">Ingresos brutos (pagos completados)</div></div>
+          <div class="tile"><div class="num">${dinero(m.dinero.comisiones)}</div><div class="txt">Comisiones de reservas activas</div></div>
+          <div class="tile"><div class="num negro">${dinero(m.dinero.reembolsos)}</div><div class="txt">Reembolsos entregados</div></div>
+          <div class="tile"><div class="num negro">${m.dinero.reservas_30_dias}</div><div class="txt">Reservas en los últimos 30 días</div></div>
+        </div>
+        <div class="tiles">
+          <div class="tile"><div class="num">${m.espacios.verificados}</div><div class="txt">Espacios verificados</div></div>
+          <div class="tile"><div class="num naranja">${m.espacios.pendientes}</div><div class="txt">Espacios pendientes</div></div>
+          <div class="tile"><div class="num negro">${m.espacios.rechazados}</div><div class="txt">Espacios rechazados</div></div>
+          <div class="tile"><div class="num naranja">${m.vehiculos_pendientes}</div><div class="txt">Vehículos pendientes</div></div>
+        </div>
+
+        <h3 class="seccion">Usuarios por rol</h3>
+        <div class="tabla">${
+          m.usuarios.length
+            ? m.usuarios.map(u => fila(esc(ETQ[u.rol] || u.rol), `${u.total} (${u.activos} activos)`)).join('')
+            : '<p class="vacio">Sin datos.</p>'
+        }</div>
+
+        <h3 class="seccion">Reservas por estado</h3>
+        <div class="tabla">${
+          m.reservas_por_estado.length
+            ? m.reservas_por_estado.map(r => fila(esc(EST[r.estado] || r.estado), r.total)).join('')
+            : '<p class="vacio">Aún no hay reservas.</p>'
+        }</div>
+
+        <h3 class="seccion">Espacios más reservados</h3>
+        <div class="tabla">${
+          m.top_espacios.length
+            ? m.top_espacios.map(e => fila(esc(e.titulo), `${e.reservas} reservas`)).join('')
+            : '<p class="vacio">Aún no hay reservas confirmadas.</p>'
+        }</div>`;
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  // ---------- VERIFICACIONES ----------
+  const nombresPendientes = { espacios: {}, vehiculos: {} };   // id -> texto (evita pasar textos dentro del onclick)
+
+  function cargarVerificaciones() {
+    cargarEspaciosPendientes();
+    cargarVehiculosPendientes();
+  }
+
+  async function cargarEspaciosPendientes() {
+    const cont = document.getElementById('listaEspaciosPendientes');
+    cont.innerHTML = 'Cargando...';
+    try {
+      const resp = await api('/espacios/pendientes');
+      const espacios = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(espacios.error || 'Error al cargar')}</p>`; return; }
+      if (espacios.length === 0) { cont.innerHTML = '<p class="vacio">No hay espacios pendientes.</p>'; return; }
+
+      espacios.forEach(e => { nombresPendientes.espacios[e.id] = e.titulo; });
+      cont.innerHTML = espacios.map(e => {
+        const seg = [e.tiene_camara && 'Cámara', e.tiene_porton && 'Portón', e.tiene_iluminacion && 'Iluminación']
+          .filter(Boolean).join(' · ') || 'Sin datos de seguridad';
+        return `
+          <div class="card">
+            <div class="info">
+              <h4>${esc(e.titulo)}</h4>
+              <p>${esc(e.direccion)} (${esc(e.latitud)}, ${esc(e.longitud)})</p>
+              ${e.descripcion ? `<p>${esc(e.descripcion)}</p>` : ''}
+              <p>${dinero(e.precio_hora)} / hora · ${esc(seg)}</p>
+              <p>Publicado por ${esc(e.arrendador_nombre)} (${esc(e.arrendador_correo)})</p>
+            </div>
+            <div class="acciones">
+              <button class="btn verde" onclick="aprobar('espacios', ${e.id})">Aprobar</button>
+              <button class="btn rojo" onclick="abrirRechazo('espacios', ${e.id})">Rechazar</button>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  async function cargarVehiculosPendientes() {
+    const cont = document.getElementById('listaVehiculosPendientes');
+    cont.innerHTML = 'Cargando...';
+    try {
+      const resp = await api('/vehiculos/pendientes');
+      const vehiculos = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(vehiculos.error || 'Error al cargar')}</p>`; return; }
+      if (vehiculos.length === 0) { cont.innerHTML = '<p class="vacio">No hay vehículos pendientes.</p>'; return; }
+
+      vehiculos.forEach(v => { nombresPendientes.vehiculos[v.id] = 'Placa ' + v.placa; });
+      cont.innerHTML = vehiculos.map(v => `
+        <div class="card">
+          <div class="info">
+            <h4>Placa: ${esc(v.placa)}</h4>
+            <p>${esc([v.marca, v.modelo, v.color].filter(Boolean).join(' · ') || 'Sin más datos')}</p>
+            <p>Conductor: ${esc(v.conductor_nombre)} (${esc(v.conductor_correo)})</p>
+          </div>
+          <div class="acciones">
+            <button class="btn verde" onclick="aprobar('vehiculos', ${v.id})">Aprobar</button>
+            <button class="btn rojo" onclick="abrirRechazo('vehiculos', ${v.id})">Rechazar</button>
+          </div>
+        </div>`).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  async function aprobar(tipo, id) {
+    try {
+      const resp = await api(`/${tipo}/${id}/verificar`, { method: 'PUT' });
+      const data = await resp.json();
+      if (!resp.ok) { alert(data.error || 'Error al verificar'); return; }
+      cargarVerificaciones();
+    } catch (err) {
+      alert('No se pudo conectar con el servidor.');
+    }
+  }
+
+  // ---------- VENTANA PARA PEDIR UN TEXTO ----------
+  // cfg: { titulo, detalle (HTML ya escapado), placeholder, boton, clase, minimo, alConfirmar(texto) -> { ok, error } }
+  let textoCfg = null;
+
+  function pedirTexto(cfg) {
+    textoCfg = cfg;
+    document.getElementById('textoTitulo').textContent = cfg.titulo;
+    document.getElementById('textoDetalle').innerHTML = cfg.detalle || '';
+    const area = document.getElementById('textoArea');
+    area.placeholder = cfg.placeholder || '';
+    area.value = '';
+    document.getElementById('textoMensaje').textContent = '';
+    const btn = document.getElementById('btnConfirmarTexto');
+    btn.textContent = cfg.boton;
+    btn.className = 'btn ' + (cfg.clase || 'verde') + ' ancho';
+    btn.disabled = false;
+    document.getElementById('modalTexto').style.display = 'flex';
+  }
+  function cerrarTexto() {
+    document.getElementById('modalTexto').style.display = 'none';
+    textoCfg = null;
+  }
+
+  document.getElementById('btnConfirmarTexto').addEventListener('click', async () => {
+    if (!textoCfg) return;
+    const cfg = textoCfg;
+    const msg = document.getElementById('textoMensaje');
+    const texto = document.getElementById('textoArea').value.trim();
+    if (texto.length < cfg.minimo) return mostrar(msg, `Escribe al menos ${cfg.minimo} caracteres.`, true);
+
+    const btn = document.getElementById('btnConfirmarTexto');
+    btn.disabled = true;
+    try {
+      const r = await cfg.alConfirmar(texto);
+      if (!r.ok) { mostrar(msg, r.error || 'No se pudo completar la acción', true); btn.disabled = false; return; }
+      cerrarTexto();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+      btn.disabled = false;
+    }
+  });
+
+  // ---------- RECHAZAR CON MOTIVO ----------
+  function abrirRechazo(tipo, id) {
+    const nombre = nombresPendientes[tipo][id] || '';
+    pedirTexto({
+      titulo: tipo === 'espacios' ? 'Rechazar espacio' : 'Rechazar vehículo',
+      detalle: esc(nombre) + (tipo === 'vehiculos' ? '<br>El vehículo se elimina para que el conductor pueda registrarlo de nuevo corregido.' : ''),
+      placeholder: 'Motivo del rechazo (se le enviará al usuario)',
+      boton: 'Rechazar',
+      clase: 'rojo',
+      minimo: 5,
+      alConfirmar: async (motivo) => {
+        const resp = await api(`/${tipo}/${id}/rechazar`, { method: 'PUT', body: JSON.stringify({ motivo }) });
+        const data = await resp.json();
+        if (!resp.ok) return { ok: false, error: data.error };
+        cargarVerificaciones();
+        return { ok: true };
+      },
+    });
+  }
+
+  // ---------- RESERVAS ----------
+  const ETIQUETAS_RESERVA = {
+    pendiente:  { texto: 'Pendiente de pago',  clase: 'naranja' },
+    en_proceso: { texto: 'En proceso de pago', clase: 'naranja' },
+    confirmada: { texto: 'Confirmada',         clase: 'verde' },
+    completada: { texto: 'Completada',         clase: 'verde' },
+    cancelada:  { texto: 'Cancelada',          clase: 'gris' },
+  };
+
+  async function cargarReservas() {
+    const cont = document.getElementById('listaReservas');
+    cont.innerHTML = 'Cargando...';
+    const params = new URLSearchParams();
+    const q = document.getElementById('resQ').value.trim();
+    const estado = document.getElementById('resEstado').value;
+    const desde = document.getElementById('resDesde').value;
+    const hasta = document.getElementById('resHasta').value;
+    if (q) params.set('q', q);
+    if (estado) params.set('estado', estado);
+    if (desde) params.set('desde', desde);
+    if (hasta) params.set('hasta', hasta);
+
+    try {
+      const resp = await api('/admin/reservas?' + params.toString());
+      const data = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(data.error || 'Error')}</p>`; return; }
+      if (data.length === 0) { cont.innerHTML = '<p class="vacio">No se encontraron reservas con esos filtros.</p>'; return; }
+
+      cont.innerHTML = data.map(r => {
+        const et = ETIQUETAS_RESERVA[r.estado] || { texto: r.estado, clase: 'gris' };
+        const pago = r.pago_estado ? `${esc(r.metodo_pago || '')} (${esc(r.pago_estado)})` : 'Sin pago';
+        return `
+          <div class="card">
+            <div class="info">
+              <h4>#${r.id} · ${esc(r.espacio_titulo)}</h4>
+              <p>${esc(fechaCorta(r.fecha_inicio))} → ${esc(fechaCorta(r.fecha_fin))}</p>
+              <p>Conductor: ${esc(r.conductor_nombre)} (${esc(r.conductor_correo)}) · Arrendador: ${esc(r.arrendador_nombre)}</p>
+              <p>Total ${dinero(r.total)} (comisión ${dinero(r.comision)}) · Pago: ${pago}${Number(r.monto_reembolso) > 0 ? ' · Reembolso ' + dinero(r.monto_reembolso) : ''}</p>
+            </div>
+            <span class="etiqueta ${et.clase}">${et.texto}</span>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  document.getElementById('formFiltroReservas').addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarReservas();
+  });
+  function limpiarFiltroReservas() {
+    document.getElementById('resQ').value = '';
+    document.getElementById('resEstado').value = '';
+    document.getElementById('resDesde').value = '';
+    document.getElementById('resHasta').value = '';
+    cargarReservas();
+  }
+
+  // ---------- SOPORTE ----------
+  const ESTADO_CASO = {
+    abierto:    { texto: 'Abierto',    clase: 'rojo' },
+    en_proceso: { texto: 'En proceso', clase: 'naranja' },
+    resuelto:   { texto: 'Resuelto',   clase: 'verde' },
+  };
+  let casoActualId = null;
+  let chatTimer = null;
+  let ultimoTotalMensajes = -1;
+
+  function pintarInsignia(n) {
+    const el = document.getElementById('insigniaSoporte');
+    if (!el) return;
+    el.textContent = n > 99 ? '99+' : n;
+    el.style.display = n > 0 ? 'inline-flex' : 'none';
+  }
+
+  async function cargarResumenSoporte() {
+    try {
+      const resp = await api('/soporte/resumen');
+      const r = await resp.json();
+      if (!resp.ok) return;
+      pintarInsignia(r.esperando);
+      document.getElementById('resumenSoporte').innerHTML = `
+        <div class="tile"><div class="num naranja">${r.esperando}</div><div class="txt">Esperando respuesta</div></div>
+        <div class="tile"><div class="num">${r.abiertos}</div><div class="txt">Abiertos</div></div>
+        <div class="tile"><div class="num negro">${r.en_proceso}</div><div class="txt">En proceso</div></div>
+        <div class="tile"><div class="num negro">${r.escalados}</div><div class="txt">Escalados sin resolver</div></div>`;
+    } catch (err) { /* no es crítico */ }
+  }
+
+  function cargarSoporte() {
+    cerrarChat();
+    cargarResumenSoporte();
+    cargarCasos();
+  }
+
+  async function cargarCasos() {
+    const cont = document.getElementById('listaCasos');
+    cont.innerHTML = 'Cargando...';
+    const params = new URLSearchParams();
+    const q = document.getElementById('casoQ').value.trim();
+    const estado = document.getElementById('casoEstado').value;
+    const categoria = document.getElementById('casoCategoria').value;
+    const desde = document.getElementById('casoDesde').value;
+    const hasta = document.getElementById('casoHasta').value;
+    if (q) params.set('q', q);
+    if (estado) params.set('estado', estado);
+    if (categoria) params.set('categoria', categoria);
+    if (desde) params.set('desde', desde);
+    if (hasta) params.set('hasta', hasta);
+    if (document.getElementById('casoEsperando').checked) params.set('esperando', '1');
+    if (document.getElementById('casoEscalado').checked) params.set('escalado', '1');
+
+    try {
+      const resp = await api('/soporte/casos?' + params.toString());
+      const data = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(data.error || 'Error')}</p>`; return; }
+      if (data.length === 0) { cont.innerHTML = '<p class="vacio">No se encontraron casos con esos filtros.</p>'; return; }
+
+      cont.innerHTML = data.map(c => {
+        const et = ESTADO_CASO[c.estado] || { texto: c.estado, clase: 'gris' };
+        return `
+          <div class="card clic" onclick="abrirCaso(${c.id})">
+            <div class="info">
+              <h4>#${c.id} · ${esc(c.categoria)}</h4>
+              <p>${esc(c.usuario_nombre)} (${esc(c.usuario_correo)})</p>
+              <p>${c.asignado_nombre ? 'Atendido por ' + esc(c.asignado_nombre) : 'Sin asignar'} ·
+                 Creado ${esc(fechaCorta(c.fecha_creacion))} · Última actividad ${esc(fechaCorta(c.fecha_actualizacion))}</p>
+            </div>
+            <div class="acciones" style="flex-wrap:wrap;justify-content:flex-end;">
+              ${c.esperando ? '<span class="etiqueta naranja">Esperando respuesta</span>' : ''}
+              ${c.escalado ? '<span class="etiqueta negro">Escalado</span>' : ''}
+              <span class="etiqueta ${et.clase}">${et.texto}</span>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  document.getElementById('formFiltroCasos').addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarCasos();
+  });
+  function limpiarFiltroCasos() {
+    ['casoQ', 'casoEstado', 'casoCategoria', 'casoDesde', 'casoHasta'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('casoEsperando').checked = false;
+    document.getElementById('casoEscalado').checked = false;
+    cargarCasos();
+  }
+
+  // ----- conversación de un caso -----
+  function detenerChat() {
+    if (chatTimer) { clearInterval(chatTimer); chatTimer = null; }
+  }
+  function cerrarChat() {
+    detenerChat();
+    casoActualId = null;
+    ultimoTotalMensajes = -1;
+    document.getElementById('soporteChat').style.display = 'none';
+    document.getElementById('soporteLista').style.display = 'block';
+  }
+
+  async function abrirCaso(id) {
+    casoActualId = id;
+    ultimoTotalMensajes = -1;
+    document.getElementById('mensajeChat').textContent = '';
+    document.getElementById('chatTexto').value = '';
+    document.getElementById('soporteLista').style.display = 'none';
+    document.getElementById('soporteChat').style.display = 'block';
+    await cargarChat(true);
+    detenerChat();
+    chatTimer = setInterval(() => cargarChat(false), 8000);   // busca mensajes nuevos cada 8 s
+  }
+
+  async function cargarChat(forzarScroll) {
+    if (!casoActualId) return;
+    const id = casoActualId;
+    try {
+      const resp = await api(`/soporte/casos/${id}`);
+      const data = await resp.json();
+      if (id !== casoActualId) return;
+      if (!resp.ok) { mostrar(document.getElementById('mensajeChat'), data.error || 'No se pudo abrir el caso', true); return; }
+
+      const { caso, mensajes } = data;
+      const et = ESTADO_CASO[caso.estado] || { texto: caso.estado, clase: 'gris' };
+      const cerrado = caso.estado === 'resuelto';
+
+      document.getElementById('chatTitulo').textContent = `#${caso.id} · ${caso.categoria}`;
+      const chatEstado = document.getElementById('chatEstado');
+      chatEstado.textContent = et.texto;
+      chatEstado.className = 'etiqueta ' + et.clase;
+      document.getElementById('chatMeta').textContent =
+        `Usuario: ${caso.usuario_nombre} (${caso.usuario_correo}) · Creado ${fechaCorta(caso.fecha_creacion)} · ` +
+        (caso.asignado_nombre ? `Atendido por ${caso.asignado_nombre}` : 'Sin asignar');
+
+      document.getElementById('chatEscalado').innerHTML = caso.escalado
+        ? `<div class="aviso-escalado"><b>Escalado a administración.</b> Motivo: ${esc(caso.motivo_escalado || 'sin motivo registrado')}</div>`
+        : '';
+      document.getElementById('chatSolucion').innerHTML = cerrado && caso.solucion
+        ? `<div class="solucion"><b>Solución aplicada:</b> ${esc(caso.solucion)}` +
+          (caso.fecha_cierre ? ` <span style="color:#666;">(cerrado el ${esc(fechaCorta(caso.fecha_cierre))})</span>` : '') + '</div>'
+        : '';
+
+      // Acciones según el estado y el rol
+      let acciones = '';
+      if (!cerrado) {
+        if (caso.estado === 'abierto') acciones += `<button class="btn naranja" onclick="marcarEnProceso()">Marcar en proceso</button>`;
+        acciones += `<button class="btn verde" onclick="cerrarCaso()">Cerrar caso</button>`;
+        if (usuario.rol === 'soporte' && !caso.escalado) acciones += `<button class="btn-texto" onclick="escalarCaso()">Escalar caso</button>`;
+      } else {
+        acciones += `<button class="btn naranja" onclick="reabrirCaso()">Reabrir caso</button>`;
+      }
+      document.getElementById('chatAcciones').innerHTML = acciones;
+      document.getElementById('chatEntrada').style.display = cerrado ? 'none' : 'block';
+
+      const total = mensajes.length + 1;
+      if (total === ultimoTotalMensajes && !forzarScroll) return;
+      ultimoTotalMensajes = total;
+
+      const burbujas = [{ staff: false, quien: `${caso.usuario_nombre} (Usuario)`, texto: caso.descripcion, fecha: caso.fecha_creacion }]
+        .concat(mensajes.map(m => ({
+          staff: m.remitente_rol !== 'cliente',
+          quien: `${m.remitente_nombre} (${m.remitente_rol === 'cliente' ? 'Usuario' : m.remitente_rol === 'administrador' ? 'Administrador' : 'Soporte'})`,
+          texto: m.mensaje,
+          fecha: m.fecha,
+        })));
+
+      const hilo = document.getElementById('chatHilo');
+      const cercaDelFinal = hilo.scrollHeight - hilo.scrollTop - hilo.clientHeight < 80;
+      hilo.innerHTML = burbujas.map(b => `
+        <div class="msg ${b.staff ? 'staff' : 'usuario'}">
+          <div class="quien">${esc(b.quien)}</div>
+          ${esc(b.texto)}
+          <div class="hora">${esc(fechaCorta(b.fecha))}</div>
+        </div>`).join('');
+      if (forzarScroll || cercaDelFinal) hilo.scrollTop = hilo.scrollHeight;
+    } catch (err) { /* sin conexión: el siguiente ciclo lo reintenta */ }
+  }
+
+  document.getElementById('btnEnviarMensaje').addEventListener('click', async () => {
+    const msg = document.getElementById('mensajeChat');
+    const texto = document.getElementById('chatTexto').value.trim();
+    if (!texto) return mostrar(msg, 'Escribe un mensaje.', true);
+    if (!casoActualId) return;
+
+    const btn = document.getElementById('btnEnviarMensaje');
+    btn.disabled = true;
+    try {
+      const resp = await api(`/soporte/casos/${casoActualId}/mensajes`, { method: 'POST', body: JSON.stringify({ mensaje: texto }) });
+      const data = await resp.json();
+      if (!resp.ok) { mostrar(msg, data.error || 'No se pudo enviar', true); await cargarChat(true); return; }
+      msg.textContent = '';
+      document.getElementById('chatTexto').value = '';
+      await cargarChat(true);
+      cargarResumenSoporte();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Cambia el estado de un caso (en_proceso / resuelto) y refresca la pantalla
+  async function cambiarEstadoCaso(estado, solucion) {
+    const resp = await api(`/soporte/casos/${casoActualId}/estado`, { method: 'PUT', body: JSON.stringify({ estado, solucion }) });
+    const data = await resp.json();
+    if (!resp.ok) return { ok: false, error: data.error };
+    await cargarChat(true);
+    cargarResumenSoporte();
+    return { ok: true };
+  }
+
+  async function marcarEnProceso() {
+    const r = await cambiarEstadoCaso('en_proceso');
+    if (!r.ok) mostrar(document.getElementById('mensajeChat'), r.error || 'No se pudo cambiar el estado', true);
+  }
+  async function reabrirCaso() { await marcarEnProceso(); }
+
+  function cerrarCaso() {
+    pedirTexto({
+      titulo: 'Cerrar caso',
+      detalle: 'Describe la solución aplicada. El usuario la verá y recibirá una notificación de cierre.',
+      placeholder: 'Solución aplicada...',
+      boton: 'Cerrar caso',
+      clase: 'verde',
+      minimo: 5,
+      alConfirmar: (solucion) => cambiarEstadoCaso('resuelto', solucion),
+    });
+  }
+
+  function escalarCaso() {
+    pedirTexto({
+      titulo: 'Escalar caso',
+      detalle: 'El caso pasará a los administradores. Explica por qué no puedes resolverlo (el usuario no verá este motivo).',
+      placeholder: 'Motivo del escalamiento...',
+      boton: 'Escalar a administración',
+      clase: 'naranja',
+      minimo: 5,
+      alConfirmar: async (motivo) => {
+        const resp = await api(`/soporte/casos/${casoActualId}/escalar`, { method: 'PUT', body: JSON.stringify({ motivo }) });
+        const data = await resp.json();
+        if (!resp.ok) return { ok: false, error: data.error };
+        await cargarChat(true);
+        cargarResumenSoporte();
+        return { ok: true };
+      },
+    });
+  }
+
+  // ---------- USUARIOS ----------
+  async function cargarUsuarios() {
+    const cont = document.getElementById('listaUsuarios');
+    cont.innerHTML = 'Cargando...';
+    const params = new URLSearchParams();
+    const q = document.getElementById('usrQ').value.trim();
+    const rol = document.getElementById('usrRol').value;
+    if (q) params.set('q', q);
+    if (rol) params.set('rol', rol);
+
+    try {
+      const resp = await api('/admin/usuarios?' + params.toString());
+      const data = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(data.error || 'Error')}</p>`; return; }
+      if (data.length === 0) { cont.innerHTML = '<p class="vacio">No se encontraron usuarios.</p>'; return; }
+
+      const CLASE_ROL = { cliente: 'gris', soporte: 'naranja', administrador: 'verde' };
+      cont.innerHTML = data.map(u => {
+        const boton = u.id === usuario.id
+          ? '<span class="etiqueta gris">Tú</span>'
+          : u.activo
+            ? `<button class="btn rojo" onclick="cambiarActivo(${u.id}, false)">Bloquear</button>`
+            : `<button class="btn verde" onclick="cambiarActivo(${u.id}, true)">Desbloquear</button>`;
+        return `
+          <div class="card">
+            <div class="info">
+              <h4>${esc(u.nombre)} <span class="etiqueta ${CLASE_ROL[u.rol] || 'gris'}">${esc(u.rol)}</span>
+                  ${u.activo ? '' : '<span class="etiqueta rojo">Bloqueado</span>'}</h4>
+              <p>${esc(u.correo)}${u.telefono ? ' · ' + esc(u.telefono) : ''}</p>
+              <p>Registrado: ${esc(fechaCorta(u.fecha_registro))}</p>
+            </div>
+            <div class="acciones">${boton}</div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  document.getElementById('formFiltroUsuarios').addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarUsuarios();
+  });
+
+  async function cambiarActivo(id, activo) {
+    const msg = document.getElementById('mensajeUsuarios');
+    if (!activo && !confirm('¿Bloquear a este usuario? No podrá iniciar sesión ni usar la app hasta que lo desbloquees.')) return;
+    try {
+      const resp = await api(`/admin/usuarios/${id}/activo`, { method: 'PUT', body: JSON.stringify({ activo }) });
+      const data = await resp.json();
+      if (!resp.ok) { mostrar(msg, data.error || 'No se pudo actualizar', true); return; }
+      mostrar(msg, `${data.nombre} fue ${data.activo ? 'desbloqueado' : 'bloqueado'}.`, false);
+      cargarUsuarios();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    }
+  }
+
+  // ---------- CREAR STAFF ----------
+  document.getElementById('formStaff').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('mensajeStaff');
+    const body = {
+      nombre: document.getElementById('stNombre').value,
+      correo: document.getElementById('stCorreo').value,
+      contrasena: document.getElementById('stContrasena').value,
+      telefono: document.getElementById('stTelefono').value,
+      rol: document.getElementById('stRol').value,
+    };
+    try {
+      const resp = await api('/auth/crear-staff', { method: 'POST', body: JSON.stringify(body) });
+      const data = await resp.json();
+      if (!resp.ok) return mostrar(msg, data.error || 'No se pudo crear la cuenta', true);
+      mostrar(msg, `Cuenta creada: ${data.nombre} (${data.rol}). Ya puede iniciar sesión con ${data.correo}.`, false);
+      document.getElementById('formStaff').reset();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    }
+  });
+
+  // ---------- arranque ----------
+  if (sesionValida) {
+    document.getElementById('quien').textContent = `${usuario.nombre} (${usuario.rol})`;
+    document.getElementById('menu').innerHTML = vistasPermitidas()
+      .map(v => `<div class="item" data-vista="${v.id}" onclick="mostrarVista('${v.id}')"><span>${v.nombre}</span>` +
+                (v.id === 'soporte' ? '<span class="insignia" id="insigniaSoporte" style="display:none;"></span>' : '') + '</div>')
+      .join('');
+    mostrarVista(esAdmin ? 'metricas' : 'verificaciones');
+    cargarResumenSoporte();
+    setInterval(cargarResumenSoporte, 30000);   // actualiza la insignia cada 30 s
+  }
+</script>
+
+</body>
+</html>

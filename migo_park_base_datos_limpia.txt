@@ -1,0 +1,281 @@
+-- ============================================================
+-- MIGO PARK - BASE DE DATOS LIMPIA
+-- PostgreSQL
+-- ============================================================
+
+-- Este archivo reemplaza el SQL anterior y elimina las
+-- instrucciones duplicadas.
+-- Ejecutar sobre una base de datos NUEVA.
+
+-- ============================================================
+-- TIPOS ENUM
+-- ============================================================
+
+CREATE TYPE rol_usuario AS ENUM ('cliente', 'administrador', 'soporte');
+
+CREATE TYPE estado_espacio AS ENUM (
+    'disponible',
+    'ocupado',
+    'mantenimiento'
+);
+
+CREATE TYPE estado_reserva AS ENUM (
+    'pendiente',
+    'en_proceso',
+    'confirmada',
+    'completada',
+    'cancelada'
+);
+
+CREATE TYPE estado_pago AS ENUM (
+    'pendiente',
+    'en_proceso',
+    'completado',
+    'fallido'
+);
+
+CREATE TYPE estado_caso AS ENUM (
+    'abierto',
+    'en_proceso',
+    'resuelto'
+);
+
+-- ============================================================
+-- USUARIOS
+-- ============================================================
+
+CREATE TABLE usuarios (
+    id              SERIAL PRIMARY KEY,
+    nombre          VARCHAR(120) NOT NULL,
+    correo          VARCHAR(150) NOT NULL UNIQUE,
+    contrasena_hash VARCHAR(255) NOT NULL,
+    telefono        VARCHAR(30),
+    rol             rol_usuario NOT NULL DEFAULT 'cliente',
+    foto_perfil_url TEXT,
+    fecha_registro  TIMESTAMP NOT NULL DEFAULT NOW(),
+    activo          BOOLEAN NOT NULL DEFAULT TRUE,
+    reset_token_hash TEXT,
+    reset_token_expira TIMESTAMP
+);
+
+-- ============================================================
+-- ESPACIOS DE PARQUEO
+-- ============================================================
+
+CREATE TABLE espacios_parqueo (
+    id                SERIAL PRIMARY KEY,
+    arrendador_id     INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    titulo            VARCHAR(150) NOT NULL,
+    descripcion       TEXT,
+    direccion         VARCHAR(255) NOT NULL,
+    latitud           DECIMAL(10, 7) NOT NULL,
+    longitud          DECIMAL(10, 7) NOT NULL,
+    precio_hora       DECIMAL(10, 2) NOT NULL,
+    estado            estado_espacio NOT NULL DEFAULT 'disponible',
+    tiene_camara      BOOLEAN NOT NULL DEFAULT FALSE,
+    tiene_porton      BOOLEAN NOT NULL DEFAULT FALSE,
+    tiene_iluminacion BOOLEAN NOT NULL DEFAULT FALSE,
+    verificado        BOOLEAN NOT NULL DEFAULT FALSE,
+    verificado_por    INTEGER REFERENCES usuarios(id),
+    fecha_verificacion TIMESTAMP,
+    motivo_rechazo    TEXT,
+    fecha_rechazo     TIMESTAMP,
+    fecha_creacion    TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CHECK (precio_hora >= 0),
+    CHECK (
+        (verificado = FALSE)
+        OR (verificado_por IS NOT NULL)
+    )
+);
+
+-- ============================================================
+-- MULTIMEDIA DE LOS ESPACIOS
+-- ============================================================
+
+CREATE TABLE espacio_media (
+    id          SERIAL PRIMARY KEY,
+    espacio_id  INTEGER NOT NULL REFERENCES espacios_parqueo(id) ON DELETE CASCADE,
+    url         TEXT NOT NULL,
+    tipo        VARCHAR(10) NOT NULL CHECK (tipo IN ('foto', 'video')),
+    orden       INTEGER NOT NULL DEFAULT 0
+);
+
+-- ============================================================
+-- DISPONIBILIDAD DE ESPACIOS
+-- ============================================================
+
+CREATE TABLE disponibilidad_espacio (
+    id          SERIAL PRIMARY KEY,
+    espacio_id  INTEGER NOT NULL REFERENCES espacios_parqueo(id) ON DELETE CASCADE,
+    fecha       DATE NOT NULL,
+    habilitado  BOOLEAN NOT NULL DEFAULT TRUE,
+
+    UNIQUE (espacio_id, fecha)
+);
+
+-- ============================================================
+-- RESERVAS
+-- ============================================================
+
+CREATE TABLE reservas (
+    id                  SERIAL PRIMARY KEY,
+    espacio_id          INTEGER NOT NULL REFERENCES espacios_parqueo(id),
+    conductor_id        INTEGER NOT NULL REFERENCES usuarios(id),
+    fecha_inicio        TIMESTAMP NOT NULL,
+    fecha_fin           TIMESTAMP NOT NULL,
+    subtotal            DECIMAL(10, 2) NOT NULL,
+    comision            DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    total               DECIMAL(10, 2) NOT NULL,
+    estado              estado_reserva NOT NULL DEFAULT 'pendiente',
+    monto_reembolso     DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    fecha_cancelacion   TIMESTAMP,
+    recordatorio_enviado BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_creacion      TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CHECK (fecha_fin > fecha_inicio),
+    CHECK (subtotal >= 0),
+    CHECK (comision >= 0),
+    CHECK (total >= 0),
+    CHECK (monto_reembolso >= 0),
+    CHECK (monto_reembolso <= total)
+);
+
+-- ============================================================
+-- PAGOS
+-- ============================================================
+
+CREATE TABLE pagos (
+    id              SERIAL PRIMARY KEY,
+    reserva_id      INTEGER NOT NULL REFERENCES reservas(id) ON DELETE CASCADE,
+    metodo_pago     VARCHAR(50) NOT NULL,
+    monto           DECIMAL(10, 2) NOT NULL,
+    estado          estado_pago NOT NULL DEFAULT 'pendiente',
+    comprobante_url TEXT,
+    fecha_pago      TIMESTAMP,
+
+    CHECK (monto >= 0)
+);
+
+-- ============================================================
+-- CALIFICACIONES
+-- ============================================================
+
+CREATE TABLE calificaciones (
+    id          SERIAL PRIMARY KEY,
+    reserva_id  INTEGER NOT NULL REFERENCES reservas(id) ON DELETE CASCADE,
+    espacio_id  INTEGER NOT NULL REFERENCES espacios_parqueo(id),
+    conductor_id INTEGER NOT NULL REFERENCES usuarios(id),
+    puntuacion  SMALLINT NOT NULL CHECK (puntuacion BETWEEN 1 AND 5),
+    comentario  TEXT,
+    fecha       TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_calificacion_reserva UNIQUE (reserva_id)
+);
+
+-- ============================================================
+-- NOTIFICACIONES
+-- ============================================================
+
+CREATE TABLE notificaciones (
+    id          SERIAL PRIMARY KEY,
+    usuario_id  INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    tipo        VARCHAR(50) NOT NULL,
+    mensaje     TEXT NOT NULL,
+    leida       BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha       TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- CASOS DE SOPORTE
+-- ============================================================
+
+CREATE TABLE casos_soporte (
+    id                SERIAL PRIMARY KEY,
+    usuario_id        INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    categoria         VARCHAR(80) NOT NULL,
+    estado            estado_caso NOT NULL DEFAULT 'abierto',
+    descripcion       TEXT NOT NULL,
+    asignado_a        INTEGER REFERENCES usuarios(id),
+    escalado          BOOLEAN NOT NULL DEFAULT FALSE,
+    motivo_escalado   TEXT,
+    solucion          TEXT,
+    fecha_creacion    TIMESTAMP NOT NULL DEFAULT NOW(),
+    fecha_cierre      TIMESTAMP,
+    fecha_actualizacion TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- MENSAJES DE SOPORTE
+-- ============================================================
+
+CREATE TABLE mensajes_soporte (
+    id           SERIAL PRIMARY KEY,
+    caso_id      INTEGER NOT NULL REFERENCES casos_soporte(id) ON DELETE CASCADE,
+    remitente_id INTEGER NOT NULL REFERENCES usuarios(id),
+    mensaje      TEXT NOT NULL,
+    fecha        TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- VEHICULOS
+-- ============================================================
+
+CREATE TABLE vehiculos (
+    id              SERIAL PRIMARY KEY,
+    conductor_id    INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    placa           VARCHAR(10) NOT NULL UNIQUE,
+    marca           VARCHAR(50),
+    modelo          VARCHAR(50),
+    color           VARCHAR(30),
+    verificado      BOOLEAN NOT NULL DEFAULT FALSE,
+    verificado_por  INTEGER REFERENCES usuarios(id),
+    fecha_registro  TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- INDICES
+-- ============================================================
+
+CREATE INDEX idx_espacios_estado
+    ON espacios_parqueo(estado);
+
+CREATE INDEX idx_espacios_verificado
+    ON espacios_parqueo(verificado);
+
+CREATE INDEX idx_espacios_arrendador
+    ON espacios_parqueo(arrendador_id);
+
+CREATE INDEX idx_reservas_conductor
+    ON reservas(conductor_id);
+
+CREATE INDEX idx_reservas_espacio
+    ON reservas(espacio_id);
+
+CREATE INDEX idx_reservas_estado
+    ON reservas(estado);
+
+CREATE INDEX idx_reservas_fechas
+    ON reservas(espacio_id, fecha_inicio, fecha_fin);
+
+CREATE INDEX idx_notificaciones_usuario
+    ON notificaciones(usuario_id, leida);
+
+CREATE INDEX idx_vehiculos_conductor
+    ON vehiculos(conductor_id);
+
+CREATE INDEX idx_mensajes_caso
+    ON mensajes_soporte(caso_id);
+
+CREATE INDEX idx_casos_usuario
+    ON casos_soporte(usuario_id);
+
+CREATE INDEX idx_casos_estado
+    ON casos_soporte(estado);
+
+CREATE INDEX idx_casos_asignado
+    ON casos_soporte(asignado_a);
+
+-- ============================================================
+-- FIN DE LA BASE DE DATOS
+-- ============================================================

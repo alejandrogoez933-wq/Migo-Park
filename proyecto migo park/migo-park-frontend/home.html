@@ -1,0 +1,5588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+<title>Migo Park - Home</title>
+
+<style>
+  :root {
+    --verde: #2E9E4F;
+    --naranja: #F5893A;
+    --negro: #111111;
+    --rojo: #c0392b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f7f7f7;
+    color: var(--negro);
+    margin: 0;
+  }
+
+  header {
+    background: var(--negro);
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+
+  header .info {
+    font-size: 13px;
+    color: #ccc;
+    margin-right: 8px;
+  }
+
+  button.salir {
+    background: var(--naranja);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  main {
+    max-width: 800px;
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--negro);
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .tab.activo {
+    background: var(--verde);
+    color: white;
+    border-color: var(--verde);
+  }
+
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .card h3 {
+    margin: 0 0 6px 0;
+  }
+
+  .precio {
+    color: var(--verde);
+    font-weight: bold;
+  }
+
+  .card .direccion {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .seguridad {
+    font-size: 13px;
+    color: #444;
+    margin: 6px 0 10px;
+  }
+
+  .fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .detalle {
+    font-size: 14px;
+    color: #444;
+    margin: 3px 0;
+  }
+
+  form.publicar input,
+  form.publicar textarea,
+  .form-vehiculo input,
+  .modal input[type=datetime-local] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+
+  form.publicar input:focus,
+  form.publicar textarea:focus,
+  .form-vehiculo input:focus,
+  .modal input:focus {
+    outline: none;
+    border-color: var(--verde);
+  }
+
+  .checks {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .checks label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn.chico {
+    width: auto;
+    margin-top: 0;
+    padding: 8px 14px;
+  }
+
+  .btn.verde {
+    background: var(--verde);
+    color: white;
+  }
+
+  .btn.rojo {
+    background: var(--rojo);
+    color: white;
+  }
+
+  .btn.gris {
+    background: #e5e5e5;
+    color: var(--negro);
+  }
+
+  .btn.naranja {
+    background: var(--naranja);
+    color: white;
+  }
+
+  .etiqueta {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  .etiqueta.verde {
+    background: #e3f4e8;
+    color: var(--verde);
+  }
+
+  .etiqueta.naranja {
+    background: #fdeadb;
+    color: #c25f10;
+  }
+
+  .etiqueta.gris {
+    background: #e5e5e5;
+    color: var(--negro);
+  }
+
+  .etiqueta.rojo {
+    background: #f8dcd8;
+    color: var(--rojo);
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .chip {
+    padding: 6px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--negro);
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .chip.activo {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: white;
+  }
+
+  .aviso-naranja {
+    color: #c25f10;
+    font-size: 13px;
+    margin: 4px 0;
+  }
+
+  .reembolso {
+    color: var(--verde);
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  #mensaje,
+  #mensajeReservas,
+  #mensajeVehiculos,
+  #mensajeCaso,
+  #mensajeChat {
+    margin: 10px 0;
+    font-size: 14px;
+  }
+
+  .error {
+    color: var(--rojo);
+  }
+
+  .ok {
+    color: var(--verde);
+  }
+
+  .vacio {
+    color: #777;
+    text-align: center;
+    margin-top: 30px;
+  }
+
+  .campana {
+    position: relative;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 14px;
+    vertical-align: middle;
+  }
+
+  .campana svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .burbuja {
+    position: absolute;
+    top: -7px;
+    right: -9px;
+    background: var(--naranja);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+
+  .panel-notif {
+    position: fixed;
+    right: 16px;
+    top: 62px;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    max-height: 70vh;
+    overflow-y: auto;
+    background: white;
+    color: var(--negro);
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    z-index: 20;
+  }
+
+  .panel-notif .cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    background: white;
+  }
+
+  .panel-notif .cab button {
+    background: none;
+    border: none;
+    color: var(--naranja);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .notif {
+    padding: 10px 14px;
+    border-left: 4px solid var(--verde);
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .notif.naranja {
+    border-left-color: var(--naranja);
+  }
+
+  .notif.nueva {
+    background: #f4faf6;
+    font-weight: 600;
+  }
+
+  .notif .fecha {
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+    font-weight: normal;
+  }
+
+  h3.seccion {
+    margin: 22px 0 10px;
+    font-size: 16px;
+  }
+
+  textarea.area {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 8px;
+    resize: vertical;
+  }
+
+  textarea.area:focus {
+    outline: none;
+    border-color: var(--verde);
+  }
+
+  .card.clic {
+    cursor: pointer;
+  }
+
+  .card.clic:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.14);
+  }
+
+  .hilo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding: 4px;
+  }
+
+  .msg {
+    max-width: 85%;
+    padding: 9px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg.mio {
+    align-self: flex-end;
+    background: #e3f4e8;
+  }
+
+  .msg.otro {
+    align-self: flex-start;
+    background: white;
+    border: 1px solid var(--negro);
+  }
+
+  .msg .quien {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 2px;
+    font-weight: bold;
+  }
+
+  .msg .hora {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+  }
+
+  .solucion {
+    background: #e3f4e8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 12px;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 16px;
+    padding: 22px;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .modal h3 {
+    margin: 0 0 4px 0;
+  }
+
+  .modal label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 4px;
+  }
+
+  .resumen {
+    background: #f7f7f7;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 6px 0 4px;
+    font-size: 14px;
+  }
+
+  .resumen .linea {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+  }
+
+  .resumen .total {
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--verde);
+    border-top: 1px solid #ddd;
+    padding-top: 6px;
+    margin-top: 6px;
+  }
+
+  .ocupado {
+    font-size: 13px;
+    color: #c25f10;
+    margin-bottom: 8px;
+  }
+
+  .temporizador {
+    background: #fdeadb;
+    color: #c25f10;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  .metodos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 10px 0;
+  }
+
+  .metodo {
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .metodo.sel {
+    border-color: var(--verde);
+    background: #e3f4e8;
+  }
+
+  .exito {
+    text-align: center;
+  }
+
+  .exito .grande {
+    font-size: 44px;
+    color: var(--verde);
+  }
+
+  .estrellas {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 15px 0;
+  }
+
+  .estrella {
+    border: none;
+    background: transparent;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: #ccc;
+    cursor: pointer;
+  }
+
+  .estrella.seleccionada {
+    color: #f5b400;
+  }
+
+  .estrella:hover {
+    color: #f5b400;
+  }
+
+  .calificacion-promedio {
+    text-align: center;
+    font-size: 18px;
+    margin: 10px 0 16px;
+  }
+
+  .calificacion-promedio .numero {
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--verde);
+  }
+
+  .estrellas-pequenas {
+    color: #f5b400;
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+
+  .comentario-calificacion {
+    background: #f7f7f7;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 8px;
+  }
+
+  .comentario-calificacion .autor {
+    font-weight: bold;
+    font-size: 13px;
+  }
+
+  .comentario-calificacion .fecha {
+    color: #888;
+    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  .textarea-calificacion {
+    width: 100%;
+    min-height: 90px;
+    resize: vertical;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+  }
+
+  .textarea-calificacion:focus {
+    outline: none;
+    border-color: var(--verde);
+  }
+
+  /* MAPA DE ESPACIOS */
+  #mapaEspacios {
+    width: 100%;
+    height: 500px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: #e5e5e5;
+  }
+
+  .toggle-vista {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .toggle-vista .btn {
+    width: auto;
+    margin-top: 0;
+    padding: 8px 18px;
+  }
+  .foto-espacio {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .fotos-lista {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .rating-espacio {
+    color: #f5b400;
+    font-size: 17px;
+    font-weight: bold;
+    margin: 8px 0;
+  }
+
+  .rating-espacio .numero {
+    color: #333;
+    font-size: 14px;
+    margin-left: 5px;
+  }
+
+  .popup-espacio {
+    min-width: 220px;
+  }
+
+  .popup-espacio .foto-espacio {
+    height: 120px;
+  }
+
+  .popup-espacio h4 {
+    margin: 0 0 4px;
+    font-size: 14px;
+  }
+
+  .popup-espacio .precio {
+    color: #2E9E4F;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .popup-espacio .btn {
+    margin: 4px 4px 0 0;
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Migo Park</h1>
+
+  <div>
+    <div
+      class="campana"
+      onclick="alternarNotificaciones(event)"
+      title="Notificaciones"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.7 21a2 2 0 0 1-3.4 0"/>
+      </svg>
+
+      <span
+        class="burbuja"
+        id="burbuja"
+        style="display:none;"
+      >
+        0
+      </span>
+    </div>
+
+    <span class="info" id="infoUsuario"></span>
+
+    <button
+      class="salir"
+      onclick="cerrarSesion()"
+    >
+      Salir
+    </button>
+  </div>
+</header>
+
+<div
+  class="panel-notif"
+  id="panelNotif"
+  style="display:none;"
+>
+  <div class="cab">
+    <span>Notificaciones</span>
+
+    <button onclick="marcarTodasLeidas()">
+      Marcar todas como leídas
+    </button>
+  </div>
+
+  <div id="listaNotif"></div>
+</div>
+
+<main>
+
+  <div class="tabs">
+
+    <div
+      class="tab activo"
+      id="tab-buscar"
+      onclick="mostrarTab('buscar')"
+    >
+      Buscar espacios
+    </div>
+
+    <div
+      class="tab"
+      id="tab-reservas"
+      onclick="mostrarTab('reservas')"
+    >
+      Mis reservas
+    </div>
+
+    <div
+      class="tab"
+      id="tab-vehiculos"
+      onclick="mostrarTab('vehiculos')"
+    >
+      Mis vehículos
+    </div>
+
+    <div
+      class="tab"
+      id="tab-publicar"
+      onclick="mostrarTab('publicar')"
+    >
+      Publicar espacio
+    </div>
+
+    <div
+      class="tab"
+      id="tab-misespacios"
+      onclick="mostrarTab('misespacios')"
+    >
+      Mis espacios
+    </div>
+
+    <div
+      class="tab"
+      id="tab-reservas-arrendador"
+      onclick="mostrarTab('reservas-arrendador')"
+    >
+      Reservas recibidas
+    </div>
+
+    <div
+      class="tab"
+      id="tab-soporte"
+      onclick="mostrarTab('soporte')"
+    >
+      Soporte
+    </div>
+
+    <div
+      class="tab"
+      id="tab-perfil"
+      onclick="mostrarTab('perfil')"
+    >
+      Mi perfil
+    </div>
+
+  </div>
+
+  <!-- BUSCAR -->
+
+  <div id="vista-buscar">
+
+    <div class="toggle-vista">
+      <button type="button" class="btn verde" id="btnVistaLista" onclick="alternarVistaBuscar('lista')">Lista</button>
+      <button type="button" class="btn gris" id="btnVistaMapa" onclick="alternarVistaBuscar('mapa')">🗺️ Mapa</button>
+    </div>
+
+    <div id="mapaEspacios" style="display:none;"></div>
+    <div id="listaEspacios"></div>
+  </div>
+
+  <div
+    id="vista-reservas"
+    style="display:none;"
+  >
+
+    <div
+      class="chips"
+      id="chipsReservas"
+    >
+      <div
+        class="chip activo"
+        data-filtro="todas"
+        onclick="filtrarReservas('todas')"
+      >
+        Todas
+      </div>
+
+      <div
+        class="chip"
+        data-filtro="pendientes"
+        onclick="filtrarReservas('pendientes')"
+      >
+        Pendientes
+      </div>
+
+      <div
+        class="chip"
+        data-filtro="confirmada"
+        onclick="filtrarReservas('confirmada')"
+      >
+        Confirmadas
+      </div>
+
+      <div
+        class="chip"
+        data-filtro="completada"
+        onclick="filtrarReservas('completada')"
+      >
+        Completadas
+      </div>
+
+      <div
+        class="chip"
+        data-filtro="cancelada"
+        onclick="filtrarReservas('cancelada')"
+      >
+        Canceladas
+      </div>
+    </div>
+
+    <div id="mensajeReservas"></div>
+
+    <div id="listaReservas"></div>
+
+  </div>
+
+  <div
+    id="vista-vehiculos"
+    style="display:none;"
+  >
+
+    <div class="card">
+
+      <h3>Registrar vehículo</h3>
+
+      <form
+        class="form-vehiculo"
+        id="formVehiculo"
+      >
+
+        <input
+          type="text"
+          id="vehPlaca"
+          placeholder="Placa (ej: ABC123)"
+          maxlength="7"
+          required
+        >
+
+        <input
+          type="text"
+          id="vehMarca"
+          placeholder="Marca (opcional)"
+        >
+
+        <input
+          type="text"
+          id="vehModelo"
+          placeholder="Modelo (opcional)"
+        >
+
+        <input
+          type="text"
+          id="vehColor"
+          placeholder="Color (opcional)"
+        >
+
+        <button
+          type="submit"
+          class="btn verde"
+        >
+          Registrar vehículo
+        </button>
+
+      </form>
+
+      <div id="mensajeVehiculos"></div>
+
+      <p style="font-size:13px;color:#777;">
+        Un Administrador o Soporte verificará tu placa.
+      </p>
+
+    </div>
+
+    <div id="listaVehiculos"></div>
+
+  </div>
+
+  <div
+    id="vista-publicar"
+    style="display:none;"
+  >
+
+    <div class="card">
+
+      <h3>Publicar nuevo espacio</h3>
+
+      <form
+        class="publicar"
+        id="formPublicar"
+      >
+
+        <input
+          type="text"
+          id="pubTitulo"
+          placeholder="Título del espacio"
+          required
+        >
+
+        <textarea
+          id="pubDescripcion"
+          placeholder="Descripción"
+          rows="2"
+        ></textarea>
+
+        <input
+          type="text"
+          id="pubDireccion"
+          placeholder="Dirección"
+          required
+        >
+
+        <input
+          type="number"
+          step="0.0000001"
+          id="pubLatitud"
+          placeholder="Latitud (ej: 6.2442)"
+          required
+        >
+
+        <input
+          type="number"
+          step="0.0000001"
+          id="pubLongitud"
+          placeholder="Longitud (ej: -75.5812)"
+          required
+        >
+
+        <input
+          type="number"
+          step="0.01"
+          min="1"
+          id="pubPrecio"
+          placeholder="Precio por hora (ej: 3000)"
+          required
+        >
+
+        <div class="checks">
+
+          <label>
+            <input
+              type="checkbox"
+              id="pubCamara"
+              style="width:auto;margin:0;"
+            >
+            Cámara
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              id="pubPorton"
+              style="width:auto;margin:0;"
+            >
+            Portón
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              id="pubIluminacion"
+              style="width:auto;margin:0;"
+            >
+            Iluminación
+          </label>
+
+        </div>
+
+        <button
+          type="submit"
+          class="btn verde"
+        >
+          Publicar espacio
+        </button>
+
+      </form>
+
+      <div id="mensaje"></div>
+
+      <p style="font-size:13px;color:#777;margin-top:10px;">
+        Nota: el espacio queda "pendiente" hasta que un Administrador o Soporte lo verifique.
+      </p>
+
+    </div>
+
+  </div>
+
+   <div
+    id="vista-misespacios"
+    style="display:none;"
+  >
+    <div id="mensajeMisEspacios"></div>
+    <div id="listaMisEspacios"></div>
+  </div>
+
+  <div
+    id="vista-reservas-arrendador"
+    style="display:none;"
+  >
+
+    <div class="card">
+      <div class="fila">
+        <div>
+          <h3 style="margin:0;">Reservas de mis espacios</h3>
+          <div class="detalle">Consulta quién reservó, cuándo y cuánto has ganado.</div>
+        </div>
+      </div>
+
+      <div id="resumenReservasArrendador" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;"></div>
+    </div>
+
+    <div id="mensajeReservasArrendador"></div>
+    <div id="listaReservasArrendador"></div>
+
+  </div>
+
+  <div
+    id="vista-soporte"
+    style="display:none;"
+  >
+
+    <div id="soporteLista">
+
+      <div class="card">
+
+        <h3>Nuevo caso</h3>
+
+        <div
+          class="detalle"
+          style="margin-bottom:8px;"
+        >
+          ¿Sobre qué necesitas ayuda?
+        </div>
+
+        <div
+          class="chips"
+          id="chipsCategoria"
+        ></div>
+
+        <textarea
+          class="area"
+          id="casoDescripcion"
+          rows="3"
+          placeholder="Cuéntanos qué pasó (mínimo 10 caracteres)"
+        ></textarea>
+
+        <button
+          class="btn verde"
+          id="btnEnviarCaso"
+        >
+          Enviar caso
+        </button>
+
+        <div id="mensajeCaso"></div>
+
+      </div>
+
+      <h3 class="seccion">
+        Mis casos
+      </h3>
+
+      <div id="listaCasos"></div>
+
+    </div>
+
+    <div
+      id="soporteChat"
+      style="display:none;"
+    >
+
+      <button
+        class="btn gris chico"
+        onclick="cerrarChat()"
+      >
+        &larr; Volver a mis casos
+      </button>
+
+      <div
+        class="card"
+        style="margin-top:12px;"
+      >
+
+        <div class="fila">
+
+          <h3 id="chatTitulo"></h3>
+
+          <span
+            class="etiqueta"
+            id="chatEstado"
+          ></span>
+
+        </div>
+
+        <div
+          class="detalle"
+          id="chatMeta"
+        ></div>
+
+        <div id="chatSolucion"></div>
+
+      </div>
+
+      <div
+        class="hilo"
+        id="chatHilo"
+      ></div>
+
+      <div id="chatEntrada">
+
+        <textarea
+          class="area"
+          id="chatTexto"
+          rows="2"
+          placeholder="Escribe un mensaje..."
+        ></textarea>
+
+        <button
+          class="btn verde"
+          id="btnEnviarMensaje"
+        >
+          Enviar
+        </button>
+
+      </div>
+
+      <div
+        class="detalle"
+        id="chatCerrado"
+        style="display:none;"
+      >
+        Este caso está cerrado. Si necesitas más ayuda, abre un caso nuevo.
+      </div>
+
+      <div id="mensajeChat"></div>
+
+    </div>
+
+  </div>
+
+  <div
+    id="vista-perfil"
+    style="display:none;"
+  >
+
+    <div class="card">
+
+      <h3>Editar perfil</h3>
+
+      <form id="formPerfil">
+
+        <input
+          type="text"
+          id="perfNombre"
+          placeholder="Nombre completo"
+          required
+        >
+
+        <input
+          type="text"
+          id="perfCorreo"
+          disabled
+        >
+
+        <input
+          type="text"
+          id="perfTelefono"
+          placeholder="Teléfono"
+        >
+
+        <button
+          type="submit"
+          class="btn verde"
+        >
+          Guardar cambios
+        </button>
+
+      </form>
+
+      <div id="mensajePerfil"></div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<div
+  class="overlay"
+  id="overlay"
+  style="display:none;"
+>
+
+  <div class="modal">
+
+    <div id="pasoFechas">
+
+      <h3 id="resTitulo"></h3>
+
+      <div
+        class="detalle"
+        id="resDireccion"
+        style="margin-bottom:12px;"
+      ></div>
+
+      <label for="resInicio">
+        Inicio
+      </label>
+
+      <input
+        type="datetime-local"
+        id="resInicio"
+      >
+
+      <label for="resFin">
+        Fin
+      </label>
+
+      <input
+        type="datetime-local"
+        id="resFin"
+      >
+
+      <div
+        class="ocupado"
+        id="resDiasBloqueadosCliente"
+      ></div>
+
+      <div
+        class="ocupado"
+        id="resOcupado"
+      ></div>
+
+      <div
+        class="resumen"
+        id="resumen"
+      ></div>
+
+      <div id="resMensaje"></div>
+
+      <button
+        class="btn verde"
+        id="btnReservar"
+      >
+        Reservar
+      </button>
+
+      <button
+        class="btn gris"
+        onclick="cerrarModal()"
+      >
+        Cerrar
+      </button>
+
+    </div>
+
+    <div
+      id="pasoPago"
+      style="display:none;"
+    >
+
+      <h3>Pagar reserva</h3>
+
+      <div
+        class="detalle"
+        id="pagoDetalle"
+      ></div>
+
+      <div
+        class="temporizador"
+        id="temporizador"
+      ></div>
+
+      <div
+        class="resumen"
+        id="pagoResumen"
+      ></div>
+
+      <div
+        class="metodos"
+        id="metodos"
+      ></div>
+
+      <div id="pagoMensaje"></div>
+
+      <button
+        class="btn verde"
+        id="btnPagar"
+      >
+        Confirmar y pagar
+      </button>
+
+      <button
+        class="btn gris"
+        onclick="cerrarModal()"
+      >
+        Pagar después
+      </button>
+
+      <button
+        class="btn rojo"
+        id="btnCancelarPago"
+      >
+        Cancelar reserva
+      </button>
+
+    </div>
+
+    <div
+      id="pasoOk"
+      style="display:none;"
+      class="exito"
+    >
+
+      <div class="grande">
+        &#10003;
+      </div>
+
+      <h3>
+        ¡Reserva confirmada!
+      </h3>
+
+      <div
+        class="detalle"
+        id="okDetalle"
+      ></div>
+
+      <button
+        class="btn verde"
+        onclick="irAMisReservas()"
+      >
+        Ver mis reservas
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div
+  class="overlay"
+  id="overlayCalificar"
+  style="display:none;"
+>
+
+  <div class="modal">
+
+    <h3>
+      ⭐ Calificar reserva
+    </h3>
+
+    <div
+      class="detalle"
+      id="calificarDetalle"
+      style="margin-top:8px;"
+    ></div>
+
+    <p style="text-align:center;margin-bottom:4px;">
+      ¿Cómo fue tu experiencia?
+    </p>
+
+    <div
+      class="estrellas"
+      id="estrellasCalificar"
+    >
+
+      <button
+        type="button"
+        class="estrella"
+        data-puntuacion="1"
+        onclick="seleccionarEstrella(1)"
+      >
+        ★
+      </button>
+
+      <button
+        type="button"
+        class="estrella"
+        data-puntuacion="2"
+        onclick="seleccionarEstrella(2)"
+      >
+        ★
+      </button>
+
+      <button
+        type="button"
+        class="estrella"
+        data-puntuacion="3"
+        onclick="seleccionarEstrella(3)"
+      >
+        ★
+      </button>
+
+      <button
+        type="button"
+        class="estrella"
+        data-puntuacion="4"
+        onclick="seleccionarEstrella(4)"
+      >
+        ★
+      </button>
+
+      <button
+        type="button"
+        class="estrella"
+        data-puntuacion="5"
+        onclick="seleccionarEstrella(5)"
+      >
+        ★
+      </button>
+
+    </div>
+
+    <textarea
+      class="textarea-calificacion"
+      id="comentarioCalificacion"
+      placeholder="Comentario (opcional)"
+      maxlength="500"
+    ></textarea>
+
+    <div id="mensajeCalificacion"></div>
+
+    <button
+      class="btn verde"
+      id="btnEnviarCalificacion"
+      onclick="enviarCalificacion()"
+    >
+      Enviar calificación
+    </button>
+
+    <button
+      class="btn gris"
+      onclick="cerrarCalificacion()"
+    >
+      Cancelar
+    </button>
+
+  </div>
+
+</div>
+
+<div
+  class="overlay"
+  id="overlayCalificaciones"
+  style="display:none;"
+>
+
+  <div class="modal">
+
+    <h3 id="tituloCalificaciones">
+      ⭐ Calificaciones
+    </h3>
+
+    <div id="contenidoCalificaciones">
+      Cargando...
+    </div>
+
+    <button
+      class="btn gris"
+      onclick="cerrarCalificaciones()"
+    >
+      Cerrar
+    </button>
+
+  </div>
+
+</div>
+
+<div
+  class="overlay"
+  id="overlayEditar"
+  style="display:none;"
+>
+
+  <div class="modal">
+
+    <h3>✏️ Corregir espacio</h3>
+
+    <div class="aviso-naranja" style="margin:6px 0 12px;">
+      Motivo del rechazo: <span id="editMotivo"></span>
+    </div>
+
+    <form class="publicar" id="formEditar">
+
+      <input type="text" id="editTitulo" placeholder="Título del espacio" required>
+
+      <textarea id="editDescripcion" placeholder="Descripción" rows="2"></textarea>
+
+      <input type="text" id="editDireccion" placeholder="Dirección" required>
+
+      <input type="number" step="0.0000001" id="editLatitud" placeholder="Latitud" required>
+
+      <input type="number" step="0.0000001" id="editLongitud" placeholder="Longitud" required>
+
+      <input type="number" step="0.01" min="1" id="editPrecio" placeholder="Precio por hora" required>
+
+      <div class="checks">
+
+        <label>
+          <input type="checkbox" id="editCamara" style="width:auto;margin:0;">
+          Cámara
+        </label>
+
+        <label>
+          <input type="checkbox" id="editPorton" style="width:auto;margin:0;">
+          Portón
+        </label>
+
+        <label>
+          <input type="checkbox" id="editIluminacion" style="width:auto;margin:0;">
+          Iluminación
+        </label>
+
+      </div>
+
+      <div id="mensajeEditar"></div>
+
+      <button type="submit" class="btn verde" id="btnGuardarEdicion">
+        Guardar y reenviar a revisión
+      </button>
+
+      <button type="button" class="btn gris" onclick="cerrarEditarEspacio()">
+        Cancelar
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+
+  const API_URL = 'http://localhost:4000/api';
+  const FILE_URL = 'http://localhost:4000';
+
+  const COMISION = 0.10;
+
+  const METODOS = [
+    'Nequi',
+    'Daviplata',
+    'Tarjeta',
+    'PSE'
+  ];
+
+  const token =
+    sessionStorage.getItem('token');
+
+  const usuario =
+    JSON.parse(
+      sessionStorage.getItem('usuario') || 'null'
+    );
+
+  let sesionValida = false;
+
+  if (!token || !usuario) {
+
+    window.location.href = 'index.html';
+
+  } else if (
+    usuario.rol === 'administrador' ||
+    usuario.rol === 'soporte'
+  ) {
+
+    window.location.href = 'admin.html';
+
+  } else {
+
+    sesionValida = true;
+
+    document.getElementById('infoUsuario').textContent =
+      `${usuario.nombre} (${usuario.rol})`;
+  }
+
+  let espaciosCache = {};
+  let reservasCache = [];
+  let filtroReservas = 'todas';
+  let espacioActual = null;
+  let reservaActual = null;
+  let metodoSel = null;
+  let timerId = null;
+  let segundosRestantes = 0;
+  let puntuacionSeleccionada = 0;
+  let reservaCalificando = null;
+
+  function esc(t) {
+
+    return String(t ?? '')
+      .replace(
+        /[&<>"']/g,
+        c => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[c])
+      );
+
+  }
+
+  function dinero(n) {
+
+    return '$' +
+      Number(n).toLocaleString('es-CO');
+
+  }
+
+  function fechaCorta(f) {
+
+    return new Date(f).toLocaleString(
+      'es-CO',
+      {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }
+    );
+
+  }
+
+  function aInputFecha(d) {
+
+    const p =
+      n => String(n).padStart(2, '0');
+
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+
+  }
+
+  function mostrar(el, texto, esError) {
+
+    el.textContent = texto;
+
+    el.className =
+      esError
+        ? 'error'
+        : 'ok';
+
+  }
+
+  async function api(ruta, opciones = {}) {
+
+    const resp = await fetch(
+      `${API_URL}${ruta}`,
+      {
+        ...opciones,
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    if (resp.status === 401) {
+      cerrarSesion();
+    }
+
+    return resp;
+  }
+
+  async function apiArchivo(ruta, opciones = {}) {
+    const resp = await fetch(`${API_URL}${ruta}`, { ...opciones, headers: { 'Authorization': `Bearer ${token}` } });
+    if (resp.status === 401) cerrarSesion();
+    return resp;
+  }
+
+  function cerrarSesion() {
+
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+    window.location.href = 'index.html';
+
+  }
+
+  const TABS = [
+    'buscar',
+    'reservas',
+    'vehiculos',
+    'publicar',
+    'misespacios',
+    'reservas-arrendador',
+    'soporte',
+    'perfil'
+  ];
+
+  function mostrarTab(tab) {
+
+    if (tab !== 'soporte') {
+      detenerChat();
+    }
+
+    TABS.forEach(t => {
+
+      document.getElementById(
+        'vista-' + t
+      ).style.display =
+        t === tab
+          ? 'block'
+          : 'none';
+
+      document.getElementById(
+        'tab-' + t
+      ).classList.toggle(
+        'activo',
+        t === tab
+      );
+
+    });
+
+    if (tab === 'buscar') {
+      cargarEspacios();
+    }
+
+    if (tab === 'reservas') {
+      cargarReservas();
+    }
+
+    if (tab === 'vehiculos') {
+      cargarVehiculos();
+    }
+
+    if (tab === 'misespacios') {
+      cargarMisEspacios();
+    }
+
+    if (tab === 'reservas-arrendador') {
+      cargarReservasArrendador();
+    }
+
+    if (tab === 'soporte') {
+      cargarSoporte();
+    }
+
+    if (tab === 'perfil') {
+      cargarPerfil();
+    }
+
+  }
+
+  async function cargarEspacios() {
+
+    const cont =
+      document.getElementById(
+        'listaEspacios'
+      );
+
+    cont.innerHTML = 'Cargando...';
+
+    try {
+
+      const resp =
+        await fetch(
+          `${API_URL}/espacios`
+        );
+
+      const espacios =
+        await resp.json();
+
+      if (espacios.length === 0) {
+
+        cont.innerHTML =
+          '<p class="vacio">Todavía no hay espacios verificados y disponibles.</p>';
+
+        return;
+      }
+
+      espaciosCache = {};
+
+      espacios.forEach(e => {
+        espaciosCache[e.id] = e;
+      });
+
+      if (vistaBuscarActual === 'mapa') pintarMapa();
+
+      cont.innerHTML =
+        espacios.map(e => {
+
+          const seg = [
+            e.tiene_camara && 'Cámara',
+            e.tiene_porton && 'Portón',
+            e.tiene_iluminacion && 'Iluminación'
+          ]
+          .filter(Boolean)
+          .join(' · ')
+          || 'Sin datos de seguridad';
+
+          const botonReserva =
+            e.arrendador_id === usuario.id
+
+              ? '<span class="etiqueta gris">Tu espacio</span>'
+
+              : `<button
+                   class="btn verde chico"
+                   onclick="abrirReserva(${e.id})"
+                 >
+                   Reservar
+                 </button>`;
+
+          return `
+            <div class="card">
+
+              <div class="fila">
+
+                <h3>
+                  ${esc(e.titulo)}
+                </h3>
+
+                <div class="precio">
+                  ${dinero(e.precio_hora)} / hora
+                </div>
+
+              </div>
+
+              <div class="direccion">
+                ${esc(e.direccion)}
+              </div>
+
+              ${
+                e.descripcion
+                  ? `<div class="detalle">${esc(e.descripcion)}</div>`
+                  : ''
+              }
+
+              <div class="seguridad">
+                ${esc(seg)}
+              </div>
+
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+                ${botonReserva}
+
+                <button
+                  class="btn gris chico"
+                  onclick="verCalificaciones(${e.id}, '${esc(e.titulo)}')"
+                >
+                  ⭐ Ver calificaciones
+                </button>
+
+                <button
+                  class="btn naranja chico"
+                  onclick="comoLlegar(${e.id})"
+                >
+                  🧭 Cómo llegar
+                </button>
+
+              </div>
+
+            </div>
+          `;
+
+        }).join('');
+
+    } catch (err) {
+
+      cont.innerHTML =
+        '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+
+    }
+
+  }
+
+  function verPaso(paso) {
+
+    document.getElementById(
+      'pasoFechas'
+    ).style.display =
+      paso === 'fechas'
+        ? 'block'
+        : 'none';
+
+    document.getElementById(
+      'pasoPago'
+    ).style.display =
+      paso === 'pago'
+        ? 'block'
+        : 'none';
+
+    document.getElementById(
+      'pasoOk'
+    ).style.display =
+      paso === 'ok'
+        ? 'block'
+        : 'none';
+
+  }
+
+  let espacioGestionId = null;
+
+  function estrellasTexto(promedio, total) {
+    if (!total) return 'Sin calificaciones aún';
+    return `⭐ ${promedio} (${total} ${total === 1 ? 'calificación' : 'calificaciones'})`;
+  }
+
+  // ---------- MAPA DE ESPACIOS (Leaflet + OpenStreetMap) ----------
+  let vistaBuscarActual = 'lista';
+  let mapaInstancia = null;
+  let capaMarcadores = null;
+  const CENTRO_DEFECTO = [6.3373, -75.5579];   // Bello, Antioquia
+
+  function alternarVistaBuscar(modo) {
+    vistaBuscarActual = modo;
+    document.getElementById('listaEspacios').style.display = modo === 'lista' ? 'block' : 'none';
+    document.getElementById('mapaEspacios').style.display = modo === 'mapa' ? 'block' : 'none';
+    document.getElementById('btnVistaLista').className = 'btn ' + (modo === 'lista' ? 'verde' : 'gris');
+    document.getElementById('btnVistaMapa').className = 'btn ' + (modo === 'mapa' ? 'verde' : 'gris');
+    if (modo === 'mapa') pintarMapa();
+  }
+
+    function pintarMapa() {
+    if (typeof L === 'undefined') {
+      console.error('Leaflet no cargó.');
+      return;
+    }
+
+    const contenedor = document.getElementById('mapaEspacios');
+
+    if (!contenedor) {
+      console.error('No se encontró el contenedor del mapa.');
+      return;
+    }
+
+    if (!mapaInstancia) {
+      mapaInstancia = L.map('mapaEspacios').setView(CENTRO_DEFECTO, 13);
+
+      const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+
+      // Vista satélite + nombres de calles y barrios encima
+      const satelite = L.layerGroup([
+        L.tileLayer(
+          ESRI + 'World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          {
+            attribution:
+              'Tiles &copy; Esri &mdash; Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+            maxZoom: 19
+          }
+        ),
+
+        L.tileLayer(
+          ESRI + 'Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 19
+          }
+        ),
+
+        L.tileLayer(
+          ESRI + 'Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 19
+          }
+        )
+      ]);
+
+      // Vista de calles
+      const calles = L.tileLayer(
+        ESRI + 'World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution:
+            'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, USGS, and others',
+          maxZoom: 19
+        }
+      );
+
+      satelite.addTo(mapaInstancia);
+
+      L.control.layers(
+        {
+          '🛰️ Satélite': satelite,
+          '🗺️ Calles': calles
+        },
+        null,
+        {
+          position: 'topright'
+        }
+      ).addTo(mapaInstancia);
+
+      capaMarcadores =
+        L.layerGroup().addTo(mapaInstancia);
+    }
+
+    capaMarcadores.clearLayers();
+
+    const espacios =
+      Object.values(espaciosCache).filter(e =>
+        e.latitud != null &&
+        e.longitud != null &&
+        !isNaN(Number(e.latitud)) &&
+        !isNaN(Number(e.longitud))
+      );
+
+    espacios.forEach(e => {
+
+      const marcador =
+        L.marker([
+          Number(e.latitud),
+          Number(e.longitud)
+        ]).addTo(capaMarcadores);
+
+
+      // =====================================================
+      // FOTO DEL ESPACIO
+      // =====================================================
+
+      const fotosPopup =
+        Array.isArray(e.fotos)
+          ? e.fotos
+          : [];
+
+      const primeraFotoPopup =
+        fotosPopup.length > 0
+          ? fotosPopup[0]
+          : null;
+
+      let fotoPopupHTML = '';
+
+      if (primeraFotoPopup) {
+
+        const urlFoto =
+          typeof primeraFotoPopup === 'string'
+            ? primeraFotoPopup
+            : primeraFotoPopup.url;
+
+        if (urlFoto) {
+
+          fotoPopupHTML = `
+            <img
+              src="${FILE_URL}${esc(urlFoto)}"
+              class="foto-espacio"
+              alt="Foto del espacio"
+              onerror="this.style.display='none';"
+            >
+          `;
+
+        }
+      }
+
+
+      // =====================================================
+      // CALIFICACIONES
+      // =====================================================
+
+      const totalPopup =
+        Number(e.total_calificaciones || 0);
+
+      const promedioPopup =
+        Number(e.promedio_calificacion || 0);
+
+      let estrellasPopup = '';
+
+      if (totalPopup > 0) {
+
+        const estrellasLlenas =
+          Math.round(promedioPopup);
+
+        const estrellasVacias =
+          5 - estrellasLlenas;
+
+        estrellasPopup =
+          '★'.repeat(estrellasLlenas) +
+          '☆'.repeat(estrellasVacias);
+
+      } else {
+
+        estrellasPopup = '☆☆☆☆☆';
+
+      }
+
+
+      let ratingPopupHTML = '';
+
+      if (totalPopup > 0) {
+
+        ratingPopupHTML = `
+          <div class="rating-espacio">
+            ${estrellasPopup}
+
+            <span class="numero">
+              ${promedioPopup.toFixed(1)}
+              (${totalPopup})
+            </span>
+          </div>
+        `;
+
+      } else {
+
+        ratingPopupHTML = `
+          <div class="rating-espacio">
+            ${estrellasPopup}
+
+            <span class="numero">
+              Sin calificaciones
+            </span>
+          </div>
+        `;
+
+      }
+
+
+      // =====================================================
+      // POPUP DEL MAPA
+      // =====================================================
+
+      marcador.bindPopup(`
+
+        <div class="popup-espacio">
+
+          ${fotoPopupHTML}
+
+          <h4>
+            ${esc(e.titulo)}
+          </h4>
+
+          <div>
+            ${esc(e.direccion)}
+          </div>
+
+          <div class="precio">
+            ${dinero(e.precio_hora)} / hora
+          </div>
+
+          ${ratingPopupHTML}
+
+          <div style="margin-top:10px;">
+
+            ${
+              e.arrendador_id === usuario.id
+
+                ? `
+                  <span class="etiqueta gris">
+                    Tu espacio
+                  </span>
+                `
+
+                : `
+                  <button
+                    class="btn verde chico"
+                    onclick="abrirReserva(${e.id})"
+                  >
+                    Reservar
+                  </button>
+                `
+            }
+
+            <button
+              class="btn naranja chico"
+              onclick="comoLlegar(${e.id})"
+            >
+              🧭 Cómo llegar
+            </button>
+
+          </div>
+
+        </div>
+
+      `);
+
+    });
+
+
+    // =====================================================
+    // AJUSTAR VISTA DEL MAPA
+    // =====================================================
+
+    if (espacios.length > 0) {
+
+      mapaInstancia.fitBounds(
+        espacios.map(e => [
+          Number(e.latitud),
+          Number(e.longitud)
+        ]),
+        {
+          padding: [30, 30],
+          maxZoom: 15
+        }
+      );
+
+    } else {
+
+      mapaInstancia.setView(
+        CENTRO_DEFECTO,
+        13
+      );
+
+    }
+
+
+    setTimeout(() => {
+
+      mapaInstancia.invalidateSize();
+
+    }, 300);
+
+  }
+
+  // Abre Google Maps con la ruta desde tu ubicación actual hasta el espacio
+  function comoLlegar(id) {
+    const e = espaciosCache[id];
+    if (!e || e.latitud == null || e.longitud == null) return;
+
+    const url = 'https://www.google.com/maps/dir/?api=1&destination=' +
+      encodeURIComponent(`${Number(e.latitud)},${Number(e.longitud)}`) +
+      '&travelmode=driving';
+
+    window.open(url, '_blank', 'noopener');
+  }
+
+
+  // ---------- RESERVAS RECIBIDAS COMO ARRENDADOR ----------
+  let reservasArrendadorCache = [];
+
+  async function cargarReservasArrendador() {
+    const lista = document.getElementById('listaReservasArrendador');
+    const resumen = document.getElementById('resumenReservasArrendador');
+    const mensaje = document.getElementById('mensajeReservasArrendador');
+
+    lista.innerHTML = 'Cargando...';
+    resumen.innerHTML = '';
+    mensaje.textContent = '';
+
+    try {
+      const resp = await api('/reservas-arrendador');
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        lista.innerHTML = `<p class="vacio error">${esc(data.error || 'No se pudieron cargar las reservas.')}</p>`;
+        return;
+      }
+
+      reservasArrendadorCache = Array.isArray(data.reservas) ? data.reservas : [];
+
+      const r = data.resumen || {};
+      resumen.innerHTML = `
+        <div class="card" style="margin:0;flex:1;min-width:150px;">
+          <div class="detalle">Reservas</div>
+          <h3 style="margin:4px 0 0;">${Number(r.total_reservas || 0)}</h3>
+        </div>
+        <div class="card" style="margin:0;flex:1;min-width:150px;">
+          <div class="detalle">Pagadas</div>
+          <h3 style="margin:4px 0 0;">${Number(r.reservas_pagadas || 0)}</h3>
+        </div>
+        <div class="card" style="margin:0;flex:1;min-width:180px;">
+          <div class="detalle">Total ganado</div>
+          <h3 style="margin:4px 0 0;">${dinero(r.total_ganado || 0)}</h3>
+        </div>`;
+
+      pintarReservasArrendador();
+    } catch (err) {
+      lista.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  function pintarReservasArrendador() {
+    const cont = document.getElementById('listaReservasArrendador');
+
+    if (reservasArrendadorCache.length === 0) {
+      cont.innerHTML = '<p class="vacio">Todavía no tienes reservas en tus espacios.</p>';
+      return;
+    }
+
+    cont.innerHTML = reservasArrendadorCache.map(r => {
+      const et = ETIQUETAS[r.estado] || { texto: r.estado || 'Sin estado', clase: 'gris' };
+      const pago = r.pago_estado === 'completado'
+        ? '<span class="etiqueta verde">Pago completado</span>'
+        : `<span class="etiqueta gris">${esc(r.pago_estado || 'Sin pago')}</span>`;
+
+      return `
+        <div class="card">
+          <div class="fila">
+            <div>
+              <h3 style="margin:0;">${esc(r.espacio_titulo)}</h3>
+              <div class="direccion">${esc(r.espacio_direccion)}</div>
+            </div>
+            <span class="etiqueta ${et.clase}">${esc(et.texto)}</span>
+          </div>
+
+          <div class="detalle" style="margin-top:12px;">
+            <b>Cliente:</b> ${esc(r.conductor_nombre)}
+          </div>
+          <div class="detalle">
+            <b>Correo:</b> ${esc(r.conductor_correo)}
+          </div>
+          ${r.conductor_telefono ? `<div class="detalle"><b>Teléfono:</b> ${esc(r.conductor_telefono)}</div>` : ''}
+          <div class="detalle" style="margin-top:8px;">
+            <b>Reserva:</b> ${esc(fechaCorta(r.fecha_inicio))} → ${esc(fechaCorta(r.fecha_fin))}
+          </div>
+          <div class="detalle">
+            <b>Duración:</b> ${Number(r.horas || 0).toLocaleString('es-CO')} horas
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <span class="etiqueta gris">Total pagado: ${dinero(r.total)}</span>
+            <span class="etiqueta verde">Tú ganas: ${dinero(r.ganancia)}</span>
+            ${pago}
+          </div>
+
+          ${r.estado === 'confirmada' ? `
+            <button type="button" class="btn verde chico" style="margin-top:12px;" onclick="marcarReservaCompletada(${r.id})">
+              Marcar como completada
+            </button>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  async function marcarReservaCompletada(reservaId) {
+    if (!confirm('¿Marcar esta reserva como completada?')) return;
+
+    try {
+      const resp = await api(`/reservas/${reservaId}/estado`, {
+        method: 'PUT',
+        body: JSON.stringify({ estado: 'completada' })
+      });
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        alert(data.error || 'No se pudo marcar la reserva como completada.');
+        return;
+      }
+
+      await cargarReservasArrendador();
+    } catch (err) {
+      alert('No se pudo conectar con el servidor.');
+    }
+  }
+
+  // ---------- MIS ESPACIOS (con corrección de espacios rechazados) ----------
+  let misEspaciosCache = {};
+  let espacioEditandoId = null;
+
+  async function cargarMisEspacios() {
+    const cont = document.getElementById('listaMisEspacios');
+    document.getElementById('mensajeMisEspacios').textContent = '';
+    cont.innerHTML = 'Cargando...';
+    try {
+      const resp = await api('/espacios/mios');
+      const data = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(data.error || 'Error')}</p>`; return; }
+
+      misEspaciosCache = {};
+      data.forEach(e => { misEspaciosCache[e.id] = e; });
+
+      if (data.length === 0) { cont.innerHTML = '<p class="vacio">Aún no has publicado espacios.</p>'; return; }
+
+      cont.innerHTML = data.map(e => {
+        let etiqueta;
+        if (e.verificado) etiqueta = '<span class="etiqueta verde">Verificado</span>';
+        else if (e.motivo_rechazo) etiqueta = '<span class="etiqueta rojo">Rechazado</span>';
+        else etiqueta = '<span class="etiqueta naranja">Pendiente de verificación</span>';
+
+        const rechazado = !e.verificado && !!e.motivo_rechazo;
+
+        const fotos = (e.fotos || []).map(f => `
+          <div style="position:relative;display:inline-block;margin:0 6px 6px 0;">
+            <img src="${FILE_URL}${esc(f.url)}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;">
+            <button type="button" class="btn rojo chico" style="position:absolute;top:-6px;right:-6px;padding:2px 6px;font-size:11px;border-radius:50%;"
+              onclick="borrarFoto(${e.id}, ${f.id})">&times;</button>
+          </div>`).join('');
+
+        return `
+          <div class="card">
+            <div class="fila">
+              <h3>${esc(e.titulo)}</h3>
+              ${etiqueta}
+            </div>
+            <div class="direccion">${esc(e.direccion)}</div>
+            <div class="detalle">${dinero(e.precio_hora)} / hora · ${estrellasTexto(e.promedio_calificacion, e.total_calificaciones)}</div>
+            ${e.motivo_rechazo ? `<div class="detalle" style="color:var(--rojo);">Motivo del rechazo: ${esc(e.motivo_rechazo)}</div>` : ''}
+
+            ${rechazado ? `
+              <div style="margin:8px 0;">
+                <button type="button" class="btn naranja chico" onclick="abrirEditarEspacio(${e.id})">
+                  ✏️ Corregir y reenviar
+                </button>
+              </div>` : ''}
+
+            <div class="detalle" style="margin-top:10px;"><b>Fotos (${(e.fotos || []).length}/6)</b></div>
+            <div>${fotos || '<span class="detalle">Sin fotos todavía.</span>'}</div>
+            <input type="file" id="inputFoto_${e.id}" accept="image/jpeg,image/png,image/webp" multiple style="margin-top:6px;">
+            <button type="button" class="btn verde chico" onclick="subirFotos(${e.id})">Subir fotos</button>
+
+            <div class="detalle" style="margin-top:14px;"><b>Bloquear días (para reformas, mantenimiento, etc.)</b></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+              <input type="date" id="fechaBloqueo_${e.id}">
+              <button type="button" class="btn naranja chico" onclick="bloquearDia(${e.id})">Bloquear día</button>
+            </div>
+            <div id="diasBloqueados_${e.id}" class="detalle" style="margin-top:6px;">Cargando días bloqueados...</div>
+
+            <div id="mensajeEspacio_${e.id}"></div>
+          </div>`;
+      }).join('');
+
+      data.forEach(e => cargarDiasBloqueados(e.id));
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  function abrirEditarEspacio(id) {
+    const e = misEspaciosCache[id];
+    if (!e) return;
+
+    espacioEditandoId = id;
+
+    document.getElementById('editMotivo').textContent = e.motivo_rechazo || '';
+    document.getElementById('editTitulo').value = e.titulo || '';
+    document.getElementById('editDescripcion').value = e.descripcion || '';
+    document.getElementById('editDireccion').value = e.direccion || '';
+    document.getElementById('editLatitud').value = e.latitud ?? '';
+    document.getElementById('editLongitud').value = e.longitud ?? '';
+    document.getElementById('editPrecio').value = Number(e.precio_hora);
+    document.getElementById('editCamara').checked = !!e.tiene_camara;
+    document.getElementById('editPorton').checked = !!e.tiene_porton;
+    document.getElementById('editIluminacion').checked = !!e.tiene_iluminacion;
+    document.getElementById('mensajeEditar').textContent = '';
+    document.getElementById('btnGuardarEdicion').disabled = false;
+
+    document.getElementById('overlayEditar').style.display = 'flex';
+  }
+
+  function cerrarEditarEspacio() {
+    document.getElementById('overlayEditar').style.display = 'none';
+    espacioEditandoId = null;
+  }
+
+  document
+    .getElementById('formEditar')
+    .addEventListener('submit', async (ev) => {
+
+      ev.preventDefault();
+
+      if (!espacioEditandoId) return;
+
+      const msg = document.getElementById('mensajeEditar');
+      const btn = document.getElementById('btnGuardarEdicion');
+
+      const body = {
+        titulo: document.getElementById('editTitulo').value,
+        descripcion: document.getElementById('editDescripcion').value,
+        direccion: document.getElementById('editDireccion').value,
+        latitud: parseFloat(document.getElementById('editLatitud').value),
+        longitud: parseFloat(document.getElementById('editLongitud').value),
+        precio_hora: parseFloat(document.getElementById('editPrecio').value),
+        tiene_camara: document.getElementById('editCamara').checked,
+        tiene_porton: document.getElementById('editPorton').checked,
+        tiene_iluminacion: document.getElementById('editIluminacion').checked
+      };
+
+      btn.disabled = true;
+
+      try {
+
+        const resp = await api(
+          `/espacios/${espacioEditandoId}`,
+          { method: 'PUT', body: JSON.stringify(body) }
+        );
+
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          mostrar(msg, data.error || 'No se pudo guardar', true);
+          btn.disabled = false;
+          return;
+        }
+
+        cerrarEditarEspacio();
+        await cargarMisEspacios();
+
+        mostrar(
+          document.getElementById('mensajeMisEspacios'),
+          data.mensaje || 'Espacio corregido y enviado nuevamente a revisión.',
+          false
+        );
+
+      } catch (err) {
+
+        mostrar(msg, 'No se pudo conectar con el servidor.', true);
+        btn.disabled = false;
+
+      }
+
+    });
+
+  async function subirFotos(espacioId) {
+    const input = document.getElementById(`inputFoto_${espacioId}`);
+    const msg = document.getElementById(`mensajeEspacio_${espacioId}`);
+    if (!input.files || input.files.length === 0) return mostrar(msg, 'Elige al menos una foto.', true);
+
+    const form = new FormData();
+    for (const f of input.files) form.append('fotos', f);
+
+    try {
+      const resp = await apiArchivo(`/espacios/${espacioId}/media`, { method: 'POST', body: form });
+      const data = await resp.json();
+      if (!resp.ok) return mostrar(msg, data.error || 'No se pudieron subir las fotos', true);
+      cargarMisEspacios();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    }
+  }
+
+  async function borrarFoto(espacioId, fotoId) {
+    if (!confirm('¿Borrar esta foto?')) return;
+    try {
+      const resp = await api(`/espacios/${espacioId}/media/${fotoId}`, { method: 'DELETE' });
+      const data = await resp.json();
+      if (!resp.ok) { alert(data.error || 'No se pudo borrar la foto'); return; }
+      cargarMisEspacios();
+    } catch (err) {
+      alert('No se pudo conectar con el servidor.');
+    }
+  }
+
+  async function cargarDiasBloqueados(espacioId) {
+    const cont = document.getElementById(`diasBloqueados_${espacioId}`);
+    if (!cont) return;
+    try {
+      const resp = await api(`/espacios/${espacioId}/disponibilidad`);
+      const fechas = await resp.json();
+      if (!resp.ok) { cont.textContent = ''; return; }
+      if (fechas.length === 0) { cont.textContent = 'No tienes días bloqueados.'; return; }
+      cont.innerHTML = fechas.map(f => {
+        const dia = f.slice(0, 10);
+        return `<span class="etiqueta gris" style="margin:0 6px 6px 0;display:inline-block;">
+          ${esc(dia)} <span style="cursor:pointer;color:var(--naranja);font-weight:bold;" onclick="desbloquearDia(${espacioId}, '${dia}')">&times;</span>
+        </span>`;
+      }).join('');
+    } catch (err) { /* no crítico */ }
+  }
+
+  async function bloquearDia(espacioId) {
+    const fecha = document.getElementById(`fechaBloqueo_${espacioId}`).value;
+    const msg = document.getElementById(`mensajeEspacio_${espacioId}`);
+    if (!fecha) return mostrar(msg, 'Elige una fecha.', true);
+    try {
+      const resp = await api(`/espacios/${espacioId}/disponibilidad`, { method: 'PUT', body: JSON.stringify({ fecha, habilitado: false }) });
+      const data = await resp.json();
+      if (!resp.ok) return mostrar(msg, data.error || 'No se pudo bloquear el día', true);
+      msg.textContent = '';
+      cargarDiasBloqueados(espacioId);
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    }
+  }
+
+  async function desbloquearDia(espacioId, fecha) {
+    try {
+      await api(`/espacios/${espacioId}/disponibilidad`, { method: 'PUT', body: JSON.stringify({ fecha, habilitado: true }) });
+      cargarDiasBloqueados(espacioId);
+    } catch (err) { /* no crítico */ }
+  }
+  
+  async function abrirReserva(id) {
+
+    espacioActual =
+      espaciosCache[id];
+
+    reservaActual = null;
+
+    if (!espacioActual) {
+      return;
+    }
+
+    document.getElementById(
+      'resTitulo'
+    ).textContent =
+      espacioActual.titulo;
+
+    document.getElementById(
+      'resDireccion'
+    ).textContent =
+      `${espacioActual.direccion} · ${dinero(espacioActual.precio_hora)} / hora`;
+
+    document.getElementById(
+      'resMensaje'
+    ).textContent = '';
+
+    document.getElementById(
+      'resOcupado'
+    ).textContent = '';
+
+    document.getElementById(
+      'resDiasBloqueadosCliente'
+    ).textContent = 'Cargando días bloqueados...';
+
+    document.getElementById(
+      'btnReservar'
+    ).disabled = false;
+
+    const inicio =
+      new Date();
+
+    inicio.setHours(
+      inicio.getHours() + 1,
+      0,
+      0,
+      0
+    );
+
+    const fin =
+      new Date(
+        inicio.getTime()
+        + 2 * 60 * 60 * 1000
+      );
+
+    const inInicio =
+      document.getElementById(
+        'resInicio'
+      );
+
+    const inFin =
+      document.getElementById(
+        'resFin'
+      );
+
+    inInicio.min =
+      aInputFecha(new Date());
+
+    inFin.min =
+      aInputFecha(new Date());
+
+    inInicio.value =
+      aInputFecha(inicio);
+
+    inFin.value =
+      aInputFecha(fin);
+
+    calcularResumen();
+
+    verPaso('fechas');
+
+    document.getElementById(
+      'overlay'
+    ).style.display = 'flex';
+
+    cargarOcupados(id);
+    cargarDiasBloqueadosCliente(id);
+
+  }
+
+  async function cargarDiasBloqueadosCliente(espacioId) {
+
+    const el =
+      document.getElementById(
+        'resDiasBloqueadosCliente'
+      );
+
+    try {
+
+      const resp =
+        await api(
+          `/espacios/${espacioId}/disponibilidad`
+        );
+
+      const fechas =
+        await resp.json();
+
+      if (!resp.ok) {
+        el.textContent = '';
+        return;
+      }
+
+      if (!Array.isArray(fechas) || fechas.length === 0) {
+        el.textContent = 'No hay días bloqueados por el arrendador.';
+        return;
+      }
+
+      el.innerHTML =
+        '<b>Días bloqueados por el arrendador:</b><br>' +
+        fechas.map(f =>
+          `• ${esc(new Date(`${f}T00:00:00`).toLocaleDateString('es-CO', { dateStyle: 'medium' }))}`
+        ).join('<br>');
+
+    } catch (err) {
+      el.textContent = '';
+    }
+
+  }
+
+  async function cargarOcupados(espacioId) {
+
+    const el =
+      document.getElementById(
+        'resOcupado'
+      );
+
+    try {
+
+      const resp =
+        await api(
+          `/reservas/espacio/${espacioId}/ocupado`
+        );
+
+      const filas =
+        await resp.json();
+
+      if (
+        resp.ok &&
+        filas.length > 0
+      ) {
+
+        el.innerHTML =
+          'Horarios ya ocupados:<br>' +
+          filas.map(f =>
+            `• ${esc(fechaCorta(f.fecha_inicio))} → ${esc(fechaCorta(f.fecha_fin))}`
+          ).join('<br>');
+
+      }
+
+    } catch (err) {}
+
+  }
+
+  function calcularResumen() {
+
+    const el =
+      document.getElementById(
+        'resumen'
+      );
+
+    const ini =
+      new Date(
+        document.getElementById(
+          'resInicio'
+        ).value
+      );
+
+    const fin =
+      new Date(
+        document.getElementById(
+          'resFin'
+        ).value
+      );
+
+    if (
+      isNaN(ini) ||
+      isNaN(fin) ||
+      fin <= ini
+    ) {
+
+      el.innerHTML =
+        'Elige una fecha y hora de inicio y fin válidas.';
+
+      return null;
+    }
+
+    const horas =
+      (fin - ini) / 36e5;
+
+    const subtotal =
+      Number(
+        (
+          horas *
+          Number(
+            espacioActual.precio_hora
+          )
+        ).toFixed(2)
+      );
+
+    const comision =
+      Number(
+        (
+          subtotal *
+          COMISION
+        ).toFixed(2)
+      );
+
+    const total =
+      Number(
+        (
+          subtotal +
+          comision
+        ).toFixed(2)
+      );
+
+    el.innerHTML = `
+
+      <div class="linea">
+        <span>Duración</span>
+        <span>${Number(horas.toFixed(2))} h</span>
+      </div>
+
+      <div class="linea">
+        <span>Subtotal</span>
+        <span>${dinero(subtotal)}</span>
+      </div>
+
+      <div class="linea">
+        <span>Comisión (${COMISION * 100}%)</span>
+        <span>${dinero(comision)}</span>
+      </div>
+
+      <div class="linea total">
+        <span>Total</span>
+        <span>${dinero(total)}</span>
+      </div>
+
+    `;
+
+    return {
+      ini,
+      fin,
+      subtotal,
+      comision,
+      total
+    };
+
+  }
+
+  document
+    .getElementById('resInicio')
+    .addEventListener(
+      'input',
+      () => {
+
+        const ini =
+          new Date(
+            document.getElementById(
+              'resInicio'
+            ).value
+          );
+
+        const finEl =
+          document.getElementById(
+            'resFin'
+          );
+
+        if (
+          !isNaN(ini) &&
+          new Date(finEl.value) <= ini
+        ) {
+
+          finEl.value =
+            aInputFecha(
+              new Date(
+                ini.getTime()
+                + 60 * 60 * 1000
+              )
+            );
+
+        }
+
+        calcularResumen();
+
+      }
+    );
+
+  document
+    .getElementById('resFin')
+    .addEventListener(
+      'input',
+      calcularResumen
+    );
+
+  document
+    .getElementById('btnReservar')
+    .addEventListener(
+      'click',
+      async () => {
+
+        const msg =
+          document.getElementById(
+            'resMensaje'
+          );
+
+        const r =
+          calcularResumen();
+
+        if (!r) {
+
+          return mostrar(
+            msg,
+            'Revisa las fechas.',
+            true
+          );
+
+        }
+
+        if (r.ini < new Date()) {
+
+          return mostrar(
+            msg,
+            'El inicio no puede estar en el pasado.',
+            true
+          );
+
+        }
+
+        const btn =
+          document.getElementById(
+            'btnReservar'
+          );
+
+        btn.disabled = true;
+
+        try {
+
+          const resp =
+            await api(
+              '/reservas',
+              {
+                method: 'POST',
+
+                body: JSON.stringify({
+                  espacio_id:
+                    espacioActual.id,
+
+                  fecha_inicio:
+                    r.ini.toISOString(),
+
+                  fecha_fin:
+                    r.fin.toISOString()
+                })
+              }
+            );
+
+          const data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            mostrar(
+              msg,
+              data.error ||
+              'No se pudo crear la reserva',
+              true
+            );
+
+            btn.disabled = false;
+
+            return;
+          }
+
+          reservaActual = {
+            ...data,
+            espacio_titulo:
+              espacioActual.titulo
+          };
+
+          mostrarPasoPago(
+            data.segundos_restantes
+          );
+
+        } catch (err) {
+
+          mostrar(
+            msg,
+            'No se pudo conectar con el servidor.',
+            true
+          );
+
+          btn.disabled = false;
+
+        }
+
+      }
+    );
+
+  function mostrarPasoPago(segundos) {
+
+    metodoSel = null;
+
+    document.getElementById(
+      'pagoMensaje'
+    ).textContent = '';
+
+    document.getElementById(
+      'btnPagar'
+    ).disabled = false;
+
+    document.getElementById(
+      'pagoDetalle'
+    ).innerHTML =
+      `<b>${esc(reservaActual.espacio_titulo)}</b><br>` +
+      `${esc(fechaCorta(reservaActual.fecha_inicio))} → ${esc(fechaCorta(reservaActual.fecha_fin))}`;
+
+    document.getElementById(
+      'pagoResumen'
+    ).innerHTML = `
+
+      <div class="linea">
+        <span>Subtotal</span>
+        <span>${dinero(reservaActual.subtotal)}</span>
+      </div>
+
+      <div class="linea">
+        <span>Comisión</span>
+        <span>${dinero(reservaActual.comision)}</span>
+      </div>
+
+      <div class="linea total">
+        <span>Total a pagar</span>
+        <span>${dinero(reservaActual.total)}</span>
+      </div>
+
+    `;
+
+    document.getElementById(
+      'metodos'
+    ).innerHTML =
+      METODOS
+        .map(m =>
+          `<div
+            class="metodo"
+            data-metodo="${m}"
+            onclick="elegirMetodo('${m}')"
+          >
+            ${m}
+          </div>`
+        )
+        .join('');
+
+    iniciarTemporizador(segundos);
+
+    verPaso('pago');
+
+    document.getElementById(
+      'overlay'
+    ).style.display = 'flex';
+
+  }
+
+  function elegirMetodo(m) {
+
+    metodoSel = m;
+
+    document
+      .querySelectorAll('.metodo')
+      .forEach(el =>
+        el.classList.toggle(
+          'sel',
+          el.dataset.metodo === m
+        )
+      );
+
+  }
+
+  function detenerTemporizador() {
+
+    if (timerId) {
+
+      clearInterval(timerId);
+
+      timerId = null;
+
+    }
+
+  }
+
+  function pintarTemporizador() {
+
+    const el =
+      document.getElementById(
+        'temporizador'
+      );
+
+    if (segundosRestantes <= 0) {
+
+      el.textContent =
+        'Se acabó el tiempo. La reserva fue liberada.';
+
+      document.getElementById(
+        'btnPagar'
+      ).disabled = true;
+
+      return;
+    }
+
+    const mm =
+      String(
+        Math.floor(
+          segundosRestantes / 60
+        )
+      ).padStart(2, '0');
+
+    const ss =
+      String(
+        segundosRestantes % 60
+      ).padStart(2, '0');
+
+    el.textContent =
+      `Tienes ${mm}:${ss} para completar el pago`;
+
+  }
+
+  function iniciarTemporizador(seg) {
+
+    detenerTemporizador();
+
+    segundosRestantes =
+      Number(seg) || 0;
+
+    pintarTemporizador();
+
+    timerId =
+      setInterval(
+        () => {
+
+          segundosRestantes--;
+
+          pintarTemporizador();
+
+          if (
+            segundosRestantes <= 0
+          ) {
+
+            detenerTemporizador();
+
+          }
+
+        },
+        1000
+      );
+
+  }
+
+  document
+    .getElementById('btnPagar')
+    .addEventListener(
+      'click',
+      async () => {
+
+        const msg =
+          document.getElementById(
+            'pagoMensaje'
+          );
+
+        if (!metodoSel) {
+
+          return mostrar(
+            msg,
+            'Elige un método de pago.',
+            true
+          );
+
+        }
+
+        const btn =
+          document.getElementById(
+            'btnPagar'
+          );
+
+        btn.disabled = true;
+
+        try {
+
+          let resp =
+            await api(
+              '/pagos',
+              {
+                method: 'POST',
+
+                body: JSON.stringify({
+                  reserva_id:
+                    reservaActual.id,
+
+                  metodo_pago:
+                    metodoSel
+                })
+              }
+            );
+
+          let data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            mostrar(
+              msg,
+              data.error ||
+              'No se pudo registrar el pago',
+              true
+            );
+
+            btn.disabled = false;
+
+            return;
+
+          }
+
+          resp =
+            await api(
+              `/pagos/${data.id}/confirmar`,
+              {
+                method: 'PUT'
+              }
+            );
+
+          data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            mostrar(
+              msg,
+              data.error ||
+              'No se pudo confirmar el pago',
+              true
+            );
+
+            btn.disabled = false;
+
+            return;
+
+          }
+
+          detenerTemporizador();
+
+          document.getElementById(
+            'okDetalle'
+          ).innerHTML =
+            `${esc(reservaActual.espacio_titulo)}<br>` +
+            `${esc(fechaCorta(reservaActual.fecha_inicio))} → ${esc(fechaCorta(reservaActual.fecha_fin))}<br>` +
+            `<b>${dinero(reservaActual.total)}</b> pagado con ${esc(metodoSel)}`;
+
+          verPaso('ok');
+
+        } catch (err) {
+
+          mostrar(
+            msg,
+            'No se pudo conectar con el servidor.',
+            true
+          );
+
+          btn.disabled = false;
+
+        }
+
+      }
+    );
+
+  document
+    .getElementById('btnCancelarPago')
+    .addEventListener(
+      'click',
+      () => {
+
+        if (reservaActual) {
+
+          cancelarReserva(
+            reservaActual.id,
+            true
+          );
+
+        }
+
+      }
+    );
+
+  function cerrarModal() {
+
+    detenerTemporizador();
+
+    document.getElementById(
+      'overlay'
+    ).style.display = 'none';
+
+    if (
+      document.getElementById(
+        'vista-reservas'
+      ).style.display !== 'none'
+    ) {
+
+      cargarReservas();
+
+    }
+
+  }
+
+  function irAMisReservas() {
+
+    cerrarModal();
+
+    mostrarTab('reservas');
+
+  }
+
+  const ETIQUETAS = {
+
+    pendiente: {
+      texto: 'Pendiente de pago',
+      clase: 'naranja'
+    },
+
+    en_proceso: {
+      texto: 'En proceso de pago',
+      clase: 'naranja'
+    },
+
+    confirmada: {
+      texto: 'Confirmada',
+      clase: 'verde'
+    },
+
+    completada: {
+      texto: 'Completada',
+      clase: 'verde'
+    },
+
+    cancelada: {
+      texto: 'Cancelada',
+      clase: 'gris'
+    }
+
+  };
+
+  function porcentajeReembolso(
+    fechaInicio
+  ) {
+
+    const horas =
+      (
+        new Date(fechaInicio) -
+        new Date()
+      ) / 36e5;
+
+    return horas >= 24
+      ? 100
+      : horas >= 2
+        ? 50
+        : 0;
+
+  }
+
+  function filtrarReservas(f) {
+
+    filtroReservas = f;
+
+    document
+      .querySelectorAll(
+        '#chipsReservas .chip'
+      )
+      .forEach(c =>
+        c.classList.toggle(
+          'activo',
+          c.dataset.filtro === f
+        )
+      );
+
+    pintarReservas();
+
+  }
+
+  async function cargarReservas() {
+
+    const cont =
+      document.getElementById(
+        'listaReservas'
+      );
+
+    cont.innerHTML =
+      'Cargando...';
+
+    try {
+
+      const resp =
+        await api(
+          '/reservas/mias'
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        cont.innerHTML =
+          `<p class="vacio error">${esc(data.error || 'Error')}</p>`;
+
+        return;
+
+      }
+
+      reservasCache = data;
+
+      pintarReservas();
+
+    } catch (err) {
+
+      cont.innerHTML =
+        '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+
+    }
+
+  }
+
+  function pintarReservas() {
+
+    const cont =
+      document.getElementById(
+        'listaReservas'
+      );
+
+    const lista =
+      reservasCache.filter(r => {
+
+        if (
+          filtroReservas === 'todas'
+        ) {
+
+          return true;
+
+        }
+
+        if (
+          filtroReservas === 'pendientes'
+        ) {
+
+          return [
+            'pendiente',
+            'en_proceso'
+          ].includes(r.estado);
+
+        }
+
+        return r.estado === filtroReservas;
+
+      });
+
+    if (lista.length === 0) {
+
+      cont.innerHTML =
+        '<p class="vacio">No hay reservas en esta categoría.</p>';
+
+      return;
+
+    }
+
+    cont.innerHTML =
+      lista.map(r => {
+
+        const et =
+          ETIQUETAS[r.estado] ||
+          {
+            texto: r.estado,
+            clase: 'gris'
+          };
+
+        const horas =
+          (
+            new Date(r.fecha_fin) -
+            new Date(r.fecha_inicio)
+          ) / 36e5;
+
+        const impago =
+          [
+            'pendiente',
+            'en_proceso'
+          ].includes(r.estado) &&
+          Number(r.segundos_restantes) > 0;
+
+        let acciones = '';
+        let extra = '';
+
+        if (impago) {
+
+          const min =
+            Math.ceil(
+              Number(
+                r.segundos_restantes
+              ) / 60
+            );
+
+          extra =
+            `<div class="aviso-naranja">
+              Te quedan ~${min} min para pagar antes de que se libere.
+            </div>`;
+
+          acciones = `
+
+            <button
+              class="btn verde chico"
+              onclick="pagarReserva(${r.id})"
+            >
+              Pagar ahora
+            </button>
+
+            <button
+              class="btn rojo chico"
+              onclick="cancelarReserva(${r.id})"
+            >
+              Cancelar
+            </button>
+
+          `;
+
+        } else if (
+          r.estado === 'confirmada' &&
+          new Date(r.fecha_inicio) > new Date()
+        ) {
+
+          acciones =
+            `<button
+              class="btn rojo chico"
+              onclick="cancelarReserva(${r.id})"
+            >
+              Cancelar reserva
+            </button>`;
+
+        }
+
+        if (
+          r.estado === 'completada'
+        ) {
+
+          acciones += `
+
+            <button
+              class="btn naranja chico"
+              onclick="abrirCalificacion(${r.id})"
+            >
+              ⭐ Calificar
+            </button>
+
+          `;
+
+        }
+
+        // COMPROBANTE PDF (cualquier reserva con pago completado)
+        if (r.pago_estado === 'completado' && r.pago_id) {
+          acciones += `
+            <button class="btn gris chico" onclick="descargarComprobante(${r.pago_id})">
+              📄 Comprobante
+            </button>
+          `;
+        }
+
+        if (
+          r.estado === 'cancelada' &&
+          r.pago_estado === 'completado'
+        ) {
+
+          extra =
+            Number(r.monto_reembolso) > 0
+
+              ? `<div class="reembolso">
+                   Reembolso: ${dinero(r.monto_reembolso)}
+                 </div>`
+
+              : '<div class="detalle">Cancelada sin reembolso.</div>';
+
+        }
+
+        return `
+
+          <div class="card">
+
+            <div class="fila">
+
+              <h3>
+                ${esc(r.espacio_titulo)}
+              </h3>
+
+              <span class="etiqueta ${et.clase}">
+                ${et.texto}
+              </span>
+
+            </div>
+
+            <div class="direccion">
+              ${esc(r.espacio_direccion)}
+            </div>
+
+            <div class="detalle">
+              ${esc(fechaCorta(r.fecha_inicio))}
+              →
+              ${esc(fechaCorta(r.fecha_fin))}
+              (${Number(horas.toFixed(2))} h)
+            </div>
+
+            <div class="detalle">
+
+              Total:
+
+              <span class="precio">
+                ${dinero(r.total)}
+              </span>
+
+              ${
+                r.metodo_pago &&
+                r.pago_estado === 'completado'
+
+                  ? ' · ' + esc(r.metodo_pago)
+
+                  : ''
+              }
+
+            </div>
+
+            ${extra}
+
+            <div
+              style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"
+            >
+              ${acciones}
+            </div>
+
+          </div>
+
+        `;
+
+      }).join('');
+
+  }
+
+  async function descargarComprobante(pagoId) {
+    try {
+      const resp = await apiArchivo(`/pagos/${pagoId}/comprobante`);
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        alert(data.error || 'No se pudo descargar el comprobante');
+        return;
+      }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comprobante-migo-park-${pagoId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('No se pudo conectar con el servidor.');
+    }
+  }
+
+  function pagarReserva(id) {
+
+    const r =
+      reservasCache.find(
+        x => x.id === id
+      );
+
+    if (!r) {
+      return;
+    }
+
+    reservaActual = r;
+
+    mostrarPasoPago(
+      r.segundos_restantes
+    );
+
+  }
+
+  async function cancelarReserva(
+    id,
+    desdeModal = false
+  ) {
+
+    const r =
+      reservaActual &&
+      reservaActual.id === id
+
+        ? reservaActual
+
+        : reservasCache.find(
+            x => x.id === id
+          );
+
+    let aviso =
+      '¿Seguro que quieres cancelar esta reserva?';
+
+    if (
+      r &&
+      r.estado === 'confirmada'
+    ) {
+
+      const p =
+        porcentajeReembolso(
+          r.fecha_inicio
+        );
+
+      aviso +=
+        `\n\nSegún el tiempo que falta, se te devolvería el ${p}% (${dinero(Number(r.total) * p / 100)}).` +
+        '\n\nPolítica: más de 24 h antes = 100% · entre 2 y 24 h = 50% · menos de 2 h = sin reembolso.';
+
+    }
+
+    if (!confirm(aviso)) {
+      return;
+    }
+
+    const msg =
+      document.getElementById(
+        'mensajeReservas'
+      );
+
+    try {
+
+      const resp =
+        await api(
+          `/reservas/${id}/cancelar`,
+          {
+            method: 'PUT'
+          }
+        );
+
+      const data =
+        await resp.json();
+
+      if (desdeModal) {
+        cerrarModal();
+      }
+
+      if (!resp.ok) {
+
+        mostrarTab('reservas');
+
+        mostrar(
+          msg,
+          data.error ||
+          'No se pudo cancelar',
+          true
+        );
+
+        return;
+
+      }
+
+      mostrarTab('reservas');
+
+      mostrar(
+        msg,
+
+        data.monto_reembolso > 0
+
+          ? `Reserva cancelada. Reembolso: ${dinero(data.monto_reembolso)} (${data.porcentaje_reembolso}%).`
+
+          : 'Reserva cancelada.',
+
+        false
+      );
+
+    } catch (err) {
+
+      mostrar(
+        msg,
+        'No se pudo conectar con el servidor.',
+        true
+      );
+
+    }
+
+  }
+
+  function abrirCalificacion(
+    reservaId
+  ) {
+
+    const reserva =
+      reservasCache.find(
+        r => r.id === reservaId
+      );
+
+    if (!reserva) {
+
+      alert(
+        'No se encontró la reserva.'
+      );
+
+      return;
+    }
+
+    if (
+      reserva.estado !== 'completada'
+    ) {
+
+      alert(
+        'Solo puedes calificar reservas completadas.'
+      );
+
+      return;
+    }
+
+    reservaCalificando =
+      reservaId;
+
+    puntuacionSeleccionada = 0;
+
+    document.getElementById(
+      'calificarDetalle'
+    ).innerHTML = `
+
+      <b>
+        ${esc(reserva.espacio_titulo)}
+      </b>
+
+      <br>
+
+      ${esc(
+        fechaCorta(
+          reserva.fecha_inicio
+        )
+      )}
+
+    `;
+
+    document.getElementById(
+      'comentarioCalificacion'
+    ).value = '';
+
+    document.getElementById(
+      'mensajeCalificacion'
+    ).textContent = '';
+
+    pintarEstrellas();
+
+    document.getElementById(
+      'btnEnviarCalificacion'
+    ).disabled = false;
+
+    document.getElementById(
+      'overlayCalificar'
+    ).style.display = 'flex';
+
+  }
+
+  function seleccionarEstrella(
+    puntuacion
+  ) {
+
+    puntuacionSeleccionada =
+      puntuacion;
+
+    pintarEstrellas();
+
+  }
+
+  function pintarEstrellas() {
+
+    document
+      .querySelectorAll(
+        '#estrellasCalificar .estrella'
+      )
+      .forEach(estrella => {
+
+        const valor =
+          Number(
+            estrella.dataset.puntuacion
+          );
+
+        estrella.classList.toggle(
+          'seleccionada',
+          valor <=
+          puntuacionSeleccionada
+        );
+
+      });
+
+  }
+
+  async function enviarCalificacion() {
+
+    const msg =
+      document.getElementById(
+        'mensajeCalificacion'
+      );
+
+    if (!reservaCalificando) {
+
+      mostrar(
+        msg,
+        'No se encontró la reserva.',
+        true
+      );
+
+      return;
+    }
+
+    if (
+      puntuacionSeleccionada < 1 ||
+      puntuacionSeleccionada > 5
+    ) {
+
+      mostrar(
+        msg,
+        'Selecciona una puntuación de 1 a 5 estrellas.',
+        true
+      );
+
+      return;
+    }
+
+    const comentario =
+      document.getElementById(
+        'comentarioCalificacion'
+      ).value.trim();
+
+    const btn =
+      document.getElementById(
+        'btnEnviarCalificacion'
+      );
+
+    btn.disabled = true;
+
+    try {
+
+      const resp =
+        await api(
+          `/calificaciones/reserva/${reservaCalificando}`,
+          {
+            method: 'POST',
+
+            body: JSON.stringify({
+              puntuacion:
+                puntuacionSeleccionada,
+
+              comentario:
+                comentario || null
+            })
+          }
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        mostrar(
+          msg,
+          data.error ||
+          'No se pudo registrar la calificación.',
+          true
+        );
+
+        btn.disabled = false;
+
+        return;
+      }
+
+      mostrar(
+        msg,
+        '¡Calificación registrada correctamente!',
+        false
+      );
+
+      setTimeout(
+        () => {
+
+          cerrarCalificacion();
+
+          cargarReservas();
+
+        },
+        1000
+      );
+
+    } catch (err) {
+
+      mostrar(
+        msg,
+        'No se pudo conectar con el servidor.',
+        true
+      );
+
+      btn.disabled = false;
+
+    }
+
+  }
+
+  function cerrarCalificacion() {
+
+    document.getElementById(
+      'overlayCalificar'
+    ).style.display = 'none';
+
+    reservaCalificando = null;
+    puntuacionSeleccionada = 0;
+
+  }
+
+  async function verCalificaciones(
+    espacioId,
+    titulo
+  ) {
+
+    document.getElementById(
+      'tituloCalificaciones'
+    ).textContent =
+      `⭐ Calificaciones de ${titulo}`;
+
+    document.getElementById(
+      'contenidoCalificaciones'
+    ).innerHTML =
+      '<p class="vacio">Cargando calificaciones...</p>';
+
+    document.getElementById(
+      'overlayCalificaciones'
+    ).style.display =
+      'flex';
+
+    try {
+
+      const resp =
+        await fetch(
+          `${API_URL}/calificaciones/espacio/${espacioId}`
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        document.getElementById(
+          'contenidoCalificaciones'
+        ).innerHTML =
+          `<p class="error">${esc(data.error || 'No se pudieron consultar las calificaciones.')}</p>`;
+
+        return;
+      }
+
+      const promedio =
+        Number(data.promedio || 0);
+
+      const cantidad =
+        Number(data.cantidad || 0);
+
+      let html = `
+
+        <div class="calificacion-promedio">
+
+          <div class="numero">
+            ${promedio.toFixed(1)}
+          </div>
+
+          <div class="estrellas-pequenas">
+            ${generarEstrellas(promedio)}
+          </div>
+
+          <div class="detalle">
+            ${cantidad}
+            ${cantidad === 1 ? 'calificación' : 'calificaciones'}
+          </div>
+
+        </div>
+
+      `;
+
+      if (
+        !data.calificaciones ||
+        data.calificaciones.length === 0
+      ) {
+
+        html +=
+          '<p class="vacio">Este espacio todavía no tiene calificaciones.</p>';
+
+      } else {
+
+        html +=
+          data.calificaciones
+            .map(c => `
+
+              <div class="comentario-calificacion">
+
+                <div class="autor">
+                  ${esc(c.conductor)}
+                </div>
+
+                <div class="estrellas-pequenas">
+                  ${generarEstrellas(
+                    Number(c.puntuacion)
+                  )}
+                </div>
+
+                ${
+                  c.comentario
+                    ? `<div style="margin-top:6px;">
+                         ${esc(c.comentario)}
+                       </div>`
+                    : '<div class="detalle">Sin comentario.</div>'
+                }
+
+                <div class="fecha">
+                  ${esc(fechaCorta(c.fecha))}
+                </div>
+
+              </div>
+
+            `)
+            .join('');
+
+      }
+
+      document.getElementById(
+        'contenidoCalificaciones'
+      ).innerHTML = html;
+
+    } catch (err) {
+
+      document.getElementById(
+        'contenidoCalificaciones'
+      ).innerHTML =
+        '<p class="error">No se pudo conectar con el servidor.</p>';
+
+    }
+
+  }
+
+  function generarEstrellas(
+    puntuacion
+  ) {
+
+    const redondeada =
+      Math.round(
+        Number(puntuacion)
+      );
+
+    return '★'.repeat(
+      Math.max(
+        0,
+        Math.min(
+          5,
+          redondeada
+        )
+      )
+    ) +
+    '☆'.repeat(
+      5 -
+      Math.max(
+        0,
+        Math.min(
+          5,
+          redondeada
+        )
+      )
+    );
+
+  }
+
+  function cerrarCalificaciones() {
+
+    document.getElementById(
+      'overlayCalificaciones'
+    ).style.display =
+      'none';
+
+  }
+
+  async function cargarVehiculos() {
+
+    const cont =
+      document.getElementById(
+        'listaVehiculos'
+      );
+
+    cont.innerHTML =
+      'Cargando...';
+
+    try {
+
+      const resp =
+        await api(
+          '/vehiculos/mios'
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        cont.innerHTML =
+          `<p class="vacio error">${esc(data.error || 'Error')}</p>`;
+
+        return;
+      }
+
+      if (data.length === 0) {
+
+        cont.innerHTML =
+          '<p class="vacio">Aún no has registrado vehículos.</p>';
+
+        return;
+      }
+
+      cont.innerHTML =
+        data.map(v => `
+
+          <div class="card">
+
+            <div class="fila">
+
+              <h3>
+                ${esc(v.placa)}
+              </h3>
+
+              <span
+                class="etiqueta ${
+                  v.verificado
+                    ? 'verde'
+                    : 'naranja'
+                }"
+              >
+                ${
+                  v.verificado
+                    ? 'Verificado'
+                    : 'Pendiente de verificación'
+                }
+              </span>
+
+            </div>
+
+            <div class="detalle">
+              ${esc(
+                [
+                  v.marca,
+                  v.modelo,
+                  v.color
+                ]
+                .filter(Boolean)
+                .join(' · ')
+                ||
+                'Sin más datos'
+              )}
+            </div>
+
+          </div>
+
+        `).join('');
+
+    } catch (err) {
+
+      cont.innerHTML =
+        '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+
+    }
+
+  }
+
+  document
+    .getElementById('formVehiculo')
+    .addEventListener(
+      'submit',
+      async (e) => {
+
+        e.preventDefault();
+
+        const msg =
+          document.getElementById(
+            'mensajeVehiculos'
+          );
+
+        try {
+
+          const resp =
+            await api(
+              '/vehiculos',
+              {
+                method: 'POST',
+
+                body: JSON.stringify({
+
+                  placa:
+                    document.getElementById(
+                      'vehPlaca'
+                    ).value,
+
+                  marca:
+                    document.getElementById(
+                      'vehMarca'
+                    ).value,
+
+                  modelo:
+                    document.getElementById(
+                      'vehModelo'
+                    ).value,
+
+                  color:
+                    document.getElementById(
+                      'vehColor'
+                    ).value
+
+                })
+              }
+            );
+
+          const data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            return mostrar(
+              msg,
+              data.error ||
+              'No se pudo registrar',
+              true
+            );
+
+          }
+
+          mostrar(
+            msg,
+            'Vehículo registrado. Queda pendiente de verificación.',
+            false
+          );
+
+          document
+            .getElementById(
+              'formVehiculo'
+            )
+            .reset();
+
+          cargarVehiculos();
+
+        } catch (err) {
+
+          mostrar(
+            msg,
+            'No se pudo conectar con el servidor.',
+            true
+          );
+
+        }
+
+      }
+    );
+
+  async function cargarPerfil() {
+
+    try {
+
+      const resp = await api('/auth/perfil');
+      const data = await resp.json();
+
+      if (!resp.ok) return;
+
+      document.getElementById('perfNombre').value = data.nombre || '';
+      document.getElementById('perfCorreo').value = data.correo || '';
+      document.getElementById('perfTelefono').value = data.telefono || '';
+
+    } catch (err) {}
+
+  }
+
+  document
+    .getElementById('formPerfil')
+    .addEventListener(
+      'submit',
+      async (e) => {
+
+        e.preventDefault();
+
+        const msg = document.getElementById('mensajePerfil');
+
+        try {
+
+          const resp = await api(
+            '/auth/perfil',
+            {
+              method: 'PUT',
+              body: JSON.stringify({
+                nombre: document.getElementById('perfNombre').value,
+                telefono: document.getElementById('perfTelefono').value
+              })
+            }
+          );
+
+          const data = await resp.json();
+
+          if (!resp.ok) {
+            return mostrar(msg, data.error || 'No se pudo actualizar', true);
+          }
+
+          usuario.nombre = data.usuario.nombre;
+          sessionStorage.setItem('usuario', JSON.stringify(usuario));
+          document.getElementById('infoUsuario').textContent =
+            `${usuario.nombre} (${usuario.rol})`;
+
+          mostrar(msg, 'Perfil actualizado correctamente.', false);
+
+        } catch (err) {
+          mostrar(msg, 'No se pudo conectar con el servidor.', true);
+        }
+
+      }
+    );
+
+  const NOTIF_NARANJA = [
+    'recordatorio_fin',
+    'reserva_cancelada',
+    'espacio_rechazado',
+    'vehiculo_rechazado',
+    'caso_escalado',
+    'caso_estado'
+  ];
+
+  function pestanaDeNotificacion(tipo) {
+
+    if (
+      tipo.startsWith('caso_')
+    ) {
+
+      return 'soporte';
+
+    }
+
+    if (
+      tipo.startsWith('espacio_')
+    ) {
+
+      return 'publicar';
+
+    }
+
+    if (
+      tipo.startsWith('vehiculo_')
+    ) {
+
+      return 'vehiculos';
+
+    }
+
+    return 'reservas';
+
+  }
+
+  function pintarBurbuja(n) {
+
+    const b =
+      document.getElementById(
+        'burbuja'
+      );
+
+    b.textContent =
+      n > 99
+        ? '99+'
+        : n;
+
+    b.style.display =
+      n > 0
+        ? 'flex'
+        : 'none';
+
+  }
+
+  async function actualizarContador() {
+
+    try {
+
+      const resp =
+        await api(
+          '/notificaciones/contador'
+        );
+
+      const data =
+        await resp.json();
+
+      if (resp.ok) {
+
+        pintarBurbuja(
+          data.no_leidas
+        );
+
+      }
+
+    } catch (err) {}
+
+  }
+
+  async function alternarNotificaciones(
+    ev
+  ) {
+
+    ev.stopPropagation();
+
+    const panel =
+      document.getElementById(
+        'panelNotif'
+      );
+
+    if (
+      panel.style.display === 'none'
+    ) {
+
+      panel.style.display =
+        'block';
+
+      await cargarNotificaciones();
+
+    } else {
+
+      panel.style.display =
+        'none';
+
+    }
+
+  }
+
+  async function cargarNotificaciones() {
+
+    const cont =
+      document.getElementById(
+        'listaNotif'
+      );
+
+    cont.innerHTML =
+      '<p class="vacio">Cargando...</p>';
+
+    try {
+
+      const resp =
+        await api(
+          '/notificaciones'
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        cont.innerHTML =
+          `<p class="vacio error">${esc(data.error || 'Error')}</p>`;
+
+        return;
+      }
+
+      pintarBurbuja(
+        data.no_leidas
+      );
+
+      if (
+        data.notificaciones.length === 0
+      ) {
+
+        cont.innerHTML =
+          '<p class="vacio">No tienes notificaciones.</p>';
+
+        return;
+      }
+
+      cont.innerHTML =
+        data.notificaciones
+          .map(n => `
+
+            <div
+              class="notif ${
+                NOTIF_NARANJA.includes(n.tipo)
+                  ? 'naranja'
+                  : ''
+              } ${
+                n.leida
+                  ? ''
+                  : 'nueva'
+              }"
+              onclick="abrirNotificacion(${n.id}, '${esc(n.tipo)}')"
+            >
+
+              ${esc(n.mensaje)}
+
+              <div class="fecha">
+                ${esc(fechaCorta(n.fecha))}
+              </div>
+
+            </div>
+
+          `)
+          .join('');
+
+    } catch (err) {
+
+      cont.innerHTML =
+        '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+
+    }
+
+  }
+
+  async function abrirNotificacion(
+    id,
+    tipo
+  ) {
+
+    try {
+
+      await api(
+        `/notificaciones/${id}/leida`,
+        {
+          method: 'PUT'
+        }
+      );
+
+    } catch (err) {}
+
+    document.getElementById(
+      'panelNotif'
+    ).style.display =
+      'none';
+
+    actualizarContador();
+
+    mostrarTab(
+      pestanaDeNotificacion(
+        tipo
+      )
+    );
+
+  }
+
+  async function marcarTodasLeidas() {
+
+    try {
+
+      await api(
+        '/notificaciones/marcar-todas',
+        {
+          method: 'PUT'
+        }
+      );
+
+      await cargarNotificaciones();
+
+    } catch (err) {}
+
+  }
+
+  document.addEventListener(
+    'click',
+    (e) => {
+
+      const panel =
+        document.getElementById(
+          'panelNotif'
+        );
+
+      if (
+        panel.style.display !== 'none' &&
+        !panel.contains(e.target)
+      ) {
+
+        panel.style.display =
+          'none';
+
+      }
+
+    }
+  );
+
+  const CATEGORIAS = [
+    'Pago o reembolso',
+    'Reserva',
+    'Espacio',
+    'Vehículo',
+    'Cuenta',
+    'Otro'
+  ];
+
+  const ESTADO_CASO = {
+
+    abierto: {
+      texto: 'Abierto',
+      clase: 'rojo'
+    },
+
+    en_proceso: {
+      texto: 'En proceso',
+      clase: 'naranja'
+    },
+
+    resuelto: {
+      texto: 'Resuelto',
+      clase: 'verde'
+    }
+
+  };
+
+  let categoriaSel = null;
+  let casoAbiertoId = null;
+  let chatTimer = null;
+  let ultimoTotalMensajes = -1;
+
+  function pintarChips() {
+
+    document.getElementById(
+      'chipsCategoria'
+    ).innerHTML =
+
+      CATEGORIAS
+        .map(
+          (c, i) => `
+
+            <div
+              class="chip ${
+                c === categoriaSel
+                  ? 'activo'
+                  : ''
+              }"
+              onclick="elegirCategoria(${i})"
+            >
+              ${esc(c)}
+            </div>
+
+          `
+        )
+        .join('');
+
+  }
+
+  function elegirCategoria(i) {
+
+    categoriaSel =
+      CATEGORIAS[i];
+
+    pintarChips();
+
+  }
+
+  function cargarSoporte() {
+
+    cerrarChat();
+
+    pintarChips();
+
+    cargarCasos();
+
+  }
+
+  async function cargarCasos() {
+
+    const cont =
+      document.getElementById(
+        'listaCasos'
+      );
+
+    cont.innerHTML =
+      'Cargando...';
+
+    try {
+
+      const resp =
+        await api(
+          '/soporte/casos/mios'
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        cont.innerHTML =
+          `<p class="vacio error">${esc(data.error || 'Error')}</p>`;
+
+        return;
+      }
+
+      if (data.length === 0) {
+
+        cont.innerHTML =
+          '<p class="vacio">Aún no has abierto casos de soporte.</p>';
+
+        return;
+      }
+
+      cont.innerHTML =
+        data.map(c => {
+
+          const et =
+            ESTADO_CASO[c.estado] ||
+            {
+              texto: c.estado,
+              clase: 'gris'
+            };
+
+          const respondido =
+            c.estado !== 'resuelto' &&
+            [
+              'soporte',
+              'administrador'
+            ].includes(
+              c.ultimo_rol
+            );
+
+          const resumen =
+            c.descripcion.length > 90
+              ? c.descripcion.slice(
+                  0,
+                  90
+                ) + '…'
+              : c.descripcion;
+
+          return `
+
+            <div
+              class="card clic"
+              onclick="abrirCaso(${c.id})"
+            >
+
+              <div class="fila">
+
+                <h3>
+                  #${c.id} · ${esc(c.categoria)}
+                </h3>
+
+                <span
+                  class="etiqueta ${et.clase}"
+                >
+                  ${et.texto}
+                </span>
+
+              </div>
+
+              <div class="detalle">
+                ${esc(resumen)}
+              </div>
+
+              <div class="detalle">
+
+                ${
+                  c.escalado &&
+                  c.estado !== 'resuelto'
+                    ? 'Escalado a un administrador · '
+                    : ''
+                }
+
+                ${
+                  respondido
+                    ? '<b style="color:var(--verde)">Soporte respondió</b> · '
+                    : ''
+                }
+
+                Actualizado:
+                ${esc(
+                  fechaCorta(
+                    c.fecha_actualizacion
+                  )
+                )}
+
+              </div>
+
+            </div>
+
+          `;
+
+        }).join('');
+
+    } catch (err) {
+
+      cont.innerHTML =
+        '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+
+    }
+
+  }
+
+  document
+    .getElementById('btnEnviarCaso')
+    .addEventListener(
+      'click',
+      async () => {
+
+        const msg =
+          document.getElementById(
+            'mensajeCaso'
+          );
+
+        const descripcion =
+          document.getElementById(
+            'casoDescripcion'
+          ).value.trim();
+
+        if (!categoriaSel) {
+
+          return mostrar(
+            msg,
+            'Elige una categoría.',
+            true
+          );
+
+        }
+
+        if (
+          descripcion.length < 10
+        ) {
+
+          return mostrar(
+            msg,
+            'Describe el problema (mínimo 10 caracteres).',
+            true
+          );
+
+        }
+
+        const btn =
+          document.getElementById(
+            'btnEnviarCaso'
+          );
+
+        btn.disabled = true;
+
+        try {
+
+          const resp =
+            await api(
+              '/soporte/casos',
+              {
+                method: 'POST',
+
+                body: JSON.stringify({
+                  categoria:
+                    categoriaSel,
+
+                  descripcion
+                })
+              }
+            );
+
+          const data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            mostrar(
+              msg,
+              data.error ||
+              'No se pudo enviar el caso',
+              true
+            );
+
+            return;
+
+          }
+
+          mostrar(
+            msg,
+            `Caso #${data.id} enviado. Te avisaremos cuando soporte responda.`,
+            false
+          );
+
+          document.getElementById(
+            'casoDescripcion'
+          ).value = '';
+
+          categoriaSel = null;
+
+          pintarChips();
+
+          cargarCasos();
+
+        } catch (err) {
+
+          mostrar(
+            msg,
+            'No se pudo conectar con el servidor.',
+            true
+          );
+
+        } finally {
+
+          btn.disabled = false;
+
+        }
+
+      }
+    );
+
+  function detenerChat() {
+
+    if (chatTimer) {
+
+      clearInterval(
+        chatTimer
+      );
+
+      chatTimer = null;
+
+    }
+
+  }
+
+  function cerrarChat() {
+
+    detenerChat();
+
+    casoAbiertoId = null;
+
+    ultimoTotalMensajes = -1;
+
+    document.getElementById(
+      'soporteChat'
+    ).style.display =
+      'none';
+
+    document.getElementById(
+      'soporteLista'
+    ).style.display =
+      'block';
+
+  }
+
+  async function abrirCaso(id) {
+
+    casoAbiertoId = id;
+
+    ultimoTotalMensajes = -1;
+
+    document.getElementById(
+      'mensajeChat'
+    ).textContent = '';
+
+    document.getElementById(
+      'chatTexto'
+    ).value = '';
+
+    document.getElementById(
+      'soporteLista'
+    ).style.display =
+      'none';
+
+    document.getElementById(
+      'soporteChat'
+    ).style.display =
+      'block';
+
+    await cargarChat(true);
+
+    detenerChat();
+
+    chatTimer =
+      setInterval(
+        () => cargarChat(false),
+        8000
+      );
+
+  }
+
+  async function cargarChat(
+    forzarScroll
+  ) {
+
+    if (!casoAbiertoId) {
+      return;
+    }
+
+    const id =
+      casoAbiertoId;
+
+    try {
+
+      const resp =
+        await api(
+          `/soporte/casos/${id}`
+        );
+
+      const data =
+        await resp.json();
+
+      if (
+        id !== casoAbiertoId
+      ) {
+        return;
+      }
+
+      if (!resp.ok) {
+
+        mostrar(
+          document.getElementById(
+            'mensajeChat'
+          ),
+          data.error ||
+          'No se pudo abrir el caso',
+          true
+        );
+
+        return;
+      }
+
+      const {
+        caso,
+        mensajes
+      } = data;
+
+      const et =
+        ESTADO_CASO[caso.estado] ||
+        {
+          texto: caso.estado,
+          clase: 'gris'
+        };
+
+      document.getElementById(
+        'chatTitulo'
+      ).textContent =
+        `#${caso.id} · ${caso.categoria}`;
+
+      const chatEstado =
+        document.getElementById(
+          'chatEstado'
+        );
+
+      chatEstado.textContent =
+        et.texto;
+
+      chatEstado.className =
+        'etiqueta ' +
+        et.clase;
+
+      document.getElementById(
+        'chatMeta'
+      ).textContent =
+        `Abierto el ${fechaCorta(caso.fecha_creacion)}` +
+        (
+          caso.asignado_nombre
+            ? ` · Atendido por ${caso.asignado_nombre}`
+            : ' · Esperando ser atendido'
+        ) +
+        (
+          caso.escalado &&
+          caso.estado !== 'resuelto'
+            ? ' · Escalado a un administrador'
+            : ''
+        );
+
+      const cerrado =
+        caso.estado === 'resuelto';
+
+      document.getElementById(
+        'chatSolucion'
+      ).innerHTML =
+        cerrado &&
+        caso.solucion
+
+          ? `<div class="solucion">
+               <b>Solución aplicada:</b>
+               ${esc(caso.solucion)}
+
+               ${
+                 caso.fecha_cierre
+                   ? `<div class="detalle">
+                        Cerrado el
+                        ${esc(
+                          fechaCorta(
+                            caso.fecha_cierre
+                          )
+                        )}
+                      </div>`
+                   : ''
+               }
+
+             </div>`
+
+          : '';
+
+      document.getElementById(
+        'chatEntrada'
+      ).style.display =
+        cerrado
+          ? 'none'
+          : 'block';
+
+      document.getElementById(
+        'chatCerrado'
+      ).style.display =
+        cerrado
+          ? 'block'
+          : 'none';
+
+      const total =
+        mensajes.length + 1;
+
+      if (
+        total ===
+        ultimoTotalMensajes &&
+        !forzarScroll
+      ) {
+
+        return;
+
+      }
+
+      ultimoTotalMensajes =
+        total;
+
+      const burbujas = [
+        {
+          mio: true,
+          quien: 'Tú',
+          texto: caso.descripcion,
+          fecha: caso.fecha_creacion
+        }
+      ].concat(
+        mensajes.map(m => ({
+          mio:
+            m.remitente_id ===
+            usuario.id,
+
+          quien:
+            m.remitente_id ===
+            usuario.id
+              ? 'Tú'
+              : `${m.remitente_nombre} (${m.remitente_rol === 'administrador' ? 'Administrador' : 'Soporte'})`,
+
+          texto: m.mensaje,
+
+          fecha: m.fecha
+        }))
+      );
+
+      const hilo =
+        document.getElementById(
+          'chatHilo'
+        );
+
+      const cercaDelFinal =
+        hilo.scrollHeight -
+        hilo.scrollTop -
+        hilo.clientHeight < 80;
+
+      hilo.innerHTML =
+        burbujas
+          .map(b => `
+
+            <div
+              class="msg ${
+                b.mio
+                  ? 'mio'
+                  : 'otro'
+              }"
+            >
+
+              <div class="quien">
+                ${esc(b.quien)}
+              </div>
+
+              ${esc(b.texto)}
+
+              <div class="hora">
+                ${esc(
+                  fechaCorta(
+                    b.fecha
+                  )
+                )}
+              </div>
+
+            </div>
+
+          `)
+          .join('');
+
+      if (
+        forzarScroll ||
+        cercaDelFinal
+      ) {
+
+        hilo.scrollTop =
+          hilo.scrollHeight;
+
+      }
+
+    } catch (err) {}
+
+  }
+
+  document
+    .getElementById(
+      'btnEnviarMensaje'
+    )
+    .addEventListener(
+      'click',
+      async () => {
+
+        const msg =
+          document.getElementById(
+            'mensajeChat'
+          );
+
+        const texto =
+          document.getElementById(
+            'chatTexto'
+          ).value.trim();
+
+        if (!texto) {
+
+          return mostrar(
+            msg,
+            'Escribe un mensaje.',
+            true
+          );
+
+        }
+
+        if (!casoAbiertoId) {
+          return;
+        }
+
+        const btn =
+          document.getElementById(
+            'btnEnviarMensaje'
+          );
+
+        btn.disabled = true;
+
+        try {
+
+          const resp =
+            await api(
+              `/soporte/casos/${casoAbiertoId}/mensajes`,
+              {
+                method: 'POST',
+
+                body: JSON.stringify({
+                  mensaje: texto
+                })
+              }
+            );
+
+          const data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            mostrar(
+              msg,
+              data.error ||
+              'No se pudo enviar',
+              true
+            );
+
+            await cargarChat(true);
+
+            return;
+
+          }
+
+          msg.textContent = '';
+
+          document.getElementById(
+            'chatTexto'
+          ).value = '';
+
+          await cargarChat(true);
+
+        } catch (err) {
+
+          mostrar(
+            msg,
+            'No se pudo conectar con el servidor.',
+            true
+          );
+
+        } finally {
+
+          btn.disabled = false;
+
+        }
+
+      }
+    );
+
+  document
+    .getElementById(
+      'formPublicar'
+    )
+    .addEventListener(
+      'submit',
+      async (e) => {
+
+        e.preventDefault();
+
+        const body = {
+
+          titulo:
+            document.getElementById(
+              'pubTitulo'
+            ).value,
+
+          descripcion:
+            document.getElementById(
+              'pubDescripcion'
+            ).value,
+
+          direccion:
+            document.getElementById(
+              'pubDireccion'
+            ).value,
+
+          latitud:
+            parseFloat(
+              document.getElementById(
+                'pubLatitud'
+              ).value
+            ),
+
+          longitud:
+            parseFloat(
+              document.getElementById(
+                'pubLongitud'
+              ).value
+            ),
+
+          precio_hora:
+            parseFloat(
+              document.getElementById(
+                'pubPrecio'
+              ).value
+            ),
+
+          tiene_camara:
+            document.getElementById(
+              'pubCamara'
+            ).checked,
+
+          tiene_porton:
+            document.getElementById(
+              'pubPorton'
+            ).checked,
+
+          tiene_iluminacion:
+            document.getElementById(
+              'pubIluminacion'
+            ).checked
+
+        };
+
+        const msg =
+          document.getElementById(
+            'mensaje'
+          );
+
+        try {
+
+          const resp =
+            await api(
+              '/espacios',
+              {
+                method: 'POST',
+                body:
+                  JSON.stringify(body)
+              }
+            );
+
+          const data =
+            await resp.json();
+
+          if (!resp.ok) {
+
+            return mostrar(
+              msg,
+              data.error ||
+              'Error al publicar',
+              true
+            );
+
+          }
+
+          mostrar(
+            msg,
+            'Espacio publicado. Queda pendiente de verificación.',
+            false
+          );
+
+          document.getElementById(
+            'formPublicar'
+          ).reset();
+
+        } catch (err) {
+
+          mostrar(
+            msg,
+            'No se pudo conectar con el servidor.',
+            true
+          );
+
+        }
+
+      }
+    );
+
+  if (sesionValida) {
+
+    cargarEspacios();
+
+    actualizarContador();
+
+    setInterval(
+      actualizarContador,
+      30000
+    );
+
+  }
+
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</body>
+</html>
