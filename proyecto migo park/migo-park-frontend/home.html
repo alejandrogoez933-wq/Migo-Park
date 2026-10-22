@@ -12,7 +12,10 @@
 
 <style>
   :root {
-    --verde: #2E9E4F;
+    --verde: #E1A800;
+    --verde-texto: #8A6700;
+    --verde-claro: #FFF3C4;
+    --texto-sobre-verde: #2B2100;
     --naranja: #F5893A;
     --negro: #111111;
     --rojo: #c0392b;
@@ -100,7 +103,7 @@
   }
 
   .precio {
-    color: var(--verde);
+    color: var(--verde-texto);
     font-weight: bold;
   }
 
@@ -141,6 +144,57 @@
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
+  }
+
+  form.publicar label.campo {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin: 4px 0 4px;
+  }
+
+  form.publicar .ayuda-campo {
+    font-size: 12px;
+    color: #777;
+    margin: -6px 0 10px;
+  }
+
+  #pubFotosPrevias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  #pubFotosPrevias .previa {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+
+  #pubFotosPrevias .previa img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  #pubFotosPrevias .previa button {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #d32f2f;
+    color: #fff;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
   }
 
   form.publicar input:focus,
@@ -217,8 +271,8 @@
   }
 
   .etiqueta.verde {
-    background: #e3f4e8;
-    color: var(--verde);
+    background: #FFF3C4;
+    color: var(--verde-texto);
   }
 
   .etiqueta.naranja {
@@ -265,7 +319,7 @@
   }
 
   .reembolso {
-    color: var(--verde);
+    color: var(--verde-texto);
     font-weight: bold;
     font-size: 14px;
   }
@@ -284,7 +338,7 @@
   }
 
   .ok {
-    color: var(--verde);
+    color: var(--verde-texto);
   }
 
   .vacio {
@@ -434,7 +488,7 @@
 
   .msg.mio {
     align-self: flex-end;
-    background: #e3f4e8;
+    background: #FFF3C4;
   }
 
   .msg.otro {
@@ -457,7 +511,7 @@
   }
 
   .solucion {
-    background: #e3f4e8;
+    background: #FFF3C4;
     border-radius: 10px;
     padding: 10px 12px;
     margin-top: 10px;
@@ -473,7 +527,7 @@
     align-items: flex-start;
     padding: 24px 12px;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 3000;
   }
 
   .modal {
@@ -512,7 +566,7 @@
   .resumen .total {
     font-size: 17px;
     font-weight: bold;
-    color: var(--verde);
+    color: var(--verde-texto);
     border-top: 1px solid #ddd;
     padding-top: 6px;
     margin-top: 6px;
@@ -553,7 +607,7 @@
 
   .metodo.sel {
     border-color: var(--verde);
-    background: #e3f4e8;
+    background: #FFF3C4;
   }
 
   .exito {
@@ -562,7 +616,7 @@
 
   .exito .grande {
     font-size: 44px;
-    color: var(--verde);
+    color: var(--verde-texto);
   }
 
   .estrellas {
@@ -600,7 +654,7 @@
   .calificacion-promedio .numero {
     font-size: 30px;
     font-weight: bold;
-    color: var(--verde);
+    color: var(--verde-texto);
   }
 
   .estrellas-pequenas {
@@ -645,6 +699,7 @@
 
   /* MAPA DE ESPACIOS */
   #mapaEspacios {
+    isolation: isolate;
     width: 100%;
     height: 500px;
     border-radius: 14px;
@@ -709,7 +764,7 @@
   }
 
   .popup-espacio .precio {
-    color: #2E9E4F;
+    color: #8A6700;
     font-weight: bold;
     font-size: 13px;
     margin-bottom: 6px;
@@ -718,6 +773,79 @@
   .popup-espacio .btn {
     margin: 4px 4px 0 0;
   }
+
+  /* ===== REDISEÑO: amarillo mostaza + botones con icono ===== */
+  .tab {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    font-weight: 600;
+  }
+  .tab.activo {
+    background: var(--verde);
+    color: var(--texto-sobre-verde);
+  }
+  .chip.activo {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: var(--texto-sobre-verde);
+  }
+  .btn {
+    border-radius: 10px;
+  }
+  .btn.verde {
+    background: var(--verde);
+    color: var(--texto-sobre-verde);
+  }
+  .btn.verde,
+  .btn.naranja,
+  .btn.rojo {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+  button.salir {
+    border-radius: 10px;
+  }
+
+  /* ===== ICONOS (monocromáticos: toman el color del texto del botón) ===== */
+  .ico {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 7px;
+    vertical-align: -0.25em;
+    background-color: currentColor;
+    -webkit-mask: var(--i) center / contain no-repeat;
+    mask: var(--i) center / contain no-repeat;
+  }
+  .i-agregar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/%3E%3C/svg%3E"); }
+  .i-bandeja { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z'/%3E%3C/svg%3E"); }
+  .i-bloquear_dia { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.31 17l2.44-2.44L14.19 17l1.06-1.06-2.44-2.44 2.44-2.44L14.19 10l-2.44 2.44L9.31 10l-1.06 1.06 2.44 2.44-2.44 2.44L9.31 17zM19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z'/%3E%3C/svg%3E"); }
+  .i-buscar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E"); }
+  .i-carro { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z'/%3E%3C/svg%3E"); }
+  .i-cerrar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E"); }
+  .i-check { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
+  .i-dinero { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z'/%3E%3C/svg%3E"); }
+  .i-documento { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z'/%3E%3C/svg%3E"); }
+  .i-editar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E"); }
+  .i-enviar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.01 21L23 12 2.01 3 2 10l15 2-15 2z'/%3E%3C/svg%3E"); }
+  .i-estrella { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'/%3E%3C/svg%3E"); }
+  .i-foto { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 4V1h2v3h3v2H5v3H3V6H0V4h3zm3 6V7h3V4h7l1.83 2H21c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V10h3zm7 9c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-3.2-5c0 1.77 1.43 3.2 3.2 3.2s3.2-1.43 3.2-3.2-1.43-3.2-3.2-3.2-3.2 1.43-3.2 3.2z'/%3E%3C/svg%3E"); }
+  .i-leidas { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z'/%3E%3C/svg%3E"); }
+  .i-lista { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z'/%3E%3C/svg%3E"); }
+  .i-mapa { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z'/%3E%3C/svg%3E"); }
+  .i-ojo { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'/%3E%3C/svg%3E"); }
+  .i-parking { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z'/%3E%3C/svg%3E"); }
+  .i-persona { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"); }
+  .i-recibo { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z'/%3E%3C/svg%3E"); }
+  .i-reservas { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z'/%3E%3C/svg%3E"); }
+  .i-ruta { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21.71 11.29l-9-9a.996.996 0 00-1.41 0l-9 9a.996.996 0 000 1.41l9 9c.39.39 1.02.39 1.41 0l9-9a.996.996 0 000-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z'/%3E%3C/svg%3E"); }
+  .i-salir { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z'/%3E%3C/svg%3E"); }
+  .i-soporte { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h4v1h-7v2h6c1.66 0 3-1.34 3-3V10c0-4.97-4.03-9-9-9z'/%3E%3C/svg%3E"); }
+  .i-tarjeta { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z'/%3E%3C/svg%3E"); }
+  .i-volver { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/%3E%3C/svg%3E"); }
 </style>
 </head>
 
@@ -759,7 +887,7 @@
       class="salir"
       onclick="cerrarSesion()"
     >
-      Salir
+      <span class="ico i-salir"></span>Salir
     </button>
   </div>
 </header>
@@ -773,7 +901,7 @@
     <span>Notificaciones</span>
 
     <button onclick="marcarTodasLeidas()">
-      Marcar todas como leídas
+      <span class="ico i-leidas"></span>Marcar todas como leídas
     </button>
   </div>
 
@@ -789,7 +917,7 @@
       id="tab-buscar"
       onclick="mostrarTab('buscar')"
     >
-      Buscar espacios
+      <span class="ico i-buscar"></span>Buscar espacios
     </div>
 
     <div
@@ -797,7 +925,7 @@
       id="tab-reservas"
       onclick="mostrarTab('reservas')"
     >
-      Mis reservas
+      <span class="ico i-reservas"></span>Mis reservas
     </div>
 
     <div
@@ -805,7 +933,7 @@
       id="tab-vehiculos"
       onclick="mostrarTab('vehiculos')"
     >
-      Mis vehículos
+      <span class="ico i-carro"></span>Mis vehículos
     </div>
 
     <div
@@ -813,7 +941,7 @@
       id="tab-publicar"
       onclick="mostrarTab('publicar')"
     >
-      Publicar espacio
+      <span class="ico i-agregar"></span>Publicar espacio
     </div>
 
     <div
@@ -821,7 +949,7 @@
       id="tab-misespacios"
       onclick="mostrarTab('misespacios')"
     >
-      Mis espacios
+      <span class="ico i-parking"></span>Mis espacios
     </div>
 
     <div
@@ -829,7 +957,7 @@
       id="tab-reservas-arrendador"
       onclick="mostrarTab('reservas-arrendador')"
     >
-      Reservas recibidas
+      <span class="ico i-bandeja"></span>Reservas recibidas
     </div>
 
     <div
@@ -837,7 +965,7 @@
       id="tab-soporte"
       onclick="mostrarTab('soporte')"
     >
-      Soporte
+      <span class="ico i-soporte"></span>Soporte
     </div>
 
     <div
@@ -845,7 +973,7 @@
       id="tab-perfil"
       onclick="mostrarTab('perfil')"
     >
-      Mi perfil
+      <span class="ico i-persona"></span>Mi perfil
     </div>
 
   </div>
@@ -855,8 +983,8 @@
   <div id="vista-buscar">
 
     <div class="toggle-vista">
-      <button type="button" class="btn verde" id="btnVistaLista" onclick="alternarVistaBuscar('lista')">Lista</button>
-      <button type="button" class="btn gris" id="btnVistaMapa" onclick="alternarVistaBuscar('mapa')">🗺️ Mapa</button>
+      <button type="button" class="btn verde" id="btnVistaLista" onclick="alternarVistaBuscar('lista')"><span class="ico i-lista"></span>Lista</button>
+      <button type="button" class="btn gris" id="btnVistaMapa" onclick="alternarVistaBuscar('mapa')"><span class="ico i-mapa"></span>Mapa</button>
     </div>
 
     <div id="mapaEspacios" style="display:none;"></div>
@@ -963,7 +1091,7 @@
           type="submit"
           class="btn verde"
         >
-          Registrar vehículo
+          <span class="ico i-carro"></span>Registrar vehículo
         </button>
 
       </form>
@@ -994,48 +1122,94 @@
         id="formPublicar"
       >
 
+        <label class="campo" for="pubTitulo">Título del espacio *</label>
         <input
           type="text"
           id="pubTitulo"
-          placeholder="Título del espacio"
+          placeholder="Ej: Garaje cubierto cerca al metro"
+          maxlength="100"
           required
         >
 
+        <label class="campo" for="pubDescripcion">Descripción</label>
         <textarea
           id="pubDescripcion"
-          placeholder="Descripción"
+          placeholder="Cuenta cómo es el espacio, cómo se llega, horarios de acceso, etc."
           rows="2"
+          maxlength="500"
         ></textarea>
 
+        <label class="campo" for="pubDireccion">Dirección *</label>
         <input
           type="text"
           id="pubDireccion"
-          placeholder="Dirección"
+          placeholder="Ej: Calle 50 # 45-20, Bello"
+          maxlength="200"
           required
         >
 
+        <label class="campo" for="pubLatitud">Latitud *</label>
         <input
           type="number"
           step="0.0000001"
+          min="-90"
+          max="90"
           id="pubLatitud"
-          placeholder="Latitud (ej: 6.2442)"
+          placeholder="Ej: 6.2442"
           required
         >
 
+        <label class="campo" for="pubLongitud">Longitud *</label>
         <input
           type="number"
           step="0.0000001"
+          min="-180"
+          max="180"
           id="pubLongitud"
-          placeholder="Longitud (ej: -75.5812)"
+          placeholder="Ej: -75.5812"
           required
         >
+        <div class="ayuda-campo">
+          Búscalas en Google Maps: clic derecho sobre tu parqueadero y copia los dos números.
+        </div>
 
+        <label class="campo" for="pubPrecio">Precio por hora (COP) *</label>
         <input
           type="number"
-          step="0.01"
+          step="1"
           min="1"
           id="pubPrecio"
-          placeholder="Precio por hora (ej: 3000)"
+          placeholder="Ej: 3000"
+          required
+        >
+
+        <label class="campo" for="pubCapacidad">Cantidad de vehículos que caben *</label>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          id="pubCapacidad"
+          placeholder="Ej: 2"
+          required
+        >
+
+        <label class="campo" for="pubLargo">Largo del espacio (metros) *</label>
+        <input
+          type="number"
+          min="0.01"
+          step="0.01"
+          id="pubLargo"
+          placeholder="Ej: 5"
+          required
+        >
+
+        <label class="campo" for="pubAncho">Ancho del espacio (metros) *</label>
+        <input
+          type="number"
+          min="0.01"
+          step="0.01"
+          id="pubAncho"
+          placeholder="Ej: 2.5"
           required
         >
 
@@ -1070,11 +1244,23 @@
 
         </div>
 
+        <label class="campo" for="pubFotos">Fotos del espacio (máximo 6, JPG, PNG o WEBP, 5 MB cada una)</label>
+        <input
+          type="file"
+          id="pubFotos"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+        >
+        <div id="pubFotosPrevias"></div>
+        <div class="ayuda-campo">
+          Sube al menos una foto: sin fotos el equipo no puede aprobar tu espacio.
+        </div>
+
         <button
           type="submit"
           class="btn verde"
         >
-          Publicar espacio
+          <span class="ico i-agregar"></span>Publicar espacio
         </button>
 
       </form>
@@ -1152,7 +1338,7 @@
           class="btn verde"
           id="btnEnviarCaso"
         >
-          Enviar caso
+          <span class="ico i-enviar"></span>Enviar caso
         </button>
 
         <div id="mensajeCaso"></div>
@@ -1176,7 +1362,7 @@
         class="btn gris chico"
         onclick="cerrarChat()"
       >
-        &larr; Volver a mis casos
+        <span class="ico i-volver"></span>Volver a mis casos
       </button>
 
       <div
@@ -1222,7 +1408,7 @@
           class="btn verde"
           id="btnEnviarMensaje"
         >
-          Enviar
+          <span class="ico i-enviar"></span>Enviar
         </button>
 
       </div>
@@ -1275,7 +1461,7 @@
           type="submit"
           class="btn verde"
         >
-          Guardar cambios
+          <span class="ico i-check"></span>Guardar cambios
         </button>
 
       </form>
@@ -1345,14 +1531,14 @@
         class="btn verde"
         id="btnReservar"
       >
-        Reservar
+        <span class="ico i-reservas"></span>Reservar
       </button>
 
       <button
         class="btn gris"
         onclick="cerrarModal()"
       >
-        Cerrar
+        <span class="ico i-cerrar"></span>Cerrar
       </button>
 
     </div>
@@ -1390,21 +1576,21 @@
         class="btn verde"
         id="btnPagar"
       >
-        Confirmar y pagar
+        <span class="ico i-tarjeta"></span>Confirmar y pagar
       </button>
 
       <button
         class="btn gris"
         onclick="cerrarModal()"
       >
-        Pagar después
+        <span class="ico i-reservas"></span>Pagar después
       </button>
 
       <button
         class="btn rojo"
         id="btnCancelarPago"
       >
-        Cancelar reserva
+        <span class="ico i-cerrar"></span>Cancelar reserva
       </button>
 
     </div>
@@ -1432,7 +1618,7 @@
         class="btn verde"
         onclick="irAMisReservas()"
       >
-        Ver mis reservas
+        <span class="ico i-ojo"></span>Ver mis reservas
       </button>
 
     </div>
@@ -1529,14 +1715,14 @@
       id="btnEnviarCalificacion"
       onclick="enviarCalificacion()"
     >
-      Enviar calificación
+      <span class="ico i-estrella"></span>Enviar calificación
     </button>
 
     <button
       class="btn gris"
       onclick="cerrarCalificacion()"
     >
-      Cancelar
+      <span class="ico i-cerrar"></span>Cancelar
     </button>
 
   </div>
@@ -1563,7 +1749,7 @@
       class="btn gris"
       onclick="cerrarCalificaciones()"
     >
-      Cerrar
+      <span class="ico i-cerrar"></span>Cerrar
     </button>
 
   </div>
@@ -1578,11 +1764,11 @@
 
   <div class="modal">
 
-    <h3>✏️ Corregir espacio</h3>
+    <h3>✏️ Editar espacio</h3>
 
-    <div class="aviso-naranja" style="margin:6px 0 12px;">
-      Motivo del rechazo: <span id="editMotivo"></span>
-    </div>
+<div id="editAvisoRevision" style="margin:6px 0 12px; color:#e87500;">
+  Puedes modificar los datos y guardar los cambios sin perder la aprobación del espacio. Los administradores y soporte recibirán una notificación.
+</div>
 
     <form class="publicar" id="formEditar">
 
@@ -1597,6 +1783,34 @@
       <input type="number" step="0.0000001" id="editLongitud" placeholder="Longitud" required>
 
       <input type="number" step="0.01" min="1" id="editPrecio" placeholder="Precio por hora" required>
+      
+      <input
+  type="number"
+  min="1"
+  step="1"
+  id="editCapacidad"
+  placeholder="Cantidad de vehículos que caben"
+  required
+>
+
+<input
+  type="number"
+  min="0.01"
+  step="0.01"
+  id="editLargo"
+  placeholder="Largo del espacio en metros"
+  required
+>
+
+<input
+  type="number"
+  min="0.01"
+  step="0.01"
+  id="editAncho"
+  placeholder="Ancho del espacio en metros"
+  required
+>
+
 
       <div class="checks">
 
@@ -1620,11 +1834,11 @@
       <div id="mensajeEditar"></div>
 
       <button type="submit" class="btn verde" id="btnGuardarEdicion">
-        Guardar y reenviar a revisión
+       <span class="ico i-check"></span>Guardar cambios
       </button>
 
       <button type="button" class="btn gris" onclick="cerrarEditarEspacio()">
-        Cancelar
+        <span class="ico i-cerrar"></span>Cancelar
       </button>
 
     </form>
@@ -1632,6 +1846,8 @@
   </div>
 
 </div>
+
+<script src="verificacion.js"></script>
 
 <script>
 
@@ -1898,7 +2114,7 @@
                    class="btn verde chico"
                    onclick="abrirReserva(${e.id})"
                  >
-                   Reservar
+                   <span class="ico i-reservas"></span>Reservar
                  </button>`;
 
           return `
@@ -1930,6 +2146,19 @@
                 ${esc(seg)}
               </div>
 
+
+              <div class="detalle">
+  🚗 ${e.capacidad_vehiculos || 1} vehículo(s)
+  · 📏 ${e.largo_metros || 0} m × ${e.ancho_metros || 0} m
+  · Área:
+  ${
+    (
+      Number(e.largo_metros || 0) *
+      Number(e.ancho_metros || 0)
+    ).toFixed(2)
+  } m²
+</div>
+
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
 
                 ${botonReserva}
@@ -1938,14 +2167,14 @@
                   class="btn gris chico"
                   onclick="verCalificaciones(${e.id}, '${esc(e.titulo)}')"
                 >
-                  ⭐ Ver calificaciones
+                  <span class="ico i-estrella"></span>Ver calificaciones
                 </button>
 
                 <button
                   class="btn naranja chico"
                   onclick="comoLlegar(${e.id})"
                 >
-                  🧭 Cómo llegar
+                  <span class="ico i-ruta"></span>Cómo llegar
                 </button>
 
               </div>
@@ -2222,6 +2451,25 @@
             ${dinero(e.precio_hora)} / hora
           </div>
 
+
+<div style="margin-top:6px;">
+  🚗 Capacidad: ${e.capacidad_vehiculos || 1} vehículo(s)
+</div>
+
+<div>
+  📏 ${e.largo_metros || 0} m × ${e.ancho_metros || 0} m
+</div>
+
+<div>
+  📐 Área:
+  ${
+    (
+      Number(e.largo_metros || 0) *
+      Number(e.ancho_metros || 0)
+    ).toFixed(2)
+  } m²
+</div>
+
           ${ratingPopupHTML}
 
           <div style="margin-top:10px;">
@@ -2240,7 +2488,7 @@
                     class="btn verde chico"
                     onclick="abrirReserva(${e.id})"
                   >
-                    Reservar
+                    <span class="ico i-reservas"></span>Reservar
                   </button>
                 `
             }
@@ -2249,7 +2497,7 @@
               class="btn naranja chico"
               onclick="comoLlegar(${e.id})"
             >
-              🧭 Cómo llegar
+              <span class="ico i-ruta"></span>Cómo llegar
             </button>
 
           </div>
@@ -2399,7 +2647,7 @@
 
           ${r.estado === 'confirmada' ? `
             <button type="button" class="btn verde chico" style="margin-top:12px;" onclick="marcarReservaCompletada(${r.id})">
-              Marcar como completada
+              <span class="ico i-check"></span>Marcar como completada
             </button>` : ''}
         </div>`;
     }).join('');
@@ -2426,6 +2674,69 @@
     }
   }
 
+
+  // ---------- FOTOS AL PUBLICAR UN ESPACIO ----------
+  const MAX_FOTOS_PUBLICAR = 6;
+  const MAX_BYTES_FOTO_PUBLICAR = 5 * 1024 * 1024;
+  const TIPOS_FOTO_PUBLICAR = ['image/jpeg', 'image/png', 'image/webp'];
+
+  // verificacion.js lee esta lista al enviar el formulario
+  window.pubFotosLista = [];
+
+  function pintarFotosPublicar() {
+    const cont = document.getElementById('pubFotosPrevias');
+    if (!cont) return;
+    cont.innerHTML = '';
+    window.pubFotosLista.forEach((f, i) => {
+      const caja = document.createElement('div');
+      caja.className = 'previa';
+      const img = document.createElement('img');
+      img.alt = 'Vista previa';
+      img.src = URL.createObjectURL(f);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      const quitar = document.createElement('button');
+      quitar.type = 'button';
+      quitar.textContent = '×';
+      quitar.title = 'Quitar foto';
+      quitar.onclick = () => {
+        window.pubFotosLista.splice(i, 1);
+        pintarFotosPublicar();
+      };
+      caja.appendChild(img);
+      caja.appendChild(quitar);
+      cont.appendChild(caja);
+    });
+  }
+
+  document.getElementById('pubFotos').addEventListener('change', (ev) => {
+    const msg = document.getElementById('mensaje');
+    let aviso = '';
+    for (const f of ev.target.files) {
+      if (!TIPOS_FOTO_PUBLICAR.includes(f.type)) {
+        aviso = 'Solo se permiten imágenes JPG, PNG o WEBP.';
+        continue;
+      }
+      if (f.size > MAX_BYTES_FOTO_PUBLICAR) {
+        aviso = `"${f.name}" pesa más de 5 MB.`;
+        continue;
+      }
+      if (window.pubFotosLista.length >= MAX_FOTOS_PUBLICAR) {
+        aviso = `Solo puedes subir hasta ${MAX_FOTOS_PUBLICAR} fotos.`;
+        break;
+      }
+      window.pubFotosLista.push(f);
+    }
+    ev.target.value = ''; // permite volver a elegir la misma foto
+    pintarFotosPublicar();
+    if (aviso) mostrar(msg, aviso, true);
+    else msg.textContent = '';
+  });
+
+  document.getElementById('formPublicar').addEventListener('reset', () => {
+    window.pubFotosLista = [];
+    pintarFotosPublicar();
+  });
+
   // ---------- MIS ESPACIOS (con corrección de espacios rechazados) ----------
   let misEspaciosCache = {};
   let espacioEditandoId = null;
@@ -2450,7 +2761,6 @@
         else if (e.motivo_rechazo) etiqueta = '<span class="etiqueta rojo">Rechazado</span>';
         else etiqueta = '<span class="etiqueta naranja">Pendiente de verificación</span>';
 
-        const rechazado = !e.verificado && !!e.motivo_rechazo;
 
         const fotos = (e.fotos || []).map(f => `
           <div style="position:relative;display:inline-block;margin:0 6px 6px 0;">
@@ -2466,25 +2776,50 @@
               ${etiqueta}
             </div>
             <div class="direccion">${esc(e.direccion)}</div>
-            <div class="detalle">${dinero(e.precio_hora)} / hora · ${estrellasTexto(e.promedio_calificacion, e.total_calificaciones)}</div>
+             
+
+            <div class="detalle">
+  ${dinero(e.precio_hora)} / hora ·
+  ${estrellasTexto(e.promedio_calificacion, e.total_calificaciones)}
+</div>
+
+<div class="detalle">
+  🚗 Capacidad: ${e.capacidad_vehiculos || 1} vehículo(s)
+  · 📏 ${e.largo_metros || 0} m × ${e.ancho_metros || 0} m
+  · Área: ${
+    (
+      Number(e.largo_metros || 0) *
+      Number(e.ancho_metros || 0)
+    ).toFixed(2)
+  } m²
+</div>
+
+            <div class="detalle">
+  ${[e.tiene_camara && '📹 Cámara', e.tiene_porton && '🚪 Portón', e.tiene_iluminacion && '💡 Iluminación'].filter(Boolean).join(' · ') || 'Sin cámara, portón ni iluminación'}
+</div>
+
             ${e.motivo_rechazo ? `<div class="detalle" style="color:var(--rojo);">Motivo del rechazo: ${esc(e.motivo_rechazo)}</div>` : ''}
 
-            ${rechazado ? `
-              <div style="margin:8px 0;">
-                <button type="button" class="btn naranja chico" onclick="abrirEditarEspacio(${e.id})">
-                  ✏️ Corregir y reenviar
-                </button>
-              </div>` : ''}
+            <div style="margin:8px 0;">
+  <button
+    type="button"
+    class="btn naranja chico"
+    onclick="abrirEditarEspacio(${e.id})"
+  >
+    <span class="ico i-editar"></span>Editar espacio
+  </button>
+</div>
 
             <div class="detalle" style="margin-top:10px;"><b>Fotos (${(e.fotos || []).length}/6)</b></div>
             <div>${fotos || '<span class="detalle">Sin fotos todavía.</span>'}</div>
             <input type="file" id="inputFoto_${e.id}" accept="image/jpeg,image/png,image/webp" multiple style="margin-top:6px;">
-            <button type="button" class="btn verde chico" onclick="subirFotos(${e.id})">Subir fotos</button>
+            <button type="button" class="btn verde chico" onclick="subirFotos(${e.id})"><span class="ico i-foto"></span>Subir fotos</button>
+            <button type="button" class="btn naranja chico" onclick="subirDocumentos(${e.id})"><span class="ico i-documento"></span>Documentos</button> 
 
             <div class="detalle" style="margin-top:14px;"><b>Bloquear días (para reformas, mantenimiento, etc.)</b></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
               <input type="date" id="fechaBloqueo_${e.id}">
-              <button type="button" class="btn naranja chico" onclick="bloquearDia(${e.id})">Bloquear día</button>
+              <button type="button" class="btn naranja chico" onclick="bloquearDia(${e.id})"><span class="ico i-bloquear_dia"></span>Bloquear día</button>
             </div>
             <div id="diasBloqueados_${e.id}" class="detalle" style="margin-top:6px;">Cargando días bloqueados...</div>
 
@@ -2504,13 +2839,23 @@
 
     espacioEditandoId = id;
 
-    document.getElementById('editMotivo').textContent = e.motivo_rechazo || '';
+  
     document.getElementById('editTitulo').value = e.titulo || '';
     document.getElementById('editDescripcion').value = e.descripcion || '';
     document.getElementById('editDireccion').value = e.direccion || '';
     document.getElementById('editLatitud').value = e.latitud ?? '';
     document.getElementById('editLongitud').value = e.longitud ?? '';
     document.getElementById('editPrecio').value = Number(e.precio_hora);
+
+    document.getElementById('editCapacidad').value =
+  Number(e.capacidad_vehiculos || 1);
+
+document.getElementById('editLargo').value =
+  Number(e.largo_metros || 0);
+
+document.getElementById('editAncho').value =
+  Number(e.ancho_metros || 0);
+
     document.getElementById('editCamara').checked = !!e.tiene_camara;
     document.getElementById('editPorton').checked = !!e.tiene_porton;
     document.getElementById('editIluminacion').checked = !!e.tiene_iluminacion;
@@ -2543,6 +2888,22 @@
         latitud: parseFloat(document.getElementById('editLatitud').value),
         longitud: parseFloat(document.getElementById('editLongitud').value),
         precio_hora: parseFloat(document.getElementById('editPrecio').value),
+
+        capacidad_vehiculos:
+  parseInt(
+    document.getElementById('editCapacidad').value
+  ),
+
+largo_metros:
+  parseFloat(
+    document.getElementById('editLargo').value
+  ),
+
+ancho_metros:
+  parseFloat(
+    document.getElementById('editAncho').value
+  ),
+
         tiene_camara: document.getElementById('editCamara').checked,
         tiene_porton: document.getElementById('editPorton').checked,
         tiene_iluminacion: document.getElementById('editIluminacion').checked
@@ -2653,6 +3014,8 @@
   }
   
   async function abrirReserva(id) {
+    if (mapaInstancia) mapaInstancia.closePopup();
+
 
     espacioActual =
       espaciosCache[id];
@@ -3574,14 +3937,14 @@
               class="btn verde chico"
               onclick="pagarReserva(${r.id})"
             >
-              Pagar ahora
+              <span class="ico i-dinero"></span>Pagar ahora
             </button>
 
             <button
               class="btn rojo chico"
               onclick="cancelarReserva(${r.id})"
             >
-              Cancelar
+              <span class="ico i-cerrar"></span>Cancelar
             </button>
 
           `;
@@ -3596,7 +3959,7 @@
               class="btn rojo chico"
               onclick="cancelarReserva(${r.id})"
             >
-              Cancelar reserva
+              <span class="ico i-cerrar"></span>Cancelar reserva
             </button>`;
 
         }
@@ -3611,7 +3974,7 @@
               class="btn naranja chico"
               onclick="abrirCalificacion(${r.id})"
             >
-              ⭐ Calificar
+              <span class="ico i-estrella"></span>Calificar
             </button>
 
           `;
@@ -3622,7 +3985,7 @@
         if (r.pago_estado === 'completado' && r.pago_id) {
           acciones += `
             <button class="btn gris chico" onclick="descargarComprobante(${r.pago_id})">
-              📄 Comprobante
+              <span class="ico i-recibo"></span>Comprobante
             </button>
           `;
         }
@@ -4917,7 +5280,7 @@
 
                 ${
                   respondido
-                    ? '<b style="color:var(--verde)">Soporte respondió</b> · '
+                    ? '<b style="color: var(--verde-texto)">Soporte respondió</b> · '
                     : ''
                 }
 
@@ -5463,17 +5826,17 @@
           titulo:
             document.getElementById(
               'pubTitulo'
-            ).value,
+            ).value.trim(),
 
           descripcion:
             document.getElementById(
               'pubDescripcion'
-            ).value,
+            ).value.trim(),
 
           direccion:
             document.getElementById(
               'pubDireccion'
-            ).value,
+            ).value.trim(),
 
           latitud:
             parseFloat(
@@ -5495,6 +5858,28 @@
                 'pubPrecio'
               ).value
             ),
+
+          capacidad_vehiculos:
+  parseInt(
+    document.getElementById(
+      'pubCapacidad'
+    ).value
+  ),
+
+largo_metros:
+  parseFloat(
+    document.getElementById(
+      'pubLargo'
+    ).value
+  ),
+
+ancho_metros:
+  parseFloat(
+    document.getElementById(
+      'pubAncho'
+    ).value
+  ),
+          
 
           tiene_camara:
             document.getElementById(
@@ -5544,9 +5929,34 @@
 
           }
 
+          let textoOk =
+            'Espacio publicado. Queda pendiente de verificación.';
+
+          if (window.pubFotosLista && window.pubFotosLista.length > 0) {
+
+            const formFotos = new FormData();
+
+            window.pubFotosLista.forEach(
+              f => formFotos.append('fotos', f)
+            );
+
+            const respFotos = await apiArchivo(
+              `/espacios/${data.id}/media`,
+              {
+                method: 'POST',
+                body: formFotos
+              }
+            );
+
+            if (!respFotos.ok) {
+              textoOk =
+                'Espacio publicado, pero no se pudieron subir las fotos. Súbelas desde "Mis espacios".';
+            }
+          }
+
           mostrar(
             msg,
-            'Espacio publicado. Queda pendiente de verificación.',
+            textoOk,
             false
           );
 

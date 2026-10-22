@@ -6,7 +6,10 @@
 
 <style>
   :root {
-    --verde: #2E9E4F;
+    --verde: #E1A800;
+    --verde-texto: #8A6700;
+    --verde-claro: #FFF3C4;
+    --texto-sobre-verde: #2B2100;
     --naranja: #F5893A;
     --negro: #111111;
   }
@@ -124,8 +127,31 @@
   }
 
   .ok {
-    color: var(--verde);
+    color: var(--verde-texto);
   }
+
+  /* ===== REDISEÑO: amarillo mostaza ===== */
+  button[type="submit"] {
+    color: var(--texto-sobre-verde);
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+
+  /* ===== ICONOS (monocromáticos: toman el color del texto del botón) ===== */
+  .ico {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 7px;
+    vertical-align: -0.25em;
+    background-color: currentColor;
+    -webkit-mask: var(--i) center / contain no-repeat;
+    mask: var(--i) center / contain no-repeat;
+  }
+  .i-correo { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E"); }
+  .i-entrar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z'/%3E%3C/svg%3E"); }
+  .i-llave { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z'/%3E%3C/svg%3E"); }
+  .i-persona_mas { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"); }
 </style>
 </head>
 
@@ -165,7 +191,7 @@
     </div>
 
     <button type="submit">
-      Ingresar
+      <span class="ico i-entrar"></span>Ingresar
     </button>
 
     <div class="toggle" onclick="mostrarRecuperar()" style="margin-top:8px;">
@@ -218,7 +244,7 @@
     >
 
     <button type="submit">
-      Crear cuenta
+      <span class="ico i-persona_mas"></span>Crear cuenta
     </button>
 
   </form>
@@ -232,19 +258,21 @@
         Escribe tu correo y te enviaremos un código para cambiar tu contraseña.
       </p>
       <input type="email" id="recCorreo" placeholder="Correo" autocomplete="off" required>
-      <button type="submit" id="btnEnviarCodigo">Enviar código</button>
+      <button type="submit" id="btnEnviarCodigo"><span class="ico i-correo"></span>Enviar código</button>
     </form>
 
     <form id="formRecuperarPaso2" style="display:none;">
       <p style="font-size:14px;color:#555;margin:0 0 10px;">
-        Escribe el código que recibiste y tu nueva contraseña.
+        Escribe el código que recibiste y tu nueva contraseña. El código vence en 2 minutos.
       </p>
+      <p id="recTemporizador" style="font-size:13px;color:#555;margin:0 0 10px;">Tiempo restante: 02:00</p>
       <input type="text" id="recToken" placeholder="Código recibido" autocomplete="one-time-code" required>
       <div class="password-container">
         <input type="password" id="recContrasena" placeholder="Nueva contraseña (mínimo 8 caracteres)" autocomplete="new-password" required>
         <button type="button" class="toggle-password" onclick="alternarContrasena('recContrasena', this)">✔️</button>
       </div>
-      <button type="submit" id="btnRestablecer">Cambiar contraseña</button>
+      <button type="submit" id="btnRestablecer"><span class="ico i-llave"></span>Cambiar contraseña</button>
+      <button type="button" id="btnReenviarCodigo" style="display:none;margin-top:10px;background:#555;" disabled>Reenviar código</button>
     </form>
 
     <div class="toggle" onclick="volverALogin()">
@@ -265,8 +293,8 @@
   <div id="mensaje"></div>
 
 </div>
-
-
+<script src="contrasena.js"></script>
+<script src="2fa.js"></script>
 <script>
 
   const API_URL = 'http://localhost:4000/api';
@@ -341,9 +369,45 @@
 
 
   // RECUPERAR CONTRASEÑA
+  let temporizadorRecuperacion = null;
+  let segundosRecuperacion = 120;
 
+  function detenerTemporizadorRecuperacion() {
+    if (temporizadorRecuperacion) {
+      clearInterval(temporizadorRecuperacion);
+      temporizadorRecuperacion = null;
+    }
+  }
+
+  function iniciarTemporizadorRecuperacion() {
+    detenerTemporizadorRecuperacion();
+    segundosRecuperacion = 120;
+    const etiqueta = document.getElementById('recTemporizador');
+    const btnReenviar = document.getElementById('btnReenviarCodigo');
+    btnReenviar.style.display = 'block';
+    btnReenviar.disabled = true;
+    btnReenviar.textContent = 'Reenviar código';
+
+    const actualizar = () => {
+      const minutos = Math.floor(segundosRecuperacion / 60);
+      const segundos = segundosRecuperacion % 60;
+      etiqueta.textContent = segundosRecuperacion > 0
+        ? `Tiempo restante: ${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`
+        : 'El código ha vencido. Solicita uno nuevo.';
+      if (segundosRecuperacion <= 0) {
+        detenerTemporizadorRecuperacion();
+        btnReenviar.disabled = false;
+        btnReenviar.textContent = 'Reenviar código';
+        return;
+      }
+      segundosRecuperacion--;
+    };
+    actualizar();
+    temporizadorRecuperacion = setInterval(actualizar, 1000);
+  }
 
   function limpiarRecuperar() {
+    detenerTemporizadorRecuperacion();
     document.getElementById('formRecuperarPaso1').reset();
     document.getElementById('formRecuperarPaso2').reset();
 
@@ -356,6 +420,9 @@
 
     document.getElementById('btnEnviarCodigo').disabled = false;
     document.getElementById('btnRestablecer').disabled = false;
+    document.getElementById('btnReenviarCodigo').style.display = 'none';
+    document.getElementById('btnReenviarCodigo').disabled = true;
+    document.getElementById('recTemporizador').textContent = 'Tiempo restante: 02:00';
   }
 
   function mostrarRecuperar() {
@@ -398,6 +465,7 @@
         if (resp.ok) {
           document.getElementById('formRecuperarPaso1').style.display = 'none';
           document.getElementById('formRecuperarPaso2').style.display = 'block';
+          iniciarTemporizadorRecuperacion();
         }
       } catch (err) {
         mostrarMensaje('No se pudo conectar con el servidor.', true);
@@ -405,6 +473,31 @@
         btn.disabled = false;
       }
     });
+
+  document.getElementById('btnReenviarCodigo').addEventListener('click', async () => {
+    const btn = document.getElementById('btnReenviarCodigo');
+    const correo = document.getElementById('recCorreo').value.trim();
+    btn.disabled = true;
+    try {
+      const resp = await fetch(`${API_URL}/auth/olvide-contrasena`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        mostrarMensaje(data.error || 'No se pudo reenviar el código.', true);
+        btn.disabled = false;
+        return;
+      }
+      document.getElementById('recToken').value = '';
+      mostrarMensaje('Si el correo existe, enviamos un nuevo código. El anterior deja de ser válido.', false);
+      iniciarTemporizadorRecuperacion();
+    } catch (err) {
+      mostrarMensaje('No se pudo conectar con el servidor.', true);
+      btn.disabled = false;
+    }
+  });
 
   document
     .getElementById('formRecuperarPaso2')
@@ -426,7 +519,8 @@
           btn.disabled = false;
           return;
         }
-        mostrarMensaje('Contraseña actualizada. Ya puedes iniciar sesión.', false);
+        detenerTemporizadorRecuperacion();
+        mostrarMensaje('Contraseña actualizada. El código fue invalidado; ya puedes iniciar sesión.', false);
         setTimeout(volverALogin, 1200);
       } catch (err) {
         mostrarMensaje('No se pudo conectar con el servidor.', true);
@@ -483,6 +577,11 @@
           return;
         }
 
+                // Administradores: después de la contraseña se pide el código de 2 pasos
+        if (data.requiere2fa || data.configurar2fa) {
+          await iniciar2fa(data);
+          return;
+        }
 
         sessionStorage.setItem(
           'token',

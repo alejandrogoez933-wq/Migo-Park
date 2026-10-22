@@ -7,7 +7,7 @@ const { verificarToken } = require('../middlewares/auth.middleware');
 const { enviarCorreoRecuperacion } = require('../utils/correo');
 
 const router = express.Router();
-const MINUTOS_TOKEN_RESET = 30;
+const MINUTOS_TOKEN_RESET = 2; // Código válido durante 2 minutos (se aplica en PostgreSQL).
 
 // POST /api/auth/registro -> el registro público SIEMPRE crea clientes
 router.post('/registro', async (req, res) => {
@@ -246,20 +246,21 @@ router.post('/olvide-contrasena', async (req, res) => {
 
     const usuario = r.rows[0];
 
-    const token = crypto.randomBytes(16).toString('hex');
+    const token = String(crypto.randomInt(100000, 1000000));
 
     const tokenHash = crypto
       .createHash('sha256')
       .update(token)
       .digest('hex');
 
-    const expira = new Date(
-      Date.now() + MINUTOS_TOKEN_RESET * 60 * 1000
-    );
-
+    // Usar el reloj de PostgreSQL tanto para guardar como para validar la expiración.
+    // Así se evita que el reloj/zona horaria del servidor Node y la base de datos difieran.
     await pool.query(
-      'UPDATE usuarios SET reset_token_hash = $1, reset_token_expira = $2 WHERE id = $3',
-      [tokenHash, expira, usuario.id]
+      `UPDATE usuarios
+       SET reset_token_hash = $1,
+           reset_token_expira = NOW() + INTERVAL '2 minutes'
+       WHERE id = $2`,
+      [tokenHash, usuario.id]
     );
 
     await enviarCorreoRecuperacion(

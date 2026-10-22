@@ -140,20 +140,27 @@ router.post(
   async (req, res) => {
 
     const {
-      titulo,
-      descripcion,
-      direccion,
-      latitud,
-      longitud,
-      precio_hora,
-      tiene_camara,
-      tiene_porton,
-      tiene_iluminacion
-    } = req.body;
+  titulo,
+  descripcion,
+  direccion,
+  latitud,
+  longitud,
+  precio_hora,
+  capacidad_vehiculos,
+  largo_metros,
+  ancho_metros,
+  tiene_camara,
+  tiene_porton,
+  tiene_iluminacion
+} = req.body;
+
+    const tituloLimpio = String(titulo || '').trim();
+    const direccionLimpia = String(direccion || '').trim();
+    const descripcionLimpia = String(descripcion || '').trim();
 
     if (
-      !titulo ||
-      !direccion ||
+      !tituloLimpio ||
+      !direccionLimpia ||
       latitud == null ||
       longitud == null ||
       !precio_hora
@@ -166,6 +173,10 @@ router.post(
     const lat = Number(latitud);
     const lng = Number(longitud);
     const precio = Number(precio_hora);
+
+    const capacidad = Number(capacidad_vehiculos);
+    const largo = Number(largo_metros);
+    const ancho = Number(ancho_metros);
 
     if (
       isNaN(lat) ||
@@ -189,50 +200,82 @@ router.post(
       });
     }
 
+    if (
+  !Number.isInteger(capacidad) ||
+  capacidad <= 0
+) {
+  return res.status(400).json({
+    error: 'La capacidad de vehículos debe ser un número entero mayor a 0'
+  });
+}
+
+if (
+  isNaN(largo) ||
+  largo <= 0 ||
+  isNaN(ancho) ||
+  ancho <= 0
+) {
+  return res.status(400).json({
+    error: 'El largo y el ancho deben ser mayores a 0'
+  });
+}
+
     try {
 
       const resultado = await pool.query(
         `
-        INSERT INTO espacios_parqueo
-        (
-          arrendador_id,
-          titulo,
-          descripcion,
-          direccion,
-          latitud,
-          longitud,
-          precio_hora,
-          tiene_camara,
-          tiene_porton,
-          tiene_iluminacion
-        )
+ INSERT INTO espacios_parqueo
+(
+  arrendador_id,
+  titulo,
+  descripcion,
+  direccion,
+  latitud,
+  longitud,
+  precio_hora,
+  capacidad_vehiculos,
+  largo_metros,
+  ancho_metros,
+  tiene_camara,
+  tiene_porton,
+  tiene_iluminacion
+)
+
         VALUES
-        (
-          $1,
-          $2,
-          $3,
-          $4,
-          $5,
-          $6,
-          $7,
-          $8,
-          $9,
-          $10
-        )
+(
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8,
+  $9,
+  $10,
+  $11,
+  $12,
+  $13
+)
+
         RETURNING *
         `,
         [
-          req.usuario.id,
-          titulo,
-          descripcion || null,
-          direccion,
-          lat,
-          lng,
-          precio,
-          !!tiene_camara,
-          !!tiene_porton,
-          !!tiene_iluminacion
-        ]
+  req.usuario.id,
+  tituloLimpio,
+  descripcionLimpia || null,
+  direccionLimpia,
+  lat,
+  lng,
+  precio,
+  capacidad,
+  largo,
+  ancho,
+  !!tiene_camara,
+  !!tiene_porton,
+  !!tiene_iluminacion
+]
+
       );
 
       res.status(201).json(
@@ -351,7 +394,8 @@ router.get(
         SELECT
           e.*,
           u.nombre AS arrendador_nombre,
-          u.correo AS arrendador_correo
+          u.correo AS arrendador_correo,
+          ${SUBCONSULTA_MEDIA}
 
         FROM espacios_parqueo e
 
@@ -551,8 +595,8 @@ router.put(
 
 // ======================================================
 // PUT /api/espacios/:id
-// Editar espacio rechazado
-// y volverlo a enviar a revisión
+// Editar cualquier espacio propio sin perder su aprobación
+// Notifica a administradores y soporte con los cambios realizados
 // ======================================================
 
 router.put(
@@ -567,7 +611,6 @@ router.put(
       const espacioId = req.params.id;
 
       if (!idValido(espacioId)) {
-
         return res.status(400).json({
           error: 'ID de espacio inválido'
         });
@@ -580,6 +623,9 @@ router.put(
         latitud,
         longitud,
         precio_hora,
+        capacidad_vehiculos,
+        largo_metros,
+        ancho_metros,
         tiene_camara,
         tiene_porton,
         tiene_iluminacion
@@ -590,9 +636,11 @@ router.put(
         !direccion ||
         latitud == null ||
         longitud == null ||
-        precio_hora == null
+        precio_hora == null ||
+        capacidad_vehiculos == null ||
+        largo_metros == null ||
+        ancho_metros == null
       ) {
-
         return res.status(400).json({
           error: 'Faltan campos obligatorios del espacio'
         });
@@ -601,6 +649,9 @@ router.put(
       const lat = Number(latitud);
       const lng = Number(longitud);
       const precio = Number(precio_hora);
+      const capacidad = Number(capacidad_vehiculos);
+      const largo = Number(largo_metros);
+      const ancho = Number(ancho_metros);
 
       if (
         isNaN(lat) ||
@@ -610,30 +661,41 @@ router.put(
         lng < -180 ||
         lng > 180
       ) {
-
         return res.status(400).json({
           error: 'Latitud o longitud fuera de rango'
         });
       }
 
-      if (
-        isNaN(precio) ||
-        precio <= 0
-      ) {
-
+      if (isNaN(precio) || precio <= 0) {
         return res.status(400).json({
-          error:
-            'El precio por hora debe ser mayor a 0'
+          error: 'El precio por hora debe ser mayor a 0'
         });
       }
 
-      // Verificar que el espacio exista
-      // y pertenezca al cliente
+      if (
+        !Number.isInteger(capacidad) ||
+        capacidad <= 0
+      ) {
+        return res.status(400).json({
+          error: 'La capacidad debe ser un número entero mayor a 0'
+        });
+      }
+
+      if (
+        isNaN(largo) ||
+        largo <= 0 ||
+        isNaN(ancho) ||
+        ancho <= 0
+      ) {
+        return res.status(400).json({
+          error: 'El largo y el ancho deben ser mayores a 0'
+        });
+      }
+
       const espacio = await pool.query(
         `
         SELECT *
         FROM espacios_parqueo
-
         WHERE id = $1
           AND arrendador_id = $2
         `,
@@ -644,26 +706,15 @@ router.put(
       );
 
       if (espacio.rows.length === 0) {
-
         return res.status(404).json({
-          error:
-            'Espacio no encontrado o no te pertenece'
+          error: 'Espacio no encontrado o no te pertenece'
         });
       }
 
-      // Solo se puede corregir un espacio rechazado
-      if (!espacio.rows[0].motivo_rechazo) {
-
-        return res.status(400).json({
-          error:
-            'Este espacio no está rechazado.'
-        });
-      }
-
+      const anterior = espacio.rows[0];
       const resultado = await pool.query(
         `
         UPDATE espacios_parqueo
-
         SET
           titulo = $1,
           descripcion = $2,
@@ -671,215 +722,72 @@ router.put(
           latitud = $4,
           longitud = $5,
           precio_hora = $6,
-          tiene_camara = $7,
-          tiene_porton = $8,
-          tiene_iluminacion = $9,
-
-          verificado = FALSE,
-          verificado_por = NULL,
-          fecha_verificacion = NULL,
-
+          capacidad_vehiculos = $7,
+          largo_metros = $8,
+          ancho_metros = $9,
+          tiene_camara = $10,
+          tiene_porton = $11,
+          tiene_iluminacion = $12,
           motivo_rechazo = NULL,
           fecha_rechazo = NULL
-
-        WHERE id = $10
-          AND arrendador_id = $11
-
+        WHERE id = $13 AND arrendador_id = $14
         RETURNING *
         `,
         [
           titulo.trim(),
-          descripcion
-            ? descripcion.trim()
-            : null,
-          direccion.trim(),
-          lat,
-          lng,
-          precio,
-          !!tiene_camara,
-          !!tiene_porton,
-          !!tiene_iluminacion,
-          espacioId,
-          usuarioId
+          descripcion ? descripcion.trim() : null,
+          direccion.trim(), lat, lng, precio, capacidad, largo, ancho,
+          !!tiene_camara, !!tiene_porton, !!tiene_iluminacion,
+          espacioId, usuarioId
         ]
+      );
+
+      const actualizado = resultado.rows[0];
+      const campos = [
+        ['Título', 'titulo', anterior.titulo, actualizado.titulo],
+        ['Descripción', 'descripcion', anterior.descripcion, actualizado.descripcion],
+        ['Dirección', 'direccion', anterior.direccion, actualizado.direccion],
+        ['Latitud', 'latitud', anterior.latitud, actualizado.latitud],
+        ['Longitud', 'longitud', anterior.longitud, actualizado.longitud],
+        ['Precio por hora', 'precio_hora', anterior.precio_hora, actualizado.precio_hora],
+        ['Capacidad', 'capacidad_vehiculos', anterior.capacidad_vehiculos, actualizado.capacidad_vehiculos],
+        ['Largo (m)', 'largo_metros', anterior.largo_metros, actualizado.largo_metros],
+        ['Ancho (m)', 'ancho_metros', anterior.ancho_metros, actualizado.ancho_metros],
+        ['Tiene cámara', 'tiene_camara', anterior.tiene_camara, actualizado.tiene_camara],
+        ['Tiene portón', 'tiene_porton', anterior.tiene_porton, actualizado.tiene_porton],
+        ['Tiene iluminación', 'tiene_iluminacion', anterior.tiene_iluminacion, actualizado.tiene_iluminacion]
+      ];
+      const cambios = campos
+        .filter(([, , antes, despues]) => String(antes ?? '') !== String(despues ?? ''))
+        .map(([etiqueta, , antes, despues]) => `${etiqueta}: ${antes ?? 'Vacío'} → ${despues ?? 'Vacío'}`);
+      const detalle = cambios.length ? cambios.join(' | ') : 'Se guardaron los datos del espacio.';
+      const mensaje = `El arrendador ${req.usuario.nombre || ('ID ' + usuarioId)} modificó el espacio "${actualizado.titulo}" (ID ${actualizado.id}). Cambios: ${detalle}`;
+
+      await pool.query(
+        `INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+         SELECT id, 'espacio_modificado', $1
+         FROM usuarios WHERE rol IN ('administrador', 'soporte')`,
+        [mensaje]
       );
 
       res.json({
         ok: true,
-        mensaje:
-          'Espacio corregido y enviado nuevamente a revisión.',
-        espacio:
-          resultado.rows[0]
+        mensaje: 'Espacio actualizado correctamente. Su estado de aprobación se conserva y se notificó a administración y soporte.',
+        espacio: actualizado,
+        cambios
       });
 
     } catch (err) {
 
       console.error(
-        'Error al editar espacio rechazado:',
+        'Error al editar espacio:',
         err
       );
 
       res.status(500).json({
-        error:
-          'Error al editar el espacio rechazado'
+        error: 'Error al editar el espacio'
       });
     }
-  }
-);
-
-
-// ======================================================
-// POST /api/espacios/:id/media
-// Subir hasta 6 fotos
-// ======================================================
-
-router.post(
-  '/:id/media',
-  verificarToken,
-  requiereRol('cliente'),
-  (req, res) => {
-
-    upload.array(
-      'fotos',
-      MAX_FOTOS
-    )(req, res, async (err) => {
-
-      if (err) {
-
-        return res.status(400).json({
-          error:
-            err.message ||
-            'Error al subir las fotos'
-        });
-      }
-
-      try {
-
-        const espacio =
-          await espacioDelDueno(
-            req.params.id,
-            req.usuario.id
-          );
-
-        if (!espacio) {
-
-          (req.files || []).forEach(
-            f => fs.unlink(
-              f.path,
-              () => {}
-            )
-          );
-
-          return res.status(404).json({
-            error:
-              'Espacio no encontrado o no te pertenece'
-          });
-        }
-
-        if (
-          !req.files ||
-          req.files.length === 0
-        ) {
-
-          return res.status(400).json({
-            error:
-              'No se recibió ninguna foto'
-          });
-        }
-
-        const actuales =
-          await pool.query(
-            `
-            SELECT COUNT(*)::int AS n
-            FROM espacio_media
-            WHERE espacio_id = $1
-            `,
-            [espacio.id]
-          );
-
-        if (
-          actuales.rows[0].n +
-          req.files.length >
-          MAX_FOTOS
-        ) {
-
-          req.files.forEach(
-            f => fs.unlink(
-              f.path,
-              () => {}
-            )
-          );
-
-          return res.status(400).json({
-            error:
-              `Un espacio admite máximo ${MAX_FOTOS} fotos (ya tienes ${actuales.rows[0].n})`
-          });
-        }
-
-        const insertadas = [];
-
-        for (
-          let i = 0;
-          i < req.files.length;
-          i++
-        ) {
-
-          const url =
-            `/uploads/espacios/${req.files[i].filename}`;
-
-          const r =
-            await pool.query(
-              `
-              INSERT INTO espacio_media
-              (
-                espacio_id,
-                url,
-                tipo,
-                orden
-              )
-              VALUES
-              (
-                $1,
-                $2,
-                'foto',
-                $3
-              )
-
-              RETURNING id, url
-              `,
-              [
-                espacio.id,
-                url,
-                actuales.rows[0].n + i
-              ]
-            );
-
-          insertadas.push(
-            r.rows[0]
-          );
-        }
-
-        res.status(201).json(
-          insertadas
-        );
-
-      } catch (err2) {
-
-        (req.files || []).forEach(
-          f => fs.unlink(
-            f.path,
-            () => {}
-          )
-        );
-
-        console.error(err2);
-
-        res.status(500).json({
-          error:
-            'Error al guardar las fotos'
-        });
-      }
-    });
   }
 );
 
@@ -1190,6 +1098,84 @@ router.put(
         error:
           'Error al actualizar el calendario'
       });
+    }
+  }
+);
+
+
+// ======================================================
+// POST /api/espacios/:id/media
+// Subir fotos del espacio propio (máximo 6 en total)
+// ======================================================
+
+router.post(
+  '/:id/media',
+  verificarToken,
+  requiereRol('cliente'),
+  (req, res, next) => {
+    upload.array('fotos', MAX_FOTOS)(req, res, (err) => {
+      if (err) {
+        const mensaje = err.code === 'LIMIT_FILE_SIZE'
+          ? 'Cada foto debe pesar máximo 5 MB'
+          : err.code === 'LIMIT_FILE_COUNT'
+            ? `Puedes subir máximo ${MAX_FOTOS} fotos por solicitud`
+            : err.message || 'No se pudieron procesar las fotos';
+        return res.status(400).json({ error: mensaje });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    const { id } = req.params;
+    const archivos = req.files || [];
+
+    if (!idValido(id)) {
+      archivos.forEach((f) => fs.unlink(f.path, () => {}));
+      return res.status(400).json({ error: 'ID de espacio inválido' });
+    }
+
+    if (archivos.length === 0) {
+      return res.status(400).json({ error: 'Selecciona al menos una foto' });
+    }
+
+    try {
+      const espacio = await espacioDelDueno(id, req.usuario.id);
+      if (!espacio) {
+        archivos.forEach((f) => fs.unlink(f.path, () => {}));
+        return res.status(404).json({ error: 'Espacio no encontrado o no te pertenece' });
+      }
+
+      const existentes = await pool.query(
+        'SELECT COUNT(*)::int AS total FROM espacio_media WHERE espacio_id = $1',
+        [espacio.id]
+      );
+      const totalActual = existentes.rows[0].total;
+
+      if (totalActual + archivos.length > MAX_FOTOS) {
+        archivos.forEach((f) => fs.unlink(f.path, () => {}));
+        return res.status(400).json({
+          error: `Este espacio admite máximo ${MAX_FOTOS} fotos. Ya tienes ${totalActual}.`
+        });
+      }
+
+      const guardadas = [];
+      for (const archivo of archivos) {
+        const url = `/uploads/espacios/${archivo.filename}`;
+        const orden = totalActual + guardadas.length;
+        const resultado = await pool.query(
+          `INSERT INTO espacio_media (espacio_id, url, tipo, orden)
+           VALUES ($1, $2, 'foto', $3)
+           RETURNING id, url, tipo, orden`,
+          [espacio.id, url, orden]
+        );
+        guardadas.push(resultado.rows[0]);
+      }
+
+      return res.status(201).json({ ok: true, fotos: guardadas });
+    } catch (err) {
+      console.error('Error al subir fotos del espacio:', err);
+      archivos.forEach((f) => fs.unlink(f.path, () => {}));
+      return res.status(500).json({ error: 'Error al guardar las fotos del espacio' });
     }
   }
 );

@@ -1,14 +1,20 @@
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const pool = require('./db');
+const { validarContrasena, generarContrasenaSegura } = require('./utils/contrasena');
 require('dotenv').config();
 
 // Puedes fijar correo/contraseña propios así, en vez de escribirlos en el código:
 //   ADMIN_EMAIL=tucorreo@dominio.com ADMIN_PASSWORD=tuclave node src/seed-admin.js
 async function crearAdminInicial() {
   const correo = process.env.ADMIN_EMAIL || 'admin@migopark.com';
-  const generada = crypto.randomBytes(9).toString('base64url'); // se usa solo si no diste ADMIN_PASSWORD
-  const contrasena = process.env.ADMIN_PASSWORD || generada;
+  const contrasena = process.env.ADMIN_PASSWORD || generarContrasenaSegura(); // se genera sola si no diste ADMIN_PASSWORD
+
+  const error = validarContrasena(contrasena);
+  if (error) {
+    console.error('La ADMIN_PASSWORD no cumple la política de contraseñas.');
+    console.error(error);
+    process.exit(1);
+  }
 
   try {
     const existe = await pool.query('SELECT id FROM usuarios WHERE correo = $1', [correo]);

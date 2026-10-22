@@ -6,7 +6,10 @@
 <title>Migo Park - Panel</title>
 <style>
   :root {
-    --verde: #2E9E4F;
+    --verde: #E1A800;
+    --verde-texto: #8A6700;
+    --verde-claro: #FFF3C4;
+    --texto-sobre-verde: #2B2100;
     --naranja: #F5893A;
     --negro: #111111;
     --rojo: #c0392b;
@@ -100,7 +103,7 @@
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .etiqueta { font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 12px; white-space: nowrap; display: inline-block; }
-  .etiqueta.verde { background: #e3f4e8; color: var(--verde); }
+  .etiqueta.verde { background: #FFF3C4; color: var(--verde-texto); }
   .etiqueta.naranja { background: #fdeadb; color: #c25f10; }
   .etiqueta.gris { background: #e5e5e5; color: var(--negro); }
   .etiqueta.rojo { background: #f8dcd8; color: var(--rojo); }
@@ -122,7 +125,7 @@
 
   .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-bottom: 8px; }
   .tile { background: white; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .tile .num { font-size: 22px; font-weight: bold; color: var(--verde); }
+  .tile .num { font-size: 22px; font-weight: bold; color: var(--verde-texto); }
   .tile .num.naranja { color: var(--naranja); }
   .tile .num.negro { color: var(--negro); }
   .tile .txt { font-size: 13px; color: #555; margin-top: 2px; }
@@ -136,12 +139,12 @@
   .card.clic:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.14); }
   .encabezado { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
   .aviso-escalado { border-left: 4px solid var(--naranja); background: #fdf3ea; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 13px; }
-  .solucion { background: #e3f4e8; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 13px; }
+  .solucion { background: #FFF3C4; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 13px; }
   .acciones-caso { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
   .btn-texto { background: none; border: none; color: var(--naranja); font-weight: bold; cursor: pointer; font-size: 13px; padding: 9px 6px; }
   .hilo { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; max-height: 50vh; overflow-y: auto; padding: 4px; }
   .msg { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: 14px; white-space: pre-wrap; word-break: break-word; }
-  .msg.usuario { align-self: flex-start; background: #e3f4e8; }
+  .msg.usuario { align-self: flex-start; background: #FFF3C4; }
   .msg.staff { align-self: flex-end; background: white; border: 1px solid var(--negro); }
   .msg .quien { font-size: 11px; color: #666; margin-bottom: 2px; font-weight: bold; }
   .msg .hora { font-size: 11px; color: #888; margin-top: 4px; }
@@ -151,7 +154,7 @@
   }
   textarea.area:focus { outline: none; border-color: var(--verde); }
   .error { color: var(--rojo); }
-  .ok { color: var(--verde); }
+  .ok { color: var(--verde-texto); }
   .vacio { color: #777; text-align: center; margin: 24px 0; }
 
   .overlay {
@@ -174,6 +177,74 @@
     .sidebar .salir { margin-top: 0; margin-left: auto; }
     .contenido { padding: 16px; }
   }
+
+  .barra-superior { display:flex; justify-content:flex-end; align-items:center; margin-bottom:16px; position:relative; }
+  .btn-notificaciones { position:relative; border:1px solid #ddd; background:#fff; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; color:#111; }
+  .contador-notificaciones { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; margin-left:6px; border-radius:12px; background:#c0392b; color:white; font-size:11px; padding:0 5px; }
+  .panel-notificaciones { display:none; position:absolute; z-index:100; right:0; top:48px; width:min(440px, calc(100vw - 32px)); max-height:70vh; overflow:auto; background:white; border:1px solid #ddd; border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,.18); padding:14px; }
+  .notificacion-item { border-bottom:1px solid #eee; padding:12px 4px; cursor:pointer; white-space:normal; }
+  .notificacion-item:last-child { border-bottom:0; }
+  .notificacion-item.no-leida { background:#FFF8DC; border-radius:8px; padding:12px 8px; }
+  .notificacion-item p { font-size:13px; color:#333; margin:5px 0; overflow-wrap:anywhere; }
+  .notificacion-item small { color:#777; font-size:11px; }
+
+
+  /* ===== REDISEÑO: amarillo mostaza + botones con icono ===== */
+  /* clases usadas por el menú lateral: i-grafico i-check i-reservas i-parking i-soporte i-usuarios i-persona_mas */
+  .sidebar .item.activo { background: var(--verde); color: var(--texto-sobre-verde); font-weight: bold; }
+  .sidebar .item { border-radius: 10px; }
+  .btn { border-radius: 10px; }
+  .btn.verde { background: var(--verde); color: var(--texto-sobre-verde); }
+
+  .sidebar .item > span:first-child::before {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 7px;
+    vertical-align: -0.25em;
+    background-color: currentColor;
+    -webkit-mask: var(--i) center / contain no-repeat;
+    mask: var(--i) center / contain no-repeat;
+  }
+  .sidebar .item[data-vista="metricas"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="verificaciones"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="reservas"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="espacios"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="soporte"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h4v1h-7v2h6c1.66 0 3-1.34 3-3V10c0-4.97-4.03-9-9-9z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="usuarios"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="staff"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"); }
+
+  /* ===== ICONOS (monocromáticos: toman el color del texto del botón) ===== */
+  .ico {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 7px;
+    vertical-align: -0.25em;
+    background-color: currentColor;
+    -webkit-mask: var(--i) center / contain no-repeat;
+    mask: var(--i) center / contain no-repeat;
+  }
+  .i-bloquear { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z'/%3E%3C/svg%3E"); }
+  .i-buscar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E"); }
+  .i-campana { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z'/%3E%3C/svg%3E"); }
+  .i-cerrar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E"); }
+  .i-check { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
+  .i-eliminar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E"); }
+  .i-enviar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.01 21L23 12 2.01 3 2 10l15 2-15 2z'/%3E%3C/svg%3E"); }
+  .i-grafico { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'/%3E%3C/svg%3E"); }
+  .i-leidas { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z'/%3E%3C/svg%3E"); }
+  .i-limpiar { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E"); }
+  .i-parking { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z'/%3E%3C/svg%3E"); }
+  .i-persona_mas { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"); }
+  .i-play { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E"); }
+  .i-reabrir { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'/%3E%3C/svg%3E"); }
+  .i-reservas { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z'/%3E%3C/svg%3E"); }
+  .i-salir { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z'/%3E%3C/svg%3E"); }
+  .i-soporte { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h4v1h-7v2h6c1.66 0 3-1.34 3-3V10c0-4.97-4.03-9-9-9z'/%3E%3C/svg%3E"); }
+  .i-usuarios { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E"); }
+  .i-volver { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/%3E%3C/svg%3E"); }
 </style>
 </head>
 <body>
@@ -183,10 +254,19 @@
     <div class="logo">Migo Park</div>
     <div class="quien" id="quien"></div>
     <div id="menu" style="display:contents;"></div>
-    <button class="salir" onclick="cerrarSesion()">Salir</button>
+    <button class="salir" onclick="cerrarSesion()"><span class="ico i-salir"></span>Salir</button>
   </aside>
 
   <main class="contenido">
+    <div class="barra-superior">
+      <button type="button" class="btn-notificaciones" onclick="alternarPanelNotificaciones(event)" aria-label="Abrir notificaciones">
+        <span class="ico i-campana"></span>Notificaciones <span id="contadorNotificaciones" class="contador-notificaciones" style="display:none">0</span>
+      </button>
+      <div id="panelNotificaciones" class="panel-notificaciones">
+        <div class="encabezado"><strong>Notificaciones</strong><button type="button" class="btn gris" onclick="marcarTodasNotificaciones(event)"><span class="ico i-leidas"></span>Marcar todas leídas</button></div>
+        <div id="listaNotificaciones">Cargando notificaciones...</div>
+      </div>
+    </div>
 
     <!-- MÉTRICAS (solo administrador) -->
     <div id="vista-metricas" style="display:none;">
@@ -218,8 +298,8 @@
         </select>
         <input type="date" id="resDesde" title="Desde (fecha de inicio de la reserva)">
         <input type="date" id="resHasta" title="Hasta (fecha de inicio de la reserva)">
-        <button type="submit" class="btn verde">Buscar</button>
-        <button type="button" class="btn gris" onclick="limpiarFiltroReservas()">Limpiar</button>
+        <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
+        <button type="button" class="btn gris" onclick="limpiarFiltroReservas()"><span class="ico i-limpiar"></span>Limpiar</button>
       </form>
       <div id="listaReservas"></div>
     </div>
@@ -252,15 +332,15 @@
           <input type="date" id="casoHasta" title="Creado hasta">
           <label class="check"><input type="checkbox" id="casoEsperando"> Esperando respuesta</label>
           <label class="check"><input type="checkbox" id="casoEscalado"> Escalados</label>
-          <button type="submit" class="btn verde">Buscar</button>
-          <button type="button" class="btn gris" onclick="limpiarFiltroCasos()">Limpiar</button>
+          <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
+          <button type="button" class="btn gris" onclick="limpiarFiltroCasos()"><span class="ico i-limpiar"></span>Limpiar</button>
         </form>
         <div id="listaCasos"></div>
       </div>
 
       <!-- Conversación de un caso -->
       <div id="soporteChat" style="display:none;">
-        <button class="btn gris" onclick="cerrarChat(); cargarSoporte();">&larr; Volver a los casos</button>
+        <button class="btn gris" onclick="cerrarChat(); cargarSoporte();"><span class="ico i-volver"></span>Volver a los casos</button>
         <div class="card bloque" style="margin-top:12px;">
           <div class="encabezado">
             <h4 id="chatTitulo" style="margin:0;font-size:16px;"></h4>
@@ -274,7 +354,7 @@
         <div class="hilo" id="chatHilo"></div>
         <div id="chatEntrada">
           <textarea class="area" id="chatTexto" rows="2" placeholder="Escribe tu respuesta al usuario..."></textarea>
-          <button class="btn verde ancho" id="btnEnviarMensaje">Enviar respuesta</button>
+          <button class="btn verde ancho" id="btnEnviarMensaje"><span class="ico i-enviar"></span>Enviar respuesta</button>
         </div>
         <div id="mensajeChat"></div>
       </div>
@@ -292,10 +372,22 @@
           <option value="soporte">Soporte</option>
           <option value="administrador">Administradores</option>
         </select>
-        <button type="submit" class="btn verde">Buscar</button>
+        <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
       </form>
       <div id="mensajeUsuarios"></div>
       <div id="listaUsuarios"></div>
+    </div>
+
+    <!-- GESTIÓN DE ESPACIOS (administrador y soporte) -->
+    <div id="vista-espacios" style="display:none;">
+      <h2>Espacios de parqueo</h2>
+      <form class="filtros" id="formFiltroEspacios">
+        <input type="text" id="espQ" placeholder="Buscar por espacio, dirección o arrendador">
+        <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
+      </form>
+      <p class="vacio">Los espacios con reservas no se pueden eliminar para proteger el historial de operaciones.</p>
+      <div id="mensajeEspaciosAdmin"></div>
+      <div id="listaEspaciosAdmin"></div>
     </div>
 
     <!-- CREAR STAFF (solo administrador) -->
@@ -316,7 +408,7 @@
             <option value="soporte">Soporte</option>
             <option value="administrador">Administrador</option>
           </select>
-          <button type="submit" class="btn verde ancho">Crear cuenta</button>
+          <button type="submit" class="btn verde ancho"><span class="ico i-persona_mas"></span>Crear cuenta</button>
         </form>
         <div id="mensajeStaff"></div>
       </div>
@@ -332,10 +424,11 @@
     <p id="textoDetalle"></p>
     <textarea id="textoArea" rows="3"></textarea>
     <div id="textoMensaje"></div>
-    <button class="btn rojo ancho" id="btnConfirmarTexto">Confirmar</button>
-    <button class="btn gris ancho" onclick="cerrarTexto()">Cancelar</button>
+    <button class="btn rojo ancho" id="btnConfirmarTexto"><span class="ico i-check"></span>Confirmar</button>
+    <button class="btn gris ancho" onclick="cerrarTexto()"><span class="ico i-cerrar"></span>Cancelar</button>
   </div>
 </div>
+<script src="contrasena.js"></script>
 
 <script>
   const API_URL = 'http://localhost:4000/api';
@@ -352,6 +445,8 @@
     sesionValida = true;
   }
   const esAdmin = !!usuario && usuario.rol === 'administrador';
+  // Solo esta cuenta es el administrador principal con privilegios sobre otros administradores.
+  const esAdminPrincipal = esAdmin && String(usuario.correo || '').toLowerCase() === 'admin@migopark.com';
 
   // ---------- utilidades ----------
   function esc(t) {
@@ -382,8 +477,9 @@
     { id: 'metricas',       nombre: 'Métricas',        soloAdmin: true, cargar: () => cargarMetricas() },
     { id: 'verificaciones', nombre: 'Verificaciones',                   cargar: () => cargarVerificaciones() },
     { id: 'reservas',       nombre: 'Reservas',                         cargar: () => cargarReservas() },
+    { id: 'espacios',       nombre: 'Espacios',                         cargar: () => cargarEspaciosAdmin() },
     { id: 'soporte',        nombre: 'Soporte',                          cargar: () => cargarSoporte() },
-    { id: 'usuarios',       nombre: 'Usuarios',        soloAdmin: true, cargar: () => cargarUsuarios() },
+    { id: 'usuarios',       nombre: 'Usuarios',                         cargar: () => cargarUsuarios() },
     { id: 'staff',          nombre: 'Crear staff',     soloAdmin: true, cargar: () => {} },
   ];
 
@@ -461,6 +557,19 @@
     cargarVehiculosPendientes();
   }
 
+  // Miniaturas de las fotos que subió el arrendador (se abren en otra pestaña)
+  function fotosPendiente(e) {
+    const base = API_URL.replace(/\/api\/?$/, '');
+    const fotos = Array.isArray(e.fotos) ? e.fotos : [];
+    if (fotos.length === 0) {
+      return '<p style="color:#c0392b;">⚠ Sin fotos todavía: no se puede aprobar hasta que el arrendador suba al menos una.</p>';
+    }
+    return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;">' + fotos.map(f => `
+      <a href="${esc(base + f.url)}" target="_blank" rel="noopener">
+        <img src="${esc(base + f.url)}" alt="Foto del espacio" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+      </a>`).join('') + '</div>';
+  }
+
   async function cargarEspaciosPendientes() {
     const cont = document.getElementById('listaEspaciosPendientes');
     cont.innerHTML = 'Cargando...';
@@ -481,11 +590,13 @@
               <p>${esc(e.direccion)} (${esc(e.latitud)}, ${esc(e.longitud)})</p>
               ${e.descripcion ? `<p>${esc(e.descripcion)}</p>` : ''}
               <p>${dinero(e.precio_hora)} / hora · ${esc(seg)}</p>
+              <p>🚗 Capacidad: ${esc(e.capacidad_vehiculos || 1)} vehículo(s) · 📏 ${esc(e.largo_metros || 0)} m × ${esc(e.ancho_metros || 0)} m · Área: ${(Number(e.largo_metros || 0) * Number(e.ancho_metros || 0)).toFixed(2)} m²</p>
+              ${fotosPendiente(e)}
               <p>Publicado por ${esc(e.arrendador_nombre)} (${esc(e.arrendador_correo)})</p>
             </div>
             <div class="acciones">
-              <button class="btn verde" onclick="aprobar('espacios', ${e.id})">Aprobar</button>
-              <button class="btn rojo" onclick="abrirRechazo('espacios', ${e.id})">Rechazar</button>
+              <button class="btn verde" onclick="aprobar('espacios', ${e.id})"><span class="ico i-check"></span>Aprobar</button>
+              <button class="btn rojo" onclick="abrirRechazo('espacios', ${e.id})"><span class="ico i-cerrar"></span>Rechazar</button>
             </div>
           </div>`;
       }).join('');
@@ -512,8 +623,8 @@
             <p>Conductor: ${esc(v.conductor_nombre)} (${esc(v.conductor_correo)})</p>
           </div>
           <div class="acciones">
-            <button class="btn verde" onclick="aprobar('vehiculos', ${v.id})">Aprobar</button>
-            <button class="btn rojo" onclick="abrirRechazo('vehiculos', ${v.id})">Rechazar</button>
+            <button class="btn verde" onclick="aprobar('vehiculos', ${v.id})"><span class="ico i-check"></span>Aprobar</button>
+            <button class="btn rojo" onclick="abrirRechazo('vehiculos', ${v.id})"><span class="ico i-cerrar"></span>Rechazar</button>
           </div>
         </div>`).join('');
     } catch (err) {
@@ -802,11 +913,11 @@
       // Acciones según el estado y el rol
       let acciones = '';
       if (!cerrado) {
-        if (caso.estado === 'abierto') acciones += `<button class="btn naranja" onclick="marcarEnProceso()">Marcar en proceso</button>`;
-        acciones += `<button class="btn verde" onclick="cerrarCaso()">Cerrar caso</button>`;
-        if (usuario.rol === 'soporte' && !caso.escalado) acciones += `<button class="btn-texto" onclick="escalarCaso()">Escalar caso</button>`;
+        if (caso.estado === 'abierto') acciones += `<button class="btn naranja" onclick="marcarEnProceso()"><span class="ico i-play"></span>Marcar en proceso</button>`;
+        acciones += `<button class="btn verde" onclick="cerrarCaso()"><span class="ico i-check"></span>Cerrar caso</button>`;
+        if (usuario.rol === 'soporte' && !caso.escalado) acciones += `<button class="btn-texto" onclick="escalarCaso()"><span class="ico i-grafico"></span>Escalar caso</button>`;
       } else {
-        acciones += `<button class="btn naranja" onclick="reabrirCaso()">Reabrir caso</button>`;
+        acciones += `<button class="btn naranja" onclick="reabrirCaso()"><span class="ico i-reabrir"></span>Reabrir caso</button>`;
       }
       document.getElementById('chatAcciones').innerHTML = acciones;
       document.getElementById('chatEntrada').style.display = cerrado ? 'none' : 'block';
@@ -923,11 +1034,25 @@
 
       const CLASE_ROL = { cliente: 'gris', soporte: 'naranja', administrador: 'verde' };
       cont.innerHTML = data.map(u => {
-        const boton = u.id === usuario.id
-          ? '<span class="etiqueta gris">Tú</span>'
-          : u.activo
-            ? `<button class="btn rojo" onclick="cambiarActivo(${u.id}, false)">Bloquear</button>`
-            : `<button class="btn verde" onclick="cambiarActivo(${u.id}, true)">Desbloquear</button>`;
+        let boton = '';
+        if (Number(u.id) === Number(usuario.id)) {
+          boton = '<span class="etiqueta gris">Tú</span>';
+        } else {
+          // Los perfiles administradores solo los puede gestionar el administrador principal.
+          const puedeGestionarAdminObjetivo = u.rol !== 'administrador' || esAdminPrincipal;
+          const puedeBloquear = puedeGestionarAdminObjetivo &&
+            (esAdmin || (usuario.rol === 'soporte' && u.rol !== 'soporte'));
+          const puedeEliminar = puedeGestionarAdminObjetivo &&
+            (esAdmin || (usuario.rol === 'soporte' && u.rol === 'cliente'));
+          if (puedeBloquear) {
+            boton += u.activo
+              ? `<button class="btn rojo" onclick="cambiarActivo(${u.id}, false)"><span class="ico i-bloquear"></span>Bloquear</button>`
+              : `<button class="btn verde" onclick="cambiarActivo(${u.id}, true)"><span class="ico i-check"></span>Desbloquear</button>`;
+          }
+          if (puedeEliminar && (u.rol !== 'soporte' || esAdmin)) {
+            boton += ` <button class="btn rojo" onclick="eliminarPerfil(${u.id}, '${esc(u.nombre).replace(/'/g, '&#39;')}')"><span class="ico i-eliminar"></span>Eliminar perfil</button>`;
+          }
+        }
         return `
           <div class="card">
             <div class="info">
@@ -943,6 +1068,66 @@
       cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
     }
   }
+
+  async function eliminarPerfil(id, nombre) {
+    if (!confirm(`¿Eliminar el perfil de ${nombre}? Esta acción no se puede deshacer. Si tiene reservas o espacios relacionados, el sistema lo protegerá y no lo eliminará.`)) return;
+    const msg = document.getElementById('mensajeUsuarios');
+    try {
+      const resp = await api(`/admin/usuarios/${id}`, { method: 'DELETE' });
+      const data = await resp.json();
+      if (!resp.ok) { mostrar(msg, data.error || 'No se pudo eliminar el perfil.', true); return; }
+      mostrar(msg, data.mensaje || 'Perfil eliminado.', false);
+      await cargarUsuarios();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    }
+  }
+
+  async function cargarEspaciosAdmin() {
+    const cont = document.getElementById('listaEspaciosAdmin');
+    const msg = document.getElementById('mensajeEspaciosAdmin');
+    cont.innerHTML = 'Cargando...';
+    const q = document.getElementById('espQ').value.trim();
+    try {
+      const resp = await api('/admin/espacios' + (q ? `?q=${encodeURIComponent(q)}` : ''));
+      const data = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(data.error || 'Error')}</p>`; return; }
+      if (!data.length) { cont.innerHTML = '<p class="vacio">No se encontraron espacios.</p>'; return; }
+      cont.innerHTML = data.map(e => `
+        <div class="card">
+          <div class="info">
+            <h4>${esc(e.titulo || 'Espacio sin título')} <span class="etiqueta ${e.verificado ? 'verde' : 'naranja'}">${e.verificado ? 'Verificado' : 'Pendiente/rechazado'}</span></h4>
+            <p>${esc(e.direccion || 'Sin dirección')}</p>
+            <p>Arrendador: ${esc(e.arrendador_nombre)} · ${esc(e.arrendador_correo)}</p>
+            <p>Reservas asociadas: ${Number(e.reservas || 0)}</p>
+          </div>
+          <div class="acciones">${Number(e.reservas || 0) > 0
+            ? '<span class="etiqueta gris">No se puede eliminar: tiene reservas</span>'
+            : `<button class="btn rojo" onclick="eliminarEspacioAdmin(${e.id}, '${esc(e.titulo || 'este espacio').replace(/'/g, '&#39;')}')"><span class="ico i-eliminar"></span>Eliminar espacio</button>`}</div>
+        </div>`).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  async function eliminarEspacioAdmin(id, titulo) {
+    if (!confirm(`¿Eliminar el espacio "${titulo}"? Esta acción no se puede deshacer.`)) return;
+    const msg = document.getElementById('mensajeEspaciosAdmin');
+    try {
+      const resp = await api(`/admin/espacios/${id}`, { method: 'DELETE' });
+      const data = await resp.json();
+      if (!resp.ok) { mostrar(msg, data.error || 'No se pudo eliminar el espacio.', true); return; }
+      mostrar(msg, data.mensaje || 'Espacio eliminado.', false);
+      await cargarEspaciosAdmin();
+    } catch (err) {
+      mostrar(msg, 'No se pudo conectar con el servidor.', true);
+    }
+  }
+
+  document.getElementById('formFiltroEspacios').addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarEspaciosAdmin();
+  });
 
   document.getElementById('formFiltroUsuarios').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -985,6 +1170,59 @@
     }
   });
 
+  // ---------- NOTIFICACIONES de administrador y soporte ----------
+  let panelNotificacionesAbierto = false;
+  function alternarPanelNotificaciones(event) {
+    if (event) event.stopPropagation();
+    panelNotificacionesAbierto = !panelNotificacionesAbierto;
+    document.getElementById('panelNotificaciones').style.display = panelNotificacionesAbierto ? 'block' : 'none';
+    if (panelNotificacionesAbierto) cargarNotificacionesPanel();
+  }
+  document.addEventListener('click', (event) => {
+    const panel = document.getElementById('panelNotificaciones');
+    if (panel && !event.target.closest('.barra-superior')) { panel.style.display = 'none'; panelNotificacionesAbierto = false; }
+  });
+  async function actualizarContadorNotificaciones() {
+    try {
+      const resp = await api('/notificaciones/contador');
+      const data = await resp.json();
+      if (!resp.ok) return;
+      const el = document.getElementById('contadorNotificaciones');
+      el.textContent = data.no_leidas || 0;
+      el.style.display = data.no_leidas > 0 ? 'inline-flex' : 'none';
+    } catch (e) { console.error('No se pudo actualizar el contador de notificaciones', e); }
+  }
+  async function cargarNotificacionesPanel() {
+    const cont = document.getElementById('listaNotificaciones');
+    cont.innerHTML = '<p>Cargando notificaciones...</p>';
+    try {
+      const resp = await api('/notificaciones');
+      const data = await resp.json();
+      if (!resp.ok) { cont.innerHTML = '<p>No se pudieron cargar las notificaciones.</p>'; return; }
+      if (!data.notificaciones || data.notificaciones.length === 0) { cont.innerHTML = '<p>No tienes notificaciones.</p>'; return; }
+      cont.innerHTML = data.notificaciones.map(n => `
+        <div class="notificacion-item ${n.leida ? '' : 'no-leida'}" onclick="abrirNotificacionPanel(${Number(n.id)})">
+          <strong>${esc(n.tipo === 'espacio_modificado' ? 'Espacio de parqueo modificado' : String(n.tipo || 'Notificación').replaceAll('_',' '))}</strong>
+          <p>${esc(n.mensaje)}</p><small>${esc(fechaCorta(n.fecha))}${n.leida ? ' · Leída' : ' · Sin leer'}</small>
+        </div>`).join('');
+      actualizarContadorNotificaciones();
+    } catch (e) { cont.innerHTML = '<p>No se pudo conectar con el servidor.</p>'; }
+  }
+  async function abrirNotificacionPanel(id) {
+    try {
+      await api(`/notificaciones/${id}/leida`, { method: 'PUT' });
+      await cargarNotificacionesPanel();
+      await actualizarContadorNotificaciones();
+    } catch (e) { console.error(e); }
+  }
+  async function marcarTodasNotificaciones(event) {
+    if (event) event.stopPropagation();
+    try {
+      const resp = await api('/notificaciones/marcar-todas', { method: 'PUT' });
+      if (resp.ok) { await cargarNotificacionesPanel(); await actualizarContadorNotificaciones(); }
+    } catch (e) { console.error('No se pudieron marcar como leídas', e); }
+  }
+
   // ---------- arranque ----------
   if (sesionValida) {
     document.getElementById('quien').textContent = `${usuario.nombre} (${usuario.rol})`;
@@ -995,8 +1233,15 @@
     mostrarVista(esAdmin ? 'metricas' : 'verificaciones');
     cargarResumenSoporte();
     setInterval(cargarResumenSoporte, 30000);   // actualiza la insignia cada 30 s
+    actualizarContadorNotificaciones();
+    setInterval(() => {
+      actualizarContadorNotificaciones();
+      if (panelNotificacionesAbierto) cargarNotificacionesPanel();
+    }, 15000);
   }
 </script>
+
+<script src="revision.js"></script>
 
 </body>
 </html>

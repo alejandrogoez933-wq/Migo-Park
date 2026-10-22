@@ -18,6 +18,11 @@ async function verificarToken(req, res, next) {
     return res.status(401).json({ error: 'Token inválido o expirado' });
   }
 
+  // Un token temporal de 2FA (a medio login) NUNCA sirve como sesión
+  if (payload.proposito || !payload.id) {
+    return res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+
   try {
     const resultado = await pool.query('SELECT rol, activo FROM usuarios WHERE id = $1', [payload.id]);
     const fila = resultado.rows[0];
