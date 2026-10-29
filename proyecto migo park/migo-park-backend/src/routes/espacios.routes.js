@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const multer = require('multer');
 const pool = require('../db');
 const { verificarToken, requiereRol } = require('../middlewares/auth.middleware');
@@ -28,6 +29,13 @@ const storage = multer.diskStorage({
     cb(null, UPLOAD_DIR),
 
   filename: (req, file, cb) => {
+    // El id llega por la URL: se valida y se convierte a número entero
+    // para que nunca pueda contener "../" u otros caracteres de ruta.
+    if (!idValido(req.params.id)) {
+      return cb(new Error('Id de espacio inválido'));
+    }
+    const espacioId = Number.parseInt(req.params.id, 10);
+
     const ext = {
       'image/jpeg': '.jpg',
       'image/png': '.png',
@@ -36,7 +44,7 @@ const storage = multer.diskStorage({
 
     cb(
       null,
-      `espacio${req.params.id}_${Date.now()}_${Math.round(Math.random() * 1e9)}${ext}`
+      `espacio${espacioId}_${Date.now()}_${crypto.randomInt(1e9)}${ext}`
     );
   },
 });
@@ -179,10 +187,10 @@ router.post(
     const ancho = Number(ancho_metros);
 
     if (
-      isNaN(lat) ||
+      Number.isNaN(lat) ||
       lat < -90 ||
       lat > 90 ||
-      isNaN(lng) ||
+      Number.isNaN(lng) ||
       lng < -180 ||
       lng > 180
     ) {
@@ -192,7 +200,7 @@ router.post(
     }
 
     if (
-      isNaN(precio) ||
+      Number.isNaN(precio) ||
       precio <= 0
     ) {
       return res.status(400).json({
@@ -210,9 +218,9 @@ router.post(
 }
 
 if (
-  isNaN(largo) ||
+  Number.isNaN(largo) ||
   largo <= 0 ||
-  isNaN(ancho) ||
+  Number.isNaN(ancho) ||
   ancho <= 0
 ) {
   return res.status(400).json({
@@ -654,10 +662,10 @@ router.put(
       const ancho = Number(ancho_metros);
 
       if (
-        isNaN(lat) ||
+        Number.isNaN(lat) ||
         lat < -90 ||
         lat > 90 ||
-        isNaN(lng) ||
+        Number.isNaN(lng) ||
         lng < -180 ||
         lng > 180
       ) {
@@ -666,7 +674,7 @@ router.put(
         });
       }
 
-      if (isNaN(precio) || precio <= 0) {
+      if (Number.isNaN(precio) || precio <= 0) {
         return res.status(400).json({
           error: 'El precio por hora debe ser mayor a 0'
         });
@@ -682,9 +690,9 @@ router.put(
       }
 
       if (
-        isNaN(largo) ||
+        Number.isNaN(largo) ||
         largo <= 0 ||
-        isNaN(ancho) ||
+        Number.isNaN(ancho) ||
         ancho <= 0
       ) {
         return res.status(400).json({
