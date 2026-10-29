@@ -43,4 +43,4 @@ async function crearAdminInicial() {
   }
 }
 
-crearAdminInicial();
+void crearAdminInicial();
