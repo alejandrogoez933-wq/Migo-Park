@@ -857,7 +857,7 @@
   <div>
     <div
       class="campana"
-      onclick="alternarNotificaciones(event)"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="alternarNotificaciones(event)"
       title="Notificaciones"
     >
       <svg
@@ -915,7 +915,7 @@
     <div
       class="tab activo"
       id="tab-buscar"
-      onclick="mostrarTab('buscar')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('buscar')"
     >
       <span class="ico i-buscar"></span>Buscar espacios
     </div>
@@ -923,7 +923,7 @@
     <div
       class="tab"
       id="tab-reservas"
-      onclick="mostrarTab('reservas')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('reservas')"
     >
       <span class="ico i-reservas"></span>Mis reservas
     </div>
@@ -931,7 +931,7 @@
     <div
       class="tab"
       id="tab-vehiculos"
-      onclick="mostrarTab('vehiculos')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('vehiculos')"
     >
       <span class="ico i-carro"></span>Mis vehículos
     </div>
@@ -939,7 +939,7 @@
     <div
       class="tab"
       id="tab-publicar"
-      onclick="mostrarTab('publicar')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('publicar')"
     >
       <span class="ico i-agregar"></span>Publicar espacio
     </div>
@@ -947,7 +947,7 @@
     <div
       class="tab"
       id="tab-misespacios"
-      onclick="mostrarTab('misespacios')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('misespacios')"
     >
       <span class="ico i-parking"></span>Mis espacios
     </div>
@@ -955,7 +955,7 @@
     <div
       class="tab"
       id="tab-reservas-arrendador"
-      onclick="mostrarTab('reservas-arrendador')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('reservas-arrendador')"
     >
       <span class="ico i-bandeja"></span>Reservas recibidas
     </div>
@@ -963,7 +963,7 @@
     <div
       class="tab"
       id="tab-soporte"
-      onclick="mostrarTab('soporte')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('soporte')"
     >
       <span class="ico i-soporte"></span>Soporte
     </div>
@@ -971,7 +971,7 @@
     <div
       class="tab"
       id="tab-perfil"
-      onclick="mostrarTab('perfil')"
+      role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarTab('perfil')"
     >
       <span class="ico i-persona"></span>Mi perfil
     </div>
@@ -1003,7 +1003,7 @@
       <div
         class="chip activo"
         data-filtro="todas"
-        onclick="filtrarReservas('todas')"
+        role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="filtrarReservas('todas')"
       >
         Todas
       </div>
@@ -1011,7 +1011,7 @@
       <div
         class="chip"
         data-filtro="pendientes"
-        onclick="filtrarReservas('pendientes')"
+        role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="filtrarReservas('pendientes')"
       >
         Pendientes
       </div>
@@ -1019,7 +1019,7 @@
       <div
         class="chip"
         data-filtro="confirmada"
-        onclick="filtrarReservas('confirmada')"
+        role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="filtrarReservas('confirmada')"
       >
         Confirmadas
       </div>
@@ -1027,7 +1027,7 @@
       <div
         class="chip"
         data-filtro="completada"
-        onclick="filtrarReservas('completada')"
+        role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="filtrarReservas('completada')"
       >
         Completadas
       </div>
@@ -1035,7 +1035,7 @@
       <div
         class="chip"
         data-filtro="cancelada"
-        onclick="filtrarReservas('cancelada')"
+        role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="filtrarReservas('cancelada')"
       >
         Canceladas
       </div>
@@ -2985,7 +2985,7 @@ ancho_metros:
       cont.innerHTML = fechas.map(f => {
         const dia = f.slice(0, 10);
         return `<span class="etiqueta gris" style="margin:0 6px 6px 0;display:inline-block;">
-          ${esc(dia)} <span style="cursor:pointer;color:var(--naranja);font-weight:bold;" onclick="desbloquearDia(${espacioId}, '${dia}')">&times;</span>
+          ${esc(dia)} <span style="cursor:pointer;color:var(--naranja);font-weight:bold;" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="desbloquearDia(${espacioId}, '${dia}')">&times;</span>
         </span>`;
       }).join('');
     } catch (err) { /* no crítico */ }
@@ -3468,7 +3468,7 @@ ancho_metros:
           `<div
             class="metodo"
             data-metodo="${m}"
-            onclick="elegirMetodo('${m}')"
+            role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="elegirMetodo('${m}')"
           >
             ${m}
           </div>`
@@ -5009,7 +5009,7 @@ ancho_metros:
                   ? ''
                   : 'nueva'
               }"
-              onclick="abrirNotificacion(${n.id}, '${esc(n.tipo)}')"
+              role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="abrirNotificacion(${n.id}, '${esc(n.tipo)}')"
             >
 
               ${esc(n.mensaje)}
@@ -5151,7 +5151,7 @@ ancho_metros:
                   ? 'activo'
                   : ''
               }"
-              onclick="elegirCategoria(${i})"
+              role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="elegirCategoria(${i})"
             >
               ${esc(c)}
             </div>
@@ -5248,7 +5248,7 @@ ancho_metros:
 
             <div
               class="card clic"
-              onclick="abrirCaso(${c.id})"
+              role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="abrirCaso(${c.id})"
             >
 
               <div class="fila">
