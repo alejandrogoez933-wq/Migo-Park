@@ -343,7 +343,7 @@
         <button class="btn gris" onclick="cerrarChat(); cargarSoporte();"><span class="ico i-volver"></span>Volver a los casos</button>
         <div class="card bloque" style="margin-top:12px;">
           <div class="encabezado">
-            <h4 id="chatTitulo" style="margin:0;font-size:16px;"></h4>
+            <h4 id="chatTitulo" style="margin:0;font-size:16px;">Caso de soporte</h4>
             <span class="etiqueta" id="chatEstado"></span>
           </div>
           <p id="chatMeta" style="font-size:13px;color:#555;margin:6px 0 0;"></p>
@@ -420,7 +420,7 @@
 <!-- Ventana genérica para pedir un texto (motivo de rechazo, solución, motivo de escalamiento) -->
 <div class="overlay" id="modalTexto" style="display:none;">
   <div class="modal">
-    <h3 id="textoTitulo"></h3>
+    <h3 id="textoTitulo">Confirmar acción</h3>
     <p id="textoDetalle"></p>
     <textarea id="textoArea" aria-label="Motivo o comentario" rows="3"></textarea>
     <div id="textoMensaje"></div>
@@ -827,7 +827,7 @@
       cont.innerHTML = data.map(c => {
         const et = ESTADO_CASO[c.estado] || { texto: c.estado, clase: 'gris' };
         return `
-          <div class="card clic" onclick="abrirCaso(${c.id})">
+          <div class="card clic" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="abrirCaso(${c.id})">
             <div class="info">
               <h4>#${c.id} · ${esc(c.categoria)}</h4>
               <p>${esc(c.usuario_nombre)} (${esc(c.usuario_correo)})</p>
@@ -1201,7 +1201,7 @@
       if (!resp.ok) { cont.innerHTML = '<p>No se pudieron cargar las notificaciones.</p>'; return; }
       if (!data.notificaciones || data.notificaciones.length === 0) { cont.innerHTML = '<p>No tienes notificaciones.</p>'; return; }
       cont.innerHTML = data.notificaciones.map(n => `
-        <div class="notificacion-item ${n.leida ? '' : 'no-leida'}" onclick="abrirNotificacionPanel(${Number(n.id)})">
+        <div class="notificacion-item ${n.leida ? '' : 'no-leida'}" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="abrirNotificacionPanel(${Number(n.id)})">
           <strong>${esc(n.tipo === 'espacio_modificado' ? 'Espacio de parqueo modificado' : String(n.tipo || 'Notificación').replaceAll('_',' '))}</strong>
           <p>${esc(n.mensaje)}</p><small>${esc(fechaCorta(n.fecha))}${n.leida ? ' · Leída' : ' · Sin leer'}</small>
         </div>`).join('');
@@ -1227,7 +1227,7 @@
   if (sesionValida) {
     document.getElementById('quien').textContent = `${usuario.nombre} (${usuario.rol})`;
     document.getElementById('menu').innerHTML = vistasPermitidas()
-      .map(v => `<div class="item" data-vista="${v.id}" onclick="mostrarVista('${v.id}')"><span>${v.nombre}</span>` +
+      .map(v => `<div class="item" data-vista="${v.id}" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarVista('${v.id}')"><span>${v.nombre}</span>` +
                 (v.id === 'soporte' ? '<span class="insignia" id="insigniaSoporte" style="display:none;"></span>' : '') + '</div>')
       .join('');
     mostrarVista(esAdmin ? 'metricas' : 'verificaciones');
