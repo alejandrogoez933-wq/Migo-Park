@@ -166,7 +166,7 @@
 
     <input
       type="email"
-      id="loginCorreo"
+      id="loginCorreo" aria-label="Correo electrónico"
       placeholder="Correo"
       required
     >
@@ -175,7 +175,7 @@
 
       <input
         type="password"
-        id="loginContrasena"
+        id="loginContrasena" aria-label="Contraseña"
         placeholder="Contraseña"
         required
       >
@@ -194,7 +194,7 @@
       <span class="ico i-entrar"></span>Ingresar
     </button>
 
-    <div class="toggle" onclick="mostrarRecuperar()" style="margin-top:8px;">
+    <div class="toggle" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarRecuperar()" style="margin-top:8px;">
       ¿Olvidaste tu contraseña?
     </div>
 
@@ -206,14 +206,14 @@
 
     <input
       type="text"
-      id="regNombre"
+      id="regNombre" aria-label="Nombre completo"
       placeholder="Nombre completo"
       required
     >
 
     <input
       type="email"
-      id="regCorreo"
+      id="regCorreo" aria-label="Correo electrónico"
       placeholder="Correo"
       required
     >
@@ -222,7 +222,7 @@
 
       <input
         type="password"
-        id="regContrasena"
+        id="regContrasena" aria-label="Contraseña"
         placeholder="Contraseña"
         required
       >
@@ -239,7 +239,7 @@
 
     <input
       type="text"
-      id="regTelefono"
+      id="regTelefono" aria-label="Teléfono"
       placeholder="Teléfono (opcional)"
     >
 
@@ -257,7 +257,7 @@
       <p style="font-size:14px;color:#555;margin:0 0 10px;">
         Escribe tu correo y te enviaremos un código para cambiar tu contraseña.
       </p>
-      <input type="email" id="recCorreo" placeholder="Correo" autocomplete="off" required>
+      <input type="email" id="recCorreo" aria-label="Correo electrónico" placeholder="Correo" autocomplete="off" required>
       <button type="submit" id="btnEnviarCodigo"><span class="ico i-correo"></span>Enviar código</button>
     </form>
 
@@ -266,16 +266,16 @@
         Escribe el código que recibiste y tu nueva contraseña. El código vence en 2 minutos.
       </p>
       <p id="recTemporizador" style="font-size:13px;color:#555;margin:0 0 10px;">Tiempo restante: 02:00</p>
-      <input type="text" id="recToken" placeholder="Código recibido" autocomplete="one-time-code" required>
+      <input type="text" id="recToken" aria-label="Código recibido" placeholder="Código recibido" autocomplete="one-time-code" required>
       <div class="password-container">
-        <input type="password" id="recContrasena" placeholder="Nueva contraseña (mínimo 8 caracteres)" autocomplete="new-password" required>
+        <input type="password" id="recContrasena" aria-label="Nueva contraseña" placeholder="Nueva contraseña (mínimo 8 caracteres)" autocomplete="new-password" required>
         <button type="button" class="toggle-password" onclick="alternarContrasena('recContrasena', this)">✔️</button>
       </div>
       <button type="submit" id="btnRestablecer"><span class="ico i-llave"></span>Cambiar contraseña</button>
       <button type="button" id="btnReenviarCodigo" style="display:none;margin-top:10px;background:#555;" disabled>Reenviar código</button>
     </form>
 
-    <div class="toggle" onclick="volverALogin()">
+    <div class="toggle" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="volverALogin()">
       ¿Ya tienes el código? Volver a iniciar sesión
     </div>
 
@@ -285,7 +285,7 @@
   <div
     class="toggle"
     id="toggleTexto"
-    onclick="cambiarModo()"
+    role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="cambiarModo()"
   >
     ¿No tienes cuenta? Crear cuenta
   </div>
