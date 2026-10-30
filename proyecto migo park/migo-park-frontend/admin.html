@@ -287,8 +287,8 @@
     <div id="vista-reservas" style="display:none;">
       <h2>Reservas</h2>
       <form class="filtros" id="formFiltroReservas">
-        <input type="text" id="resQ" placeholder="Buscar por conductor (nombre/correo) o espacio">
-        <select id="resEstado">
+        <input type="text" id="resQ" aria-label="Buscar reservas por conductor o espacio" placeholder="Buscar por conductor (nombre/correo) o espacio">
+        <select id="resEstado" aria-label="Filtrar reservas por estado">
           <option value="">Todos los estados</option>
           <option value="pendiente">Pendiente</option>
           <option value="en_proceso">En proceso</option>
@@ -296,8 +296,8 @@
           <option value="completada">Completada</option>
           <option value="cancelada">Cancelada</option>
         </select>
-        <input type="date" id="resDesde" title="Desde (fecha de inicio de la reserva)">
-        <input type="date" id="resHasta" title="Hasta (fecha de inicio de la reserva)">
+        <input type="date" id="resDesde" aria-label="Reservas desde (fecha de inicio)" title="Desde (fecha de inicio de la reserva)">
+        <input type="date" id="resHasta" aria-label="Reservas hasta (fecha de inicio)" title="Hasta (fecha de inicio de la reserva)">
         <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
         <button type="button" class="btn gris" onclick="limpiarFiltroReservas()"><span class="ico i-limpiar"></span>Limpiar</button>
       </form>
@@ -312,14 +312,14 @@
         <h2>Centro de soporte</h2>
         <div class="tiles" id="resumenSoporte"></div>
         <form class="filtros" id="formFiltroCasos">
-          <input type="text" id="casoQ" placeholder="Buscar por usuario, correo, categoría o texto">
-          <select id="casoEstado">
+          <input type="text" id="casoQ" aria-label="Buscar casos por usuario, correo, categoría o texto" placeholder="Buscar por usuario, correo, categoría o texto">
+          <select id="casoEstado" aria-label="Filtrar casos por estado">
             <option value="">Todos los estados</option>
             <option value="abierto">Abierto</option>
             <option value="en_proceso">En proceso</option>
             <option value="resuelto">Resuelto</option>
           </select>
-          <select id="casoCategoria">
+          <select id="casoCategoria" aria-label="Filtrar casos por categoría">
             <option value="">Todas las categorías</option>
             <option>Pago o reembolso</option>
             <option>Reserva</option>
@@ -328,8 +328,8 @@
             <option>Cuenta</option>
             <option>Otro</option>
           </select>
-          <input type="date" id="casoDesde" title="Creado desde">
-          <input type="date" id="casoHasta" title="Creado hasta">
+          <input type="date" id="casoDesde" aria-label="Casos creados desde" title="Creado desde">
+          <input type="date" id="casoHasta" aria-label="Casos creados hasta" title="Creado hasta">
           <label class="check"><input type="checkbox" id="casoEsperando"> Esperando respuesta</label>
           <label class="check"><input type="checkbox" id="casoEscalado"> Escalados</label>
           <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
@@ -353,7 +353,7 @@
         </div>
         <div class="hilo" id="chatHilo"></div>
         <div id="chatEntrada">
-          <textarea class="area" id="chatTexto" rows="2" placeholder="Escribe tu respuesta al usuario..."></textarea>
+          <textarea class="area" id="chatTexto" aria-label="Respuesta al usuario" rows="2" placeholder="Escribe tu respuesta al usuario..."></textarea>
           <button class="btn verde ancho" id="btnEnviarMensaje"><span class="ico i-enviar"></span>Enviar respuesta</button>
         </div>
         <div id="mensajeChat"></div>
@@ -365,8 +365,8 @@
     <div id="vista-usuarios" style="display:none;">
       <h2>Usuarios</h2>
       <form class="filtros" id="formFiltroUsuarios">
-        <input type="text" id="usrQ" placeholder="Buscar por nombre o correo">
-        <select id="usrRol">
+        <input type="text" id="usrQ" aria-label="Buscar usuarios por nombre o correo" placeholder="Buscar por nombre o correo">
+        <select id="usrRol" aria-label="Filtrar usuarios por rol">
           <option value="">Todos los roles</option>
           <option value="cliente">Clientes</option>
           <option value="soporte">Soporte</option>
@@ -382,7 +382,7 @@
     <div id="vista-espacios" style="display:none;">
       <h2>Espacios de parqueo</h2>
       <form class="filtros" id="formFiltroEspacios">
-        <input type="text" id="espQ" placeholder="Buscar por espacio, dirección o arrendador">
+        <input type="text" id="espQ" aria-label="Buscar espacios por nombre, dirección o arrendador" placeholder="Buscar por espacio, dirección o arrendador">
         <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
       </form>
       <p class="vacio">Los espacios con reservas no se pueden eliminar para proteger el historial de operaciones.</p>
@@ -422,7 +422,7 @@
   <div class="modal">
     <h3 id="textoTitulo"></h3>
     <p id="textoDetalle"></p>
-    <textarea id="textoArea" rows="3"></textarea>
+    <textarea id="textoArea" aria-label="Motivo o comentario" rows="3"></textarea>
     <div id="textoMensaje"></div>
     <button class="btn rojo ancho" id="btnConfirmarTexto"><span class="ico i-check"></span>Confirmar</button>
     <button class="btn gris ancho" onclick="cerrarTexto()"><span class="ico i-cerrar"></span>Cancelar</button>
