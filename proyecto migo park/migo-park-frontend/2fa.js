@@ -1,5 +1,5 @@
 // Verificación en dos pasos (2FA) para el login. Se carga desde index.html antes del script principal.
-// Usa API_URL, mostrarMensaje y modoRegistro, que están definidos en index.html.
+// Usa API_URL, mostrarMensaje y reiniciarModoRegistro, que están definidos en index.html.
 
 (function crearPanel2fa() {
   const card = document.querySelector('.card');
@@ -62,7 +62,7 @@ function cancelar2fa(conservarMensaje) {
   document.getElementById('formLogin').style.display = 'block';
   document.getElementById('toggleTexto').style.display = 'block';
   document.getElementById('toggleTexto').textContent = '¿No tienes cuenta? Crear cuenta';
-  modoRegistro = false;
+  reiniciarModoRegistro();
   document.getElementById('loginContrasena').value = '';
   if (!conservarMensaje) document.getElementById('mensaje').textContent = '';
 }
