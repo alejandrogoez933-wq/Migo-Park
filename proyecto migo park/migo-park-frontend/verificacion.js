@@ -152,7 +152,7 @@
 
     document.getElementById('pub_relacion').addEventListener('change', (e) => alternarGrupos('pub', e.target.value));
     alternarGrupos('pub', '');
-    cargarEstado();
+    void cargarEstado();
 
     // Se registra ANTES que el manejador original de home.html, y lo reemplaza
     form.addEventListener('submit', async (e) => {
@@ -223,7 +223,7 @@
           : 'Espacio publicado, pero sin fotos. Sube al menos una en "Mis espacios" para que el equipo pueda aprobarlo.', false);
         form.reset();
         alternarGrupos('pub', '');
-        cargarEstado();
+        void cargarEstado();
         if (typeof cargarMisEspacios === 'function') cargarMisEspacios();
       } catch (err) {
         aviso(msg, 'No se pudo conectar con el servidor.', true);
