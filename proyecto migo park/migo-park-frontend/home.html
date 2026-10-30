@@ -1063,7 +1063,7 @@
 
         <input
           type="text"
-          id="vehPlaca"
+          id="vehPlaca" aria-label="Placa del vehículo"
           placeholder="Placa (ej: ABC123)"
           maxlength="7"
           required
@@ -1071,19 +1071,19 @@
 
         <input
           type="text"
-          id="vehMarca"
+          id="vehMarca" aria-label="Marca del vehículo"
           placeholder="Marca (opcional)"
         >
 
         <input
           type="text"
-          id="vehModelo"
+          id="vehModelo" aria-label="Modelo del vehículo"
           placeholder="Modelo (opcional)"
         >
 
         <input
           type="text"
-          id="vehColor"
+          id="vehColor" aria-label="Color del vehículo"
           placeholder="Color (opcional)"
         >
 
@@ -1329,7 +1329,7 @@
 
         <textarea
           class="area"
-          id="casoDescripcion"
+          id="casoDescripcion" aria-label="Descripción del caso"
           rows="3"
           placeholder="Cuéntanos qué pasó (mínimo 10 caracteres)"
         ></textarea>
@@ -1399,7 +1399,7 @@
 
         <textarea
           class="area"
-          id="chatTexto"
+          id="chatTexto" aria-label="Mensaje"
           rows="2"
           placeholder="Escribe un mensaje..."
         ></textarea>
@@ -1440,20 +1440,20 @@
 
         <input
           type="text"
-          id="perfNombre"
+          id="perfNombre" aria-label="Nombre completo"
           placeholder="Nombre completo"
           required
         >
 
         <input
           type="text"
-          id="perfCorreo"
+          id="perfCorreo" aria-label="Correo electrónico"
           disabled
         >
 
         <input
           type="text"
-          id="perfTelefono"
+          id="perfTelefono" aria-label="Teléfono"
           placeholder="Teléfono"
         >
 
@@ -1703,7 +1703,7 @@
 
     <textarea
       class="textarea-calificacion"
-      id="comentarioCalificacion"
+      id="comentarioCalificacion" aria-label="Comentario de la calificación"
       placeholder="Comentario (opcional)"
       maxlength="500"
     ></textarea>
@@ -1772,23 +1772,23 @@
 
     <form class="publicar" id="formEditar">
 
-      <input type="text" id="editTitulo" placeholder="Título del espacio" required>
+      <input type="text" id="editTitulo" aria-label="Título del espacio" placeholder="Título del espacio" required>
 
-      <textarea id="editDescripcion" placeholder="Descripción" rows="2"></textarea>
+      <textarea id="editDescripcion" aria-label="Descripción del espacio" placeholder="Descripción" rows="2"></textarea>
 
-      <input type="text" id="editDireccion" placeholder="Dirección" required>
+      <input type="text" id="editDireccion" aria-label="Dirección del espacio" placeholder="Dirección" required>
 
-      <input type="number" step="0.0000001" id="editLatitud" placeholder="Latitud" required>
+      <input type="number" step="0.0000001" id="editLatitud" aria-label="Latitud" placeholder="Latitud" required>
 
-      <input type="number" step="0.0000001" id="editLongitud" placeholder="Longitud" required>
+      <input type="number" step="0.0000001" id="editLongitud" aria-label="Longitud" placeholder="Longitud" required>
 
-      <input type="number" step="0.01" min="1" id="editPrecio" placeholder="Precio por hora" required>
+      <input type="number" step="0.01" min="1" id="editPrecio" aria-label="Precio por hora" placeholder="Precio por hora" required>
       
       <input
   type="number"
   min="1"
   step="1"
-  id="editCapacidad"
+  id="editCapacidad" aria-label="Cantidad de vehículos que caben"
   placeholder="Cantidad de vehículos que caben"
   required
 >
@@ -1797,7 +1797,7 @@
   type="number"
   min="0.01"
   step="0.01"
-  id="editLargo"
+  id="editLargo" aria-label="Largo del espacio en metros"
   placeholder="Largo del espacio en metros"
   required
 >
@@ -1806,7 +1806,7 @@
   type="number"
   min="0.01"
   step="0.01"
-  id="editAncho"
+  id="editAncho" aria-label="Ancho del espacio en metros"
   placeholder="Ancho del espacio en metros"
   required
 >
@@ -2812,13 +2812,13 @@
 
             <div class="detalle" style="margin-top:10px;"><b>Fotos (${(e.fotos || []).length}/6)</b></div>
             <div>${fotos || '<span class="detalle">Sin fotos todavía.</span>'}</div>
-            <input type="file" id="inputFoto_${e.id}" accept="image/jpeg,image/png,image/webp" multiple style="margin-top:6px;">
+            <input type="file" id="inputFoto_${e.id}" aria-label="Fotos del espacio" accept="image/jpeg,image/png,image/webp" multiple style="margin-top:6px;">
             <button type="button" class="btn verde chico" onclick="subirFotos(${e.id})"><span class="ico i-foto"></span>Subir fotos</button>
             <button type="button" class="btn naranja chico" onclick="subirDocumentos(${e.id})"><span class="ico i-documento"></span>Documentos</button> 
 
             <div class="detalle" style="margin-top:14px;"><b>Bloquear días (para reformas, mantenimiento, etc.)</b></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
-              <input type="date" id="fechaBloqueo_${e.id}">
+              <input type="date" id="fechaBloqueo_${e.id}" aria-label="Fecha a bloquear">
               <button type="button" class="btn naranja chico" onclick="bloquearDia(${e.id})"><span class="ico i-bloquear_dia"></span>Bloquear día</button>
             </div>
             <div id="diasBloqueados_${e.id}" class="detalle" style="margin-top:6px;">Cargando días bloqueados...</div>
