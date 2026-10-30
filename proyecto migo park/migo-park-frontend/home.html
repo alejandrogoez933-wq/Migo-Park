@@ -2885,22 +2885,22 @@ document.getElementById('editAncho').value =
         titulo: document.getElementById('editTitulo').value,
         descripcion: document.getElementById('editDescripcion').value,
         direccion: document.getElementById('editDireccion').value,
-        latitud: parseFloat(document.getElementById('editLatitud').value),
-        longitud: parseFloat(document.getElementById('editLongitud').value),
-        precio_hora: parseFloat(document.getElementById('editPrecio').value),
+        latitud: Number.parseFloat(document.getElementById('editLatitud').value),
+        longitud: Number.parseFloat(document.getElementById('editLongitud').value),
+        precio_hora: Number.parseFloat(document.getElementById('editPrecio').value),
 
         capacidad_vehiculos:
-  parseInt(
+  Number.parseInt(
     document.getElementById('editCapacidad').value
   ),
 
 largo_metros:
-  parseFloat(
+  Number.parseFloat(
     document.getElementById('editLargo').value
   ),
 
 ancho_metros:
-  parseFloat(
+  Number.parseFloat(
     document.getElementById('editAncho').value
   ),
 
@@ -5839,42 +5839,42 @@ ancho_metros:
             ).value.trim(),
 
           latitud:
-            parseFloat(
+            Number.parseFloat(
               document.getElementById(
                 'pubLatitud'
               ).value
             ),
 
           longitud:
-            parseFloat(
+            Number.parseFloat(
               document.getElementById(
                 'pubLongitud'
               ).value
             ),
 
           precio_hora:
-            parseFloat(
+            Number.parseFloat(
               document.getElementById(
                 'pubPrecio'
               ).value
             ),
 
           capacidad_vehiculos:
-  parseInt(
+  Number.parseInt(
     document.getElementById(
       'pubCapacidad'
     ).value
   ),
 
 largo_metros:
-  parseFloat(
+  Number.parseFloat(
     document.getElementById(
       'pubLargo'
     ).value
   ),
 
 ancho_metros:
-  parseFloat(
+  Number.parseFloat(
     document.getElementById(
       'pubAncho'
     ).value
