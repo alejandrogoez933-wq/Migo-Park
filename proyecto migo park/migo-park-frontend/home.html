@@ -1372,7 +1372,7 @@
 
         <div class="fila">
 
-          <h3 id="chatTitulo"></h3>
+          <h3 id="chatTitulo">Caso de soporte</h3>
 
           <span
             class="etiqueta"
@@ -1484,7 +1484,7 @@
 
     <div id="pasoFechas">
 
-      <h3 id="resTitulo"></h3>
+      <h3 id="resTitulo">Reservar espacio</h3>
 
       <div
         class="detalle"
@@ -2317,8 +2317,8 @@
       Object.values(espaciosCache).filter(e =>
         e.latitud != null &&
         e.longitud != null &&
-        !isNaN(Number(e.latitud)) &&
-        !isNaN(Number(e.longitud))
+        !Number.isNaN(Number(e.latitud)) &&
+        !Number.isNaN(Number(e.longitud))
       );
 
     espacios.forEach(e => {
@@ -3198,8 +3198,8 @@ ancho_metros:
       );
 
     if (
-      isNaN(ini) ||
-      isNaN(fin) ||
+      Number.isNaN(ini.getTime()) ||
+      Number.isNaN(fin.getTime()) ||
       fin <= ini
     ) {
 
@@ -3291,7 +3291,7 @@ ancho_metros:
           );
 
         if (
-          !isNaN(ini) &&
+          !Number.isNaN(ini.getTime()) &&
           new Date(finEl.value) <= ini
         ) {
 
