@@ -138,7 +138,8 @@
   form.publicar input,
   form.publicar textarea,
   .form-vehiculo input,
-  .modal input[type=datetime-local] {
+  .modal input[type=datetime-local],
+  .modal input[type=number] {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -549,6 +550,44 @@
     font-size: 13px;
     color: #555;
     margin-bottom: 4px;
+  }
+
+  /* Selector de tarifa: por hora / por día / por mes */
+  .tarifas {
+    display: flex;
+    gap: 8px;
+    margin: 4px 0 14px;
+  }
+
+  .tarifas button {
+    flex: 1;
+    padding: 9px 6px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.3;
+    color: #333;
+  }
+
+  .tarifas button b {
+    display: block;
+    font-size: 13px;
+  }
+
+  .tarifas button span {
+    display: block;
+    font-size: 12px;
+    color: var(--verde-texto);
+    font-weight: 600;
+  }
+
+  .tarifas button.activa {
+    border-color: var(--verde);
+    background: var(--verde-claro);
+    box-shadow: 0 0 0 1px var(--verde);
   }
 
   .resumen {
@@ -1185,6 +1224,28 @@
           required
         >
 
+        <label class="campo" for="pubPrecioDia">Precio por día (COP) — opcional</label>
+        <input
+          type="number"
+          step="1"
+          min="1"
+          id="pubPrecioDia"
+          placeholder="Ej: 25000"
+        >
+
+        <label class="campo" for="pubPrecioMes">Precio por mes (COP) — opcional</label>
+        <input
+          type="number"
+          step="1"
+          min="1"
+          id="pubPrecioMes"
+          placeholder="Ej: 100000"
+        >
+        <div class="ayuda-campo">
+          Si llenas el precio por día y/o por mes, el conductor podrá elegir pagar por hora, por día o por mes.
+          Déjalos vacíos si solo arriendas por hora.
+        </div>
+
         <label class="campo" for="pubCapacidad">Cantidad de vehículos que caben *</label>
         <input
           type="number"
@@ -1494,6 +1555,15 @@
         style="margin-bottom:12px;"
       ></div>
 
+      <label>
+        ¿Cómo quieres pagar?
+      </label>
+
+      <div
+        class="tarifas"
+        id="resTarifas"
+      ></div>
+
       <label for="resInicio">
         Inicio
       </label>
@@ -1503,14 +1573,43 @@
         id="resInicio"
       >
 
-      <label for="resFin">
-        Fin
-      </label>
+      <div
+        class="detalle"
+        id="resAyudaTarifa"
+        style="margin:-6px 0 10px;"
+      ></div>
 
-      <input
-        type="datetime-local"
-        id="resFin"
-      >
+      <div id="resBloqueFin">
+
+        <label for="resFin">
+          Fin
+        </label>
+
+        <input
+          type="datetime-local"
+          id="resFin"
+        >
+
+      </div>
+
+      <div id="resBloqueCantidad" style="display:none;">
+
+        <label
+          for="resCantidad"
+          id="resCantidadLabel"
+        >
+          Cantidad de días
+        </label>
+
+        <input
+          type="number"
+          id="resCantidad"
+          min="1"
+          step="1"
+          value="1"
+        >
+
+      </div>
 
       <div
         class="ocupado"
@@ -1624,6 +1723,72 @@
       </button>
 
     </div>
+
+  </div>
+
+</div>
+
+<div
+  class="overlay"
+  id="overlayCancelar"
+  style="display:none;"
+>
+
+  <div class="modal">
+
+    <h3>
+      Cancelar reserva
+    </h3>
+
+    <div
+      class="detalle"
+      id="cancelarDetalle"
+      style="margin-top:8px;"
+    ></div>
+
+    <div
+      class="aviso-naranja"
+      id="cancelarAviso"
+      style="margin:10px 0;"
+    ></div>
+
+    <label for="cancelarMotivo">
+      Justificación del reembolso
+    </label>
+
+    <textarea
+      class="area"
+      id="cancelarMotivo"
+      rows="4"
+      maxlength="500"
+      placeholder="Explica por qué cancelas y pides el reembolso (mínimo 15 caracteres)"
+      oninput="document.getElementById('cancelarContador').textContent = this.value.length + ' / 500'"
+    ></textarea>
+
+    <div
+      class="detalle"
+      style="display:flex;justify-content:space-between;gap:10px;"
+    >
+      <span>Se envía al administrador y al soporte para que autoricen tu reembolso.</span>
+      <span id="cancelarContador">0 / 500</span>
+    </div>
+
+    <div id="cancelarMensaje"></div>
+
+    <button
+      class="btn rojo ancho"
+      id="btnConfirmarCancelar"
+      onclick="confirmarCancelar()"
+    >
+      <span class="ico i-cerrar"></span>Cancelar y solicitar reembolso
+    </button>
+
+    <button
+      class="btn gris ancho"
+      onclick="cerrarCancelar()"
+    >
+      Volver
+    </button>
 
   </div>
 
@@ -1785,6 +1950,10 @@
       <input type="number" step="0.0000001" id="editLongitud" aria-label="Longitud" placeholder="Longitud" required>
 
       <input type="number" step="0.01" min="1" id="editPrecio" aria-label="Precio por hora" placeholder="Precio por hora" required>
+
+      <input type="number" step="0.01" min="1" id="editPrecioDia" aria-label="Precio por día (opcional)" placeholder="Precio por día (opcional, vacío = no se arrienda por día)">
+
+      <input type="number" step="0.01" min="1" id="editPrecioMes" aria-label="Precio por mes (opcional)" placeholder="Precio por mes (opcional, vacío = no se arrienda por mes)">
       
       <input
   type="number"
@@ -1856,8 +2025,6 @@
   const API_URL = 'http://localhost:4000/api';
   const FILE_URL = 'http://localhost:4000';
 
-  const COMISION = 0.10;
-
   const METODOS = [
     'Nequi',
     'Daviplata',
@@ -1925,6 +2092,92 @@
 
     return '$' +
       Number(n).toLocaleString('es-CO');
+
+  }
+
+  // Lee un precio opcional de un input: vacío -> null (no ofrece esa tarifa)
+  function leerPrecioOpcional(id) {
+
+    const v = document.getElementById(id).value.trim();
+
+    return v === '' ? null : Number.parseFloat(v);
+
+  }
+
+  // Tarifas que ofrece un espacio. La de hora siempre existe; día y mes son opcionales.
+  function tarifasDe(e) {
+
+    const lista = [
+      { tipo: 'hora', campo: 'precio_hora', corto: 'hora', nombre: 'Por hora' },
+      { tipo: 'dia', campo: 'precio_dia', corto: 'día', nombre: 'Por día' },
+      { tipo: 'mes', campo: 'precio_mes', corto: 'mes', nombre: 'Por mes' }
+    ];
+
+    return lista
+      .filter(t => Number(e[t.campo]) > 0)
+      .map(t => ({ ...t, precio: Number(e[t.campo]) }));
+
+  }
+
+  // "$3.000 / hora · $25.000 / día · $100.000 / mes"
+  function preciosTexto(e, separador = ' · ') {
+
+    return tarifasDe(e)
+      .map(t => `${dinero(t.precio)} / ${t.corto}`)
+      .join(separador);
+
+  }
+
+  // Duración legible de una reserva según su tarifa
+  function duracionTexto(r) {
+
+    if (r.tipo_tarifa === 'dia' && r.cantidad) {
+      return `${r.cantidad} ${Number(r.cantidad) === 1 ? 'día' : 'días'}`;
+    }
+
+    if (r.tipo_tarifa === 'mes' && r.cantidad) {
+      return `${r.cantidad} ${Number(r.cantidad) === 1 ? 'mes' : 'meses'}`;
+    }
+
+    const horas =
+      (new Date(r.fecha_fin) - new Date(r.fecha_inicio)) / 36e5;
+
+    return `${Number(horas.toFixed(2)).toLocaleString('es-CO')} h`;
+
+  }
+
+  // Suma meses de calendario sin desbordar (31 ene + 1 mes = 28 feb)
+  function sumarMeses(fecha, meses) {
+
+    const d = new Date(fecha);
+    const dia = d.getDate();
+
+    d.setDate(1);
+    d.setMonth(d.getMonth() + meses);
+
+    const ultimo =
+      new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+
+    d.setDate(Math.min(dia, ultimo));
+
+    return d;
+
+  }
+
+  // Debe coincidir con calcularFin() del servidor
+  function calcularFinTarifa(ini, tipo, cantidad) {
+
+    if (tipo === 'dia') {
+      const fin = new Date(ini);
+      fin.setDate(fin.getDate() + cantidad);
+      return fin;
+    }
+
+    if (tipo === 'mes') {
+      return sumarMeses(ini, cantidad);
+    }
+
+    return null;
 
   }
 
@@ -2128,8 +2381,8 @@
                   ${esc(e.titulo)}
                 </h3>
 
-                <div class="precio">
-                  ${dinero(e.precio_hora)} / hora
+                <div class="precio" style="text-align:right;">
+                  ${preciosTexto(e, '<br>')}
                 </div>
 
               </div>
@@ -2450,7 +2703,7 @@
           </div>
 
           <div class="precio">
-            ${dinero(e.precio_hora)} / hora
+            ${preciosTexto(e, '<br>')}
           </div>
 
 
@@ -2593,8 +2846,9 @@
           <h3 style="margin:4px 0 0;">${Number(r.reservas_pagadas || 0)}</h3>
         </div>
         <div class="card" style="margin:0;flex:1;min-width:180px;">
-          <div class="detalle">Total ganado</div>
+          <div class="detalle">Total ganado (ya descontada la comisión)</div>
           <h3 style="margin:4px 0 0;">${dinero(r.total_ganado || 0)}</h3>
+          <div class="detalle" style="margin-top:4px;">Comisión descontada: ${dinero(r.total_comision || 0)}</div>
         </div>`;
 
       pintarReservasArrendador();
@@ -2638,11 +2892,15 @@
             <b>Reserva:</b> ${esc(fechaCorta(r.fecha_inicio))} → ${esc(fechaCorta(r.fecha_fin))}
           </div>
           <div class="detalle">
-            <b>Duración:</b> ${Number(r.horas || 0).toLocaleString('es-CO')} horas
+            <b>Tarifa:</b> ${esc(({ hora: 'Por hora', dia: 'Por día', mes: 'Por mes' })[r.tipo_tarifa] || 'Por hora')}
+            · <b>Duración:</b> ${esc(r.tipo_tarifa === 'hora' || !r.tipo_tarifa ? Number(r.horas || 0).toLocaleString('es-CO') + ' horas' : duracionTexto(r))}
           </div>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
             <span class="etiqueta gris">Total pagado: ${dinero(r.total)}</span>
+            ${Number(r.comision_arrendador) > 0
+              ? `<span class="etiqueta gris">Comisión Migo Park (${Math.round(Number(r.comision_arrendador) / Number(r.subtotal || 1) * 100)}%): −${dinero(r.comision_arrendador)}</span>`
+              : ''}
             <span class="etiqueta verde">Tú ganas: ${dinero(r.ganancia)}</span>
             ${pago}
           </div>
@@ -2781,7 +3039,7 @@
              
 
             <div class="detalle">
-  ${dinero(e.precio_hora)} / hora ·
+  ${preciosTexto(e)} ·
   ${estrellasTexto(e.promedio_calificacion, e.total_calificaciones)}
 </div>
 
@@ -2848,6 +3106,8 @@
     document.getElementById('editLatitud').value = e.latitud ?? '';
     document.getElementById('editLongitud').value = e.longitud ?? '';
     document.getElementById('editPrecio').value = Number(e.precio_hora);
+    document.getElementById('editPrecioDia').value = e.precio_dia != null ? Number(e.precio_dia) : '';
+    document.getElementById('editPrecioMes').value = e.precio_mes != null ? Number(e.precio_mes) : '';
 
     document.getElementById('editCapacidad').value =
   Number(e.capacidad_vehiculos || 1);
@@ -2890,6 +3150,8 @@ document.getElementById('editAncho').value =
         latitud: Number.parseFloat(document.getElementById('editLatitud').value),
         longitud: Number.parseFloat(document.getElementById('editLongitud').value),
         precio_hora: Number.parseFloat(document.getElementById('editPrecio').value),
+        precio_dia: leerPrecioOpcional('editPrecioDia'),
+        precio_mes: leerPrecioOpcional('editPrecioMes'),
 
         capacidad_vehiculos:
   Number.parseInt(
@@ -3036,7 +3298,7 @@ ancho_metros:
     document.getElementById(
       'resDireccion'
     ).textContent =
-      `${espacioActual.direccion} · ${dinero(espacioActual.precio_hora)} / hora`;
+      `${espacioActual.direccion} · ${preciosTexto(espacioActual)}`;
 
     document.getElementById(
       'resMensaje'
@@ -3092,7 +3354,13 @@ ancho_metros:
     inFin.value =
       aInputFecha(fin);
 
-    calcularResumen();
+    document.getElementById(
+      'resCantidad'
+    ).value = 1;
+
+    // Por defecto se empieza con la tarifa por hora; el usuario puede cambiarla
+    pintarTarifas();
+    elegirTarifa('hora');
 
     verPaso('fechas');
 
@@ -3185,6 +3453,21 @@ ancho_metros:
         'resumen'
       );
 
+    const tipo =
+      tarifaActual;
+
+    const tarifa =
+      tarifasDe(espacioActual)
+        .find(t => t.tipo === tipo);
+
+    if (!tarifa) {
+
+      el.innerHTML =
+        'Este espacio no ofrece esa tarifa.';
+
+      return null;
+    }
+
     const ini =
       new Date(
         document.getElementById(
@@ -3192,73 +3475,142 @@ ancho_metros:
         ).value
       );
 
-    const fin =
-      new Date(
-        document.getElementById(
-          'resFin'
-        ).value
-      );
-
-    if (
-      Number.isNaN(ini.getTime()) ||
-      Number.isNaN(fin.getTime()) ||
-      fin <= ini
-    ) {
+    if (Number.isNaN(ini.getTime())) {
 
       el.innerHTML =
-        'Elige una fecha y hora de inicio y fin válidas.';
+        'Elige una fecha y hora de inicio válidas.';
 
       return null;
     }
 
-    const horas =
-      (fin - ini) / 36e5;
+    let fin;
+    let cantidad = null;
+    let unidades;
+    let duracion;
+
+    if (tipo === 'hora') {
+
+      fin =
+        new Date(
+          document.getElementById(
+            'resFin'
+          ).value
+        );
+
+      if (
+        Number.isNaN(fin.getTime()) ||
+        fin <= ini
+      ) {
+
+        el.innerHTML =
+          'Elige una fecha y hora de inicio y fin válidas.';
+
+        return null;
+      }
+
+      unidades =
+        (fin - ini) / 36e5;
+
+      if (unidades > 8) {
+
+        el.innerHTML =
+          'Por hora puedes reservar máximo 8 horas. Para más tiempo elige «Por día».';
+
+        return null;
+      }
+
+      duracion =
+        `${Number(unidades.toFixed(2))} h`;
+
+    } else {
+
+      const max =
+        tipo === 'dia'
+          ? 14
+          : 12;
+
+      const nombreUnidad =
+        tipo === 'dia'
+          ? 'días'
+          : 'meses';
+
+      cantidad =
+        Number(
+          document.getElementById(
+            'resCantidad'
+          ).value
+        );
+
+      if (
+        !Number.isInteger(cantidad) ||
+        cantidad < 1 ||
+        cantidad > max
+      ) {
+
+        el.innerHTML =
+          (
+            Number.isInteger(cantidad) &&
+            cantidad > max &&
+            tipo === 'dia'
+          )
+            ? 'Por día puedes reservar máximo 14 días. Para más tiempo elige «Por mes».'
+            : `Indica cuántos ${nombreUnidad} (de 1 a ${max}).`;
+
+        return null;
+      }
+
+      fin =
+        calcularFinTarifa(
+          ini,
+          tipo,
+          cantidad
+        );
+
+      unidades =
+        cantidad;
+
+      duracion =
+        tipo === 'dia'
+          ? `${cantidad} ${cantidad === 1 ? 'día' : 'días'}`
+          : `${cantidad} ${cantidad === 1 ? 'mes' : 'meses'}`;
+    }
 
     const subtotal =
       Number(
         (
-          horas *
-          Number(
-            espacioActual.precio_hora
-          )
+          unidades *
+          tarifa.precio
         ).toFixed(2)
       );
 
-    const comision =
-      Number(
-        (
-          subtotal *
-          COMISION
-        ).toFixed(2)
-      );
-
+    // El conductor paga solo el precio del espacio: la comisión de Migo Park
+    // se le descuenta al arrendador, no al conductor.
     const total =
-      Number(
-        (
-          subtotal +
-          comision
-        ).toFixed(2)
-      );
+      subtotal;
 
     el.innerHTML = `
 
       <div class="linea">
+        <span>Tarifa</span>
+        <span>${esc(tarifa.nombre)} (${dinero(tarifa.precio)} / ${tarifa.corto})</span>
+      </div>
+
+      <div class="linea">
         <span>Duración</span>
-        <span>${Number(horas.toFixed(2))} h</span>
+        <span>${esc(duracion)}</span>
       </div>
 
-      <div class="linea">
-        <span>Subtotal</span>
-        <span>${dinero(subtotal)}</span>
-      </div>
-
-      <div class="linea">
-        <span>Comisión (${COMISION * 100}%)</span>
-        <span>${dinero(comision)}</span>
-      </div>
+      ${
+        tipo === 'hora'
+          ? ''
+          : `<div class="linea">
+               <span>Termina</span>
+               <span>${esc(fechaCorta(fin))}</span>
+             </div>`
+      }
 
       <div class="linea total">
-        <span>Total</span>
+        <span>Total a pagar</span>
         <span>${dinero(total)}</span>
       </div>
 
@@ -3267,10 +3619,101 @@ ancho_metros:
     return {
       ini,
       fin,
+      tipo,
+      cantidad,
       subtotal,
-      comision,
       total
     };
+
+  }
+
+  // Tarifa elegida en la ventana de reserva: 'hora', 'dia' o 'mes'
+  let tarifaActual = 'hora';
+
+  // Dibuja los botones de tarifa según los precios que ofrece el espacio
+  function pintarTarifas() {
+
+    document.getElementById(
+      'resTarifas'
+    ).innerHTML =
+      tarifasDe(espacioActual)
+        .map(t => `
+          <button
+            type="button"
+            data-tarifa="${t.tipo}"
+            onclick="elegirTarifa('${t.tipo}')"
+          >
+            <b>${esc(t.nombre)}</b>
+            <span>${dinero(t.precio)} / ${t.corto}</span>
+          </button>
+        `)
+        .join('');
+
+  }
+
+  // Cambia la tarifa y muestra los campos que corresponden
+  function elegirTarifa(tipo) {
+
+    tarifaActual = tipo;
+
+    document
+      .querySelectorAll('#resTarifas button')
+      .forEach(b =>
+        b.classList.toggle(
+          'activa',
+          b.dataset.tarifa === tipo
+        )
+      );
+
+    const esHora =
+      tipo === 'hora';
+
+    document.getElementById(
+      'resBloqueFin'
+    ).style.display =
+      esHora
+        ? ''
+        : 'none';
+
+    document.getElementById(
+      'resBloqueCantidad'
+    ).style.display =
+      esHora
+        ? 'none'
+        : '';
+
+    const cant =
+      document.getElementById(
+        'resCantidad'
+      );
+
+    if (tipo === 'dia') {
+      cant.max = 14;
+      document.getElementById(
+        'resCantidadLabel'
+      ).textContent =
+        'Cantidad de días (máximo 14)';
+    }
+
+    if (tipo === 'mes') {
+      cant.max = 12;
+      document.getElementById(
+        'resCantidadLabel'
+      ).textContent =
+        'Cantidad de meses (máximo 12)';
+    }
+
+    // Recordatorio de en qué rango sirve cada tarifa
+    document.getElementById(
+      'resAyudaTarifa'
+    ).textContent =
+      tipo === 'hora'
+        ? 'Por hora: hasta 8 horas. Para más tiempo, elige «Por día».'
+        : tipo === 'dia'
+          ? 'Por día: de 1 a 14 días. Para más tiempo, elige «Por mes».'
+          : 'Por mes: de 1 a 12 meses.';
+
+    calcularResumen();
 
   }
 
@@ -3293,6 +3736,7 @@ ancho_metros:
           );
 
         if (
+          tarifaActual === 'hora' &&
           !Number.isNaN(ini.getTime()) &&
           new Date(finEl.value) <= ini
         ) {
@@ -3314,6 +3758,13 @@ ancho_metros:
 
   document
     .getElementById('resFin')
+    .addEventListener(
+      'input',
+      calcularResumen
+    );
+
+  document
+    .getElementById('resCantidad')
     .addEventListener(
       'input',
       calcularResumen
@@ -3372,11 +3823,18 @@ ancho_metros:
                   espacio_id:
                     espacioActual.id,
 
+                  tipo_tarifa:
+                    r.tipo,
+
                   fecha_inicio:
                     r.ini.toISOString(),
 
-                  fecha_fin:
-                    r.fin.toISOString()
+                  // Por hora se envía el fin; por día/mes el servidor lo calcula con la cantidad
+                  ...(
+                    r.tipo === 'hora'
+                      ? { fecha_fin: r.fin.toISOString() }
+                      : { cantidad: r.cantidad }
+                  )
                 })
               }
             );
@@ -3444,16 +3902,6 @@ ancho_metros:
     document.getElementById(
       'pagoResumen'
     ).innerHTML = `
-
-      <div class="linea">
-        <span>Subtotal</span>
-        <span>${dinero(reservaActual.subtotal)}</span>
-      </div>
-
-      <div class="linea">
-        <span>Comisión</span>
-        <span>${dinero(reservaActual.comision)}</span>
-      </div>
 
       <div class="linea total">
         <span>Total a pagar</span>
@@ -3782,11 +4230,10 @@ ancho_metros:
         new Date()
       ) / 36e5;
 
-    return horas >= 24
+    // 1 hora o más antes del inicio = reembolso total; menos de 1 hora = sin reembolso
+    return horas >= 1
       ? 100
-      : horas >= 2
-        ? 50
-        : 0;
+      : 0;
 
   }
 
@@ -3953,9 +4400,10 @@ ancho_metros:
 
         } else if (
           r.estado === 'confirmada' &&
-          new Date(r.fecha_inicio) > new Date()
+          porcentajeReembolso(r.fecha_inicio) === 100
         ) {
 
+          // Faltan 1 hora o más: el botón de cancelar está disponible
           acciones =
             `<button
               class="btn rojo chico"
@@ -3963,6 +4411,17 @@ ancho_metros:
             >
               <span class="ico i-cerrar"></span>Cancelar reserva
             </button>`;
+
+        } else if (
+          r.estado === 'confirmada' &&
+          new Date(r.fecha_inicio) > new Date()
+        ) {
+
+          // Faltan menos de 1 hora: ya no se puede cancelar
+          extra =
+            `<div class="aviso-naranja">
+              Ya no puedes cancelar: solo se puede hasta 1 hora antes de que empiece la reserva.
+            </div>`;
 
         }
 
@@ -3998,13 +4457,25 @@ ancho_metros:
         ) {
 
           extra =
-            Number(r.monto_reembolso) > 0
+            r.estado_reembolso === 'pendiente'
 
-              ? `<div class="reembolso">
-                   Reembolso: ${dinero(r.monto_reembolso)}
+              ? `<div class="aviso-naranja">
+                   Reembolso de ${dinero(r.monto_reembolso)} pendiente de autorización del administrador o soporte.
                  </div>`
 
-              : '<div class="detalle">Cancelada sin reembolso.</div>';
+              : r.estado_reembolso === 'rechazado'
+
+                ? `<div class="aviso-naranja">
+                     Reembolso rechazado.${r.nota_decision_reembolso ? ' Motivo: ' + esc(r.nota_decision_reembolso) : ''}
+                   </div>`
+
+                : Number(r.monto_reembolso) > 0
+
+                  ? `<div class="reembolso">
+                       Reembolso autorizado: ${dinero(r.monto_reembolso)}
+                     </div>`
+
+                  : '<div class="detalle">Cancelada sin reembolso.</div>';
 
         }
 
@@ -4032,7 +4503,7 @@ ancho_metros:
               ${esc(fechaCorta(r.fecha_inicio))}
               →
               ${esc(fechaCorta(r.fecha_fin))}
-              (${Number(horas.toFixed(2))} h)
+              (${duracionTexto(r)})
             </div>
 
             <div class="detalle">
@@ -4116,43 +4587,69 @@ ancho_metros:
     desdeModal = false
   ) {
 
+    // Primero la lista actualizada del servidor: reservaActual es la copia de cuando se creó
+    // la reserva (estado "pendiente") y queda desactualizada después de pagar.
     const r =
-      reservaActual &&
-      reservaActual.id === id
-
-        ? reservaActual
-
-        : reservasCache.find(
-            x => x.id === id
-          );
-
-    let aviso =
-      '¿Seguro que quieres cancelar esta reserva?';
-
-    if (
-      r &&
-      r.estado === 'confirmada'
-    ) {
-
-      const p =
-        porcentajeReembolso(
-          r.fecha_inicio
-        );
-
-      aviso +=
-        `\n\nSegún el tiempo que falta, se te devolvería el ${p}% (${dinero(Number(r.total) * p / 100)}).` +
-        '\n\nPolítica: más de 24 h antes = 100% · entre 2 y 24 h = 50% · menos de 2 h = sin reembolso.';
-
-    }
-
-    if (!confirm(aviso)) {
-      return;
-    }
+      reservasCache.find(
+        x => x.id === id
+      ) ||
+      (
+        reservaActual &&
+        reservaActual.id === id
+          ? reservaActual
+          : null
+      );
 
     const msg =
       document.getElementById(
         'mensajeReservas'
       );
+
+    // Reserva pagada: SOLO se puede cancelar hasta 1 hora antes de que empiece
+    if (
+      r &&
+      r.estado === 'confirmada'
+    ) {
+
+      if (new Date(r.fecha_inicio) <= new Date()) {
+
+        mostrarTab('reservas');
+
+        mostrar(
+          msg,
+          'No puedes cancelar una reserva que ya empezó. Solo se puede cancelar hasta 1 hora antes de la hora de inicio.',
+          true
+        );
+
+        return;
+
+      }
+
+      if (porcentajeReembolso(r.fecha_inicio) !== 100) {
+
+        mostrarTab('reservas');
+
+        mostrar(
+          msg,
+          'Solo puedes cancelar hasta 1 hora antes de que empiece la reserva.',
+          true
+        );
+
+        return;
+
+      }
+
+      // Faltan 1 hora o más: se cancela y SIEMPRE se descuenta (reembolso 100% automático y simulado)
+      if (!confirm(`Se cancelará tu reserva y se te descontará/devolverá el 100% de tu pago (${dinero(r.total)}). ¿Quieres continuar?`)) {
+        return;
+      }
+
+    } else if (!confirm('¿Seguro que quieres cancelar esta reserva?')) {
+
+      // Reserva sin pagar: se cancela directo (no hay dinero que devolver)
+      return;
+
+    }
 
     try {
 
@@ -4166,6 +4663,32 @@ ancho_metros:
 
       const data =
         await resp.json();
+
+      // El servidor pide justificación (la reserva ya estaba pagada): se abre la ventana para escribirla
+      if (data.requiere_justificacion) {
+
+        await cargarReservas();
+
+        const fresca =
+          reservasCache.find(
+            x => x.id === id
+          );
+
+        if (fresca) {
+
+          if (desdeModal) {
+            cerrarModal();
+          }
+
+          mostrarTab('reservas');
+
+          abrirCancelar(fresca);
+
+          return;
+
+        }
+
+      }
 
       if (desdeModal) {
         cerrarModal();
@@ -4193,7 +4716,7 @@ ancho_metros:
 
         data.monto_reembolso > 0
 
-          ? `Reserva cancelada. Reembolso: ${dinero(data.monto_reembolso)} (${data.porcentaje_reembolso}%).`
+          ? `Reserva cancelada. Se te descontaron/devolvieron ${dinero(data.monto_reembolso)} (${data.porcentaje_reembolso}%).`
 
           : 'Reserva cancelada.',
 
@@ -4207,6 +4730,166 @@ ancho_metros:
         'No se pudo conectar con el servidor.',
         true
       );
+
+    }
+
+  }
+
+  // ----- Cancelación de una reserva pagada (con justificación) -----
+  let reservaCancelando = null;
+
+  function abrirCancelar(r) {
+
+    reservaCancelando = r;
+
+    const p =
+      porcentajeReembolso(
+        r.fecha_inicio
+      );
+
+    document.getElementById(
+      'cancelarDetalle'
+    ).innerHTML =
+      `<b>${esc(r.espacio_titulo)}</b><br>` +
+      `${esc(fechaCorta(r.fecha_inicio))} → ${esc(fechaCorta(r.fecha_fin))}`;
+
+    document.getElementById(
+      'cancelarAviso'
+    ).textContent =
+      p === 100
+
+        ? `Si cancelas ahora pides el reembolso del 100% de tu pago (${dinero(r.total)}). Un administrador o soporte debe autorizarlo y te avisaremos en tus notificaciones.`
+
+        : 'Falta menos de 1 hora para que empiece: puedes cancelar, pero ya no hay reembolso.';
+
+    document.getElementById(
+      'cancelarMotivo'
+    ).value = '';
+
+    document.getElementById(
+      'cancelarContador'
+    ).textContent = '0 / 500';
+
+    document.getElementById(
+      'cancelarMensaje'
+    ).textContent = '';
+
+    document.getElementById(
+      'btnConfirmarCancelar'
+    ).disabled = false;
+
+    document.getElementById(
+      'overlayCancelar'
+    ).style.display = 'flex';
+
+  }
+
+  function cerrarCancelar() {
+
+    document.getElementById(
+      'overlayCancelar'
+    ).style.display = 'none';
+
+    reservaCancelando = null;
+
+  }
+
+  async function confirmarCancelar() {
+
+    if (!reservaCancelando) {
+      return;
+    }
+
+    const motivo =
+      document.getElementById(
+        'cancelarMotivo'
+      ).value
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const aviso =
+      document.getElementById(
+        'cancelarMensaje'
+      );
+
+    const btn =
+      document.getElementById(
+        'btnConfirmarCancelar'
+      );
+
+    if (
+      motivo.length < 15 ||
+      motivo.split(' ').length < 3
+    ) {
+
+      mostrar(
+        aviso,
+        'Escribe una justificación válida (mínimo 15 caracteres y 3 palabras).',
+        true
+      );
+
+      return;
+
+    }
+
+    btn.disabled = true;
+
+    try {
+
+      const resp =
+        await api(
+          `/reservas/${reservaCancelando.id}/cancelar`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({ motivo })
+          }
+        );
+
+      const data =
+        await resp.json();
+
+      if (!resp.ok) {
+
+        mostrar(
+          aviso,
+          data.error ||
+          'No se pudo cancelar',
+          true
+        );
+
+        btn.disabled = false;
+
+        return;
+
+      }
+
+      cerrarCancelar();
+
+      mostrarTab('reservas');
+
+      mostrar(
+        document.getElementById(
+          'mensajeReservas'
+        ),
+
+        (
+          data.estado_reembolso === 'pendiente'
+            ? `Reserva cancelada. Tu solicitud de reembolso de ${dinero(data.monto_reembolso)} fue enviada al administrador y al soporte para que la autoricen; te avisaremos en tus notificaciones.`
+            : 'Reserva cancelada sin reembolso (faltaba menos de 1 hora).'
+        ),
+
+        false
+      );
+
+    } catch (err) {
+
+      mostrar(
+        aviso,
+        'No se pudo conectar con el servidor.',
+        true
+      );
+
+      btn.disabled = false;
 
     }
 
@@ -4847,6 +5530,7 @@ ancho_metros:
   const NOTIF_NARANJA = [
     'recordatorio_fin',
     'reserva_cancelada',
+    'reembolso_rechazado',
     'espacio_rechazado',
     'vehiculo_rechazado',
     'caso_escalado',
@@ -5860,6 +6544,12 @@ ancho_metros:
                 'pubPrecio'
               ).value
             ),
+
+          precio_dia:
+            leerPrecioOpcional('pubPrecioDia'),
+
+          precio_mes:
+            leerPrecioOpcional('pubPrecioMes'),
 
           capacidad_vehiculos:
   Number.parseInt(

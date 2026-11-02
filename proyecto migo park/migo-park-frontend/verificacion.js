@@ -170,6 +170,13 @@
       }
 
       // ----- validación de los datos del espacio antes de enviar -----
+      // Precios por día y por mes: opcionales. Vacío = no se arrienda por día / por mes.
+      for (const [id, nombre] of [['pubPrecioDia', 'día'], ['pubPrecioMes', 'mes']]) {
+        const bruto = val(id).trim();
+        if (bruto !== '' && !(Number(bruto) > 0)) {
+          return aviso(msg, `El precio por ${nombre} debe ser mayor a 0 (o déjalo vacío si no arriendas por ${nombre}).`, true);
+        }
+      }
       const capacidad = Number(val('pubCapacidad'));
       const largo = Number(val('pubLargo'));
       const ancho = Number(val('pubAncho'));
@@ -189,6 +196,8 @@
       fd.append('latitud', val('pubLatitud'));
       fd.append('longitud', val('pubLongitud'));
       fd.append('precio_hora', val('pubPrecio'));
+      fd.append('precio_dia', val('pubPrecioDia').trim());
+      fd.append('precio_mes', val('pubPrecioMes').trim());
       fd.append('capacidad_vehiculos', capacidad);
       fd.append('largo_metros', largo);
       fd.append('ancho_metros', ancho);

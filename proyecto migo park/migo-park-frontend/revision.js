@@ -121,7 +121,9 @@
 
       <div style="font-size:13px;color:#555;margin-bottom:10px;background:#f6f8f6;border-radius:8px;padding:8px 10px;">
         <b>Datos publicados:</b>
-        ${escapar(Number(e.precio_hora).toLocaleString('es-CO'))} COP / hora ·
+        ${escapar(Number(e.precio_hora).toLocaleString('es-CO'))} COP / hora
+        ${e.precio_dia ? ' · ' + escapar(Number(e.precio_dia).toLocaleString('es-CO')) + ' COP / día' : ''}
+        ${e.precio_mes ? ' · ' + escapar(Number(e.precio_mes).toLocaleString('es-CO')) + ' COP / mes' : ''} ·
         🚗 ${escapar(e.capacidad_vehiculos || 1)} vehículo(s) ·
         📏 ${escapar(e.largo_metros || 0)} m × ${escapar(e.ancho_metros || 0)} m
         (${(Number(e.largo_metros || 0) * Number(e.ancho_metros || 0)).toFixed(2)} m²)<br>

@@ -157,6 +157,14 @@
   .ok { color: var(--verde-texto); }
   .vacio { color: #777; text-align: center; margin: 24px 0; }
 
+  /* ----- Ingresos y rentabilidad ----- */
+  .nota-panel { font-size: 13px; color: #555; margin: -6px 0 14px; }
+  .ing-datos { display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 13px; color: #555; margin-top: 8px; }
+  .ing-datos b { color: var(--negro); }
+  .ing-barra { height: 8px; background: #eee; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+  .ing-barra > div { height: 100%; background: var(--verde); border-radius: 6px; }
+  .ing-espacios { font-size: 12px; color: #666; margin-top: 8px; overflow-wrap: anywhere; }
+
   .overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
     display: flex; justify-content: center; align-items: flex-start;
@@ -208,6 +216,8 @@
     mask: var(--i) center / contain no-repeat;
   }
   .sidebar .item[data-vista="metricas"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="ingresos"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z'/%3E%3C/svg%3E"); }
+  .sidebar .item[data-vista="reembolsos"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z'/%3E%3C/svg%3E"); }
   .sidebar .item[data-vista="verificaciones"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
   .sidebar .item[data-vista="reservas"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z'/%3E%3C/svg%3E"); }
   .sidebar .item[data-vista="espacios"] { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z'/%3E%3C/svg%3E"); }
@@ -281,6 +291,43 @@
       <div id="listaEspaciosPendientes"></div>
       <h3 class="seccion">Vehículos</h3>
       <div id="listaVehiculosPendientes"></div>
+    </div>
+
+    <!-- INGRESOS Y RENTABILIDAD (solo administrador) -->
+    <div id="vista-ingresos" style="display:none;">
+      <h2>Ingresos y rentabilidad</h2>
+      <p class="nota-panel">Lo que gana Migo Park (comisión) por cada espacio y por cada usuario arrendador, de mayor a menor.</p>
+      <form class="filtros" id="formFiltroIngresos">
+        <select id="ingPeriodo" aria-label="Periodo">
+          <option value="30">Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+          <option value="365">Último año</option>
+          <option value="0">Todo el tiempo</option>
+        </select>
+        <select id="ingVista" aria-label="Ver por espacio o por usuario">
+          <option value="espacio">Ver por espacio</option>
+          <option value="usuario">Ver por usuario</option>
+        </select>
+        <input type="text" id="ingQ" aria-label="Buscar por espacio o usuario" placeholder="Buscar por espacio o usuario (nombre/correo)">
+        <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Buscar</button>
+        <button type="button" class="btn gris" onclick="limpiarFiltroIngresos()"><span class="ico i-limpiar"></span>Limpiar</button>
+      </form>
+      <div id="contenidoIngresos">Cargando...</div>
+    </div>
+
+    <!-- REEMBOLSOS (administrador y soporte) -->
+    <div id="vista-reembolsos" style="display:none;">
+      <h2>Reembolsos</h2>
+      <p class="nota-panel">Cuando un conductor cancela una reserva pagada con 1 hora o más de anticipación, escribe una justificación y pide el reembolso. Aquí lo autorizas o lo rechazas.</p>
+      <form class="filtros" id="formFiltroReembolsos">
+        <select id="reembEstado" aria-label="Estado del reembolso">
+          <option value="pendiente">Por autorizar</option>
+          <option value="aprobado">Autorizados</option>
+          <option value="rechazado">Rechazados</option>
+        </select>
+        <button type="submit" class="btn verde"><span class="ico i-buscar"></span>Ver</button>
+      </form>
+      <div id="listaReembolsos">Cargando...</div>
     </div>
 
     <!-- RESERVAS -->
@@ -475,8 +522,10 @@
   // ---------- menú lateral (depende del rol) ----------
   const VISTAS = [
     { id: 'metricas',       nombre: 'Métricas',        soloAdmin: true, cargar: () => cargarMetricas() },
+    { id: 'ingresos',       nombre: 'Ingresos',        soloAdmin: true, cargar: () => cargarIngresos() },
     { id: 'verificaciones', nombre: 'Verificaciones',                   cargar: () => cargarVerificaciones() },
     { id: 'reservas',       nombre: 'Reservas',                         cargar: () => cargarReservas() },
+    { id: 'reembolsos',     nombre: 'Reembolsos',                       cargar: () => cargarReembolsos() },
     { id: 'espacios',       nombre: 'Espacios',                         cargar: () => cargarEspaciosAdmin() },
     { id: 'soporte',        nombre: 'Soporte',                          cargar: () => cargarSoporte() },
     { id: 'usuarios',       nombre: 'Usuarios',                         cargar: () => cargarUsuarios() },
@@ -512,9 +561,9 @@
 
       cont.innerHTML = `
         <div class="tiles">
-          <div class="tile"><div class="num">${dinero(m.dinero.ingresos_brutos)}</div><div class="txt">Ingresos brutos (pagos completados)</div></div>
-          <div class="tile"><div class="num">${dinero(m.dinero.comisiones)}</div><div class="txt">Comisiones de reservas activas</div></div>
-          <div class="tile"><div class="num negro">${dinero(m.dinero.reembolsos)}</div><div class="txt">Reembolsos entregados</div></div>
+          <div class="tile"><div class="num">${dinero(m.dinero.comisiones)}</div><div class="txt">Comisiones ganadas (la parte de Migo Park)</div></div>
+          <div class="tile"><div class="num negro">${dinero(m.dinero.reembolsos)}</div><div class="txt">Reembolsos autorizados</div></div>
+          <div class="tile"><div class="num naranja">${m.dinero.reembolsos_pendientes}</div><div class="txt">Reembolsos por autorizar</div></div>
           <div class="tile"><div class="num negro">${m.dinero.reservas_30_dias}</div><div class="txt">Reservas en los últimos 30 días</div></div>
         </div>
         <div class="tiles">
@@ -589,7 +638,7 @@
               <h4>${esc(e.titulo)}</h4>
               <p>${esc(e.direccion)} (${esc(e.latitud)}, ${esc(e.longitud)})</p>
               ${e.descripcion ? `<p>${esc(e.descripcion)}</p>` : ''}
-              <p>${dinero(e.precio_hora)} / hora · ${esc(seg)}</p>
+              <p>${dinero(e.precio_hora)} / hora${e.precio_dia ? ' · ' + dinero(e.precio_dia) + ' / día' : ''}${e.precio_mes ? ' · ' + dinero(e.precio_mes) + ' / mes' : ''} · ${esc(seg)}</p>
               <p>🚗 Capacidad: ${esc(e.capacidad_vehiculos || 1)} vehículo(s) · 📏 ${esc(e.largo_metros || 0)} m × ${esc(e.ancho_metros || 0)} m · Área: ${(Number(e.largo_metros || 0) * Number(e.ancho_metros || 0)).toFixed(2)} m²</p>
               ${fotosPendiente(e)}
               <p>Publicado por ${esc(e.arrendador_nombre)} (${esc(e.arrendador_correo)})</p>
@@ -705,6 +754,181 @@
     });
   }
 
+  // ---------- INGRESOS Y RENTABILIDAD (solo administrador) ----------
+  // Muestra únicamente la comisión de Migo Park, nunca lo que pagaron los conductores ni lo que ganó cada arrendador.
+  async function cargarIngresos() {
+    const cont = document.getElementById('contenidoIngresos');
+    cont.innerHTML = 'Cargando...';
+    const params = new URLSearchParams();
+    params.set('dias', document.getElementById('ingPeriodo').value);
+    const q = document.getElementById('ingQ').value.trim();
+    if (q) params.set('q', q);
+
+    try {
+      const resp = await api('/admin/rentabilidad?' + params.toString());
+      const d = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(d.error || 'Error')}</p>`; return; }
+
+      const porUsuario = document.getElementById('ingVista').value === 'usuario';
+      const r = d.resumen;
+      const pct = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString('es-CO') + '%');
+
+      const tiles = `
+        <div class="tiles">
+          <div class="tile"><div class="num">${dinero(r.comision_total)}</div><div class="txt">Comisión ganada en el periodo</div></div>
+          <div class="tile"><div class="num negro">${r.reservas}</div><div class="txt">Reservas pagadas</div></div>
+          <div class="tile"><div class="num negro">${dinero(r.comision_promedio)}</div><div class="txt">Comisión promedio por reserva</div></div>
+          <div class="tile"><div class="num naranja">${r.espacios_con_ingresos} de ${r.espacios_total}</div><div class="txt">Espacios con ingresos</div></div>
+        </div>`;
+
+      const datos = (x) => `
+        <div class="ing-datos">
+          <span>Reservas pagadas: <b>${x.reservas}</b></span>
+          <span>Comisión por reserva: <b>${dinero(x.comision_promedio)}</b></span>
+          <span>Ocupación: <b>${pct(x.ocupacion)}</b></span>
+          <span>Participación en el total: <b>${pct(x.participacion)}</b></span>
+        </div>
+        <div class="ing-barra" title="Participación en la comisión total"><div style="width:${Math.min(100, Number(x.participacion) || 0)}%"></div></div>`;
+
+      const lista = porUsuario ? d.usuarios : d.espacios;
+      let cuerpo;
+      if (lista.length === 0) {
+        cuerpo = '<p class="vacio">No se encontraron resultados con ese filtro.</p>';
+      } else if (porUsuario) {
+        cuerpo = lista.map((u, i) => `
+          <div class="card bloque">
+            <div class="encabezado">
+              <div class="info">
+                <h4>#${i + 1} · ${esc(u.nombre)}</h4>
+                <p>${esc(u.correo)} · ${u.cantidad_espacios} espacio(s)</p>
+              </div>
+              <span class="etiqueta ${Number(u.comision) > 0 ? 'verde' : 'gris'}">${dinero(u.comision)}</span>
+            </div>
+            ${datos(u)}
+            <div class="ing-espacios">Espacios: ${u.espacios.map(e => `${esc(e.titulo)} (${dinero(e.comision)})`).join(' · ')}</div>
+          </div>`).join('');
+      } else {
+        cuerpo = lista.map((e, i) => `
+          <div class="card bloque">
+            <div class="encabezado">
+              <div class="info">
+                <h4>#${i + 1} · ${esc(e.titulo)}</h4>
+                <p>${esc(e.direccion)} · Arrendador: ${esc(e.arrendador_nombre)} (${esc(e.arrendador_correo)})</p>
+              </div>
+              <span class="etiqueta ${Number(e.comision) > 0 ? 'verde' : 'gris'}">${dinero(e.comision)}</span>
+            </div>
+            ${datos(e)}
+          </div>`).join('');
+      }
+
+      cont.innerHTML = tiles + `<h3 class="seccion">${porUsuario ? 'Por usuario (arrendador)' : 'Por espacio'}</h3>` + cuerpo;
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  document.getElementById('formFiltroIngresos').addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarIngresos();
+  });
+  function limpiarFiltroIngresos() {
+    document.getElementById('ingPeriodo').value = '30';
+    document.getElementById('ingVista').value = 'espacio';
+    document.getElementById('ingQ').value = '';
+    cargarIngresos();
+  }
+
+  // ---------- REEMBOLSOS (administrador y soporte) ----------
+  function textoReembolso(r) {
+    if (r.estado_reembolso === 'pendiente') return ' · Reembolso ' + dinero(r.monto_reembolso) + ' (por autorizar)';
+    if (r.estado_reembolso === 'aprobado') return ' · Reembolso ' + dinero(r.monto_reembolso) + ' (autorizado)';
+    if (r.estado_reembolso === 'rechazado') return ' · Reembolso rechazado';
+    return '';
+  }
+
+  function actualizarInsigniaReembolsos(n) {
+    const el = document.getElementById('insigniaReembolsos');
+    if (!el) return;
+    el.textContent = n > 99 ? '99+' : n;
+    el.style.display = n > 0 ? 'inline-flex' : 'none';
+  }
+
+  async function cargarInsigniaReembolsos() {
+    try {
+      const resp = await api('/admin/reembolsos?estado=pendiente');
+      if (!resp.ok) return;
+      const d = await resp.json();
+      actualizarInsigniaReembolsos(d.pendientes);
+    } catch (err) { /* no es crítico */ }
+  }
+
+  async function cargarReembolsos() {
+    const cont = document.getElementById('listaReembolsos');
+    const estado = document.getElementById('reembEstado').value;
+    cont.innerHTML = 'Cargando...';
+    try {
+      const resp = await api('/admin/reembolsos?estado=' + encodeURIComponent(estado));
+      const d = await resp.json();
+      if (!resp.ok) { cont.innerHTML = `<p class="vacio error">${esc(d.error || 'Error')}</p>`; return; }
+      actualizarInsigniaReembolsos(d.pendientes);
+
+      if (d.reembolsos.length === 0) {
+        cont.innerHTML = `<p class="vacio">No hay reembolsos ${estado === 'pendiente' ? 'por autorizar' : estado === 'aprobado' ? 'autorizados' : 'rechazados'}.</p>`;
+        return;
+      }
+
+      cont.innerHTML = d.reembolsos.map(r => `
+        <div class="card bloque">
+          <div class="encabezado">
+            <div class="info">
+              <h4>Reserva #${r.id} · ${esc(r.espacio_titulo)}</h4>
+              <p>${esc(fechaCorta(r.fecha_inicio))} → ${esc(fechaCorta(r.fecha_fin))}</p>
+              <p>Conductor: ${esc(r.conductor_nombre)} (${esc(r.conductor_correo)}) · Arrendador: ${esc(r.arrendador_nombre)}</p>
+              <p>Pago: ${esc(r.metodo_pago || '—')} · Canceló el ${esc(fechaCorta(r.fecha_cancelacion))}</p>
+            </div>
+            <span class="etiqueta ${r.estado_reembolso === 'pendiente' ? 'naranja' : r.estado_reembolso === 'aprobado' ? 'verde' : 'rojo'}">${dinero(r.estado_reembolso === 'rechazado' ? r.total : r.monto_reembolso)}</span>
+          </div>
+          <p style="margin-top:8px;"><b>Justificación del conductor:</b> ${esc(r.motivo_cancelacion)}</p>
+          ${r.estado_reembolso === 'pendiente' ? `
+            <textarea class="area" id="notaReembolso-${r.id}" rows="2" maxlength="500" aria-label="Nota para el conductor" placeholder="Nota para el conductor (obligatoria si rechazas)"></textarea>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+              <button class="btn verde" onclick="decidirReembolso(${r.id}, 'aprobar')">Autorizar reembolso</button>
+              <button class="btn rojo" onclick="decidirReembolso(${r.id}, 'rechazar')">Rechazar</button>
+            </div>` : `
+            <p style="margin-top:6px;"><b>${r.estado_reembolso === 'aprobado' ? 'Autorizado' : 'Rechazado'}</b> por ${esc(r.decidido_por_nombre || '—')} el ${esc(fechaCorta(r.fecha_decision_reembolso))}${r.nota_decision_reembolso ? '. Nota: ' + esc(r.nota_decision_reembolso) : ''}</p>`}
+        </div>`).join('');
+    } catch (err) {
+      cont.innerHTML = '<p class="vacio error">No se pudo conectar con el servidor.</p>';
+    }
+  }
+
+  document.getElementById('formFiltroReembolsos').addEventListener('submit', (e) => {
+    e.preventDefault();
+    cargarReembolsos();
+  });
+
+  async function decidirReembolso(id, decision) {
+    const campoNota = document.getElementById('notaReembolso-' + id);
+    if (!campoNota) return;   // la lista se está recargando
+    const nota = campoNota.value.trim();
+    if (decision === 'rechazar' && nota.length < 10) {
+      alert('Escribe el motivo del rechazo (mínimo 10 caracteres); se le envía al conductor.');
+      return;
+    }
+    if (!confirm(decision === 'aprobar' ? '¿Autorizar este reembolso?' : '¿Rechazar este reembolso?')) return;
+    try {
+      const resp = await api(`/admin/reembolsos/${id}/decision`, {
+        method: 'PUT',
+        body: JSON.stringify({ decision, nota })
+      });
+      const d = await resp.json();
+      if (!resp.ok) alert(d.error || 'No se pudo registrar la decisión');
+    } catch (err) {
+      alert('No se pudo conectar con el servidor.');
+    }
+    await cargarReembolsos();
+  }
+
   // ---------- RESERVAS ----------
   const ETIQUETAS_RESERVA = {
     pendiente:  { texto: 'Pendiente de pago',  clase: 'naranja' },
@@ -742,7 +966,8 @@
               <h4>#${r.id} · ${esc(r.espacio_titulo)}</h4>
               <p>${esc(fechaCorta(r.fecha_inicio))} → ${esc(fechaCorta(r.fecha_fin))}</p>
               <p>Conductor: ${esc(r.conductor_nombre)} (${esc(r.conductor_correo)}) · Arrendador: ${esc(r.arrendador_nombre)}</p>
-              <p>Total ${dinero(r.total)} (comisión ${dinero(r.comision)}) · Pago: ${pago}${Number(r.monto_reembolso) > 0 ? ' · Reembolso ' + dinero(r.monto_reembolso) : ''}</p>
+              <p>Comisión ganada: ${dinero(['confirmada', 'completada'].includes(r.estado) ? r.comision : 0)} · Pago: ${pago}${textoReembolso(r)}</p>
+              ${r.motivo_cancelacion ? `<p><b>Justificación de la cancelación${r.fecha_cancelacion ? ' (' + esc(fechaCorta(r.fecha_cancelacion)) + ')' : ''}:</b> ${esc(r.motivo_cancelacion)}</p>` : ''}
             </div>
             <span class="etiqueta ${et.clase}">${et.texto}</span>
           </div>`;
@@ -1201,18 +1426,19 @@
       if (!resp.ok) { cont.innerHTML = '<p>No se pudieron cargar las notificaciones.</p>'; return; }
       if (!data.notificaciones || data.notificaciones.length === 0) { cont.innerHTML = '<p>No tienes notificaciones.</p>'; return; }
       cont.innerHTML = data.notificaciones.map(n => `
-        <div class="notificacion-item ${n.leida ? '' : 'no-leida'}" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="abrirNotificacionPanel(${Number(n.id)})">
+        <div class="notificacion-item ${n.leida ? '' : 'no-leida'}" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="abrirNotificacionPanel(${Number(n.id)}, '${esc(n.tipo)}')">
           <strong>${esc(n.tipo === 'espacio_modificado' ? 'Espacio de parqueo modificado' : String(n.tipo || 'Notificación').replaceAll('_',' '))}</strong>
           <p>${esc(n.mensaje)}</p><small>${esc(fechaCorta(n.fecha))}${n.leida ? ' · Leída' : ' · Sin leer'}</small>
         </div>`).join('');
       actualizarContadorNotificaciones();
     } catch (e) { cont.innerHTML = '<p>No se pudo conectar con el servidor.</p>'; }
   }
-  async function abrirNotificacionPanel(id) {
+  async function abrirNotificacionPanel(id, tipo) {
     try {
       await api(`/notificaciones/${id}/leida`, { method: 'PUT' });
       await cargarNotificacionesPanel();
       await actualizarContadorNotificaciones();
+      if (tipo === 'reembolso_pendiente') mostrarVista('reembolsos');
     } catch (e) { console.error(e); }
   }
   async function marcarTodasNotificaciones(event) {
@@ -1228,10 +1454,13 @@
     document.getElementById('quien').textContent = `${usuario.nombre} (${usuario.rol})`;
     document.getElementById('menu').innerHTML = vistasPermitidas()
       .map(v => `<div class="item" data-vista="${v.id}" role="button" tabindex="0" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="mostrarVista('${v.id}')"><span>${v.nombre}</span>` +
-                (v.id === 'soporte' ? '<span class="insignia" id="insigniaSoporte" style="display:none;"></span>' : '') + '</div>')
+                (v.id === 'soporte' ? '<span class="insignia" id="insigniaSoporte" style="display:none;"></span>' : '') +
+                (v.id === 'reembolsos' ? '<span class="insignia" id="insigniaReembolsos" style="display:none;"></span>' : '') + '</div>')
       .join('');
     mostrarVista(esAdmin ? 'metricas' : 'verificaciones');
     cargarResumenSoporte();
+    cargarInsigniaReembolsos();
+    setInterval(cargarInsigniaReembolsos, 30000);   // avisa cuántos reembolsos esperan autorización
     setInterval(cargarResumenSoporte, 30000);   // actualiza la insignia cada 30 s
     actualizarContadorNotificaciones();
     setInterval(() => {
