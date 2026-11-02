@@ -4,9 +4,11 @@
 // y ajusta MENSAJE_DESTINO.
 
 async function enviarCodigo2fa(correo, nombre, codigo) {
+  // Se quitan saltos de línea y caracteres de control para que nadie pueda inventar líneas falsas en el registro
+  const correoLog = String(correo).replace(/[\p{Cc}\u2028\u2029]+/gu, ' ').slice(0, 200);
   console.log('');
   console.log('========== CÓDIGO DE VERIFICACIÓN (modo desarrollo) ==========');
-  console.log(`Usuario: ${correo}`);
+  console.log(`Usuario: ${correoLog}`);
   console.log(`Código:  ${codigo}      (vale 5 minutos)`);
   console.log('==============================================================');
   console.log('');
