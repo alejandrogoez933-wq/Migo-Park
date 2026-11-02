@@ -545,7 +545,8 @@
     margin: 0 0 4px 0;
   }
 
-  .modal label {
+  .modal label,
+  .modal .etiqueta-grupo {
     display: block;
     font-size: 13px;
     color: #555;
@@ -1555,13 +1556,18 @@
         style="margin-bottom:12px;"
       ></div>
 
-      <label>
+      <div
+        class="etiqueta-grupo"
+        id="resTarifasTitulo"
+      >
         ¿Cómo quieres pagar?
-      </label>
+      </div>
 
       <div
         class="tarifas"
         id="resTarifas"
+        role="group"
+        aria-labelledby="resTarifasTitulo"
       ></div>
 
       <label for="resInicio">
