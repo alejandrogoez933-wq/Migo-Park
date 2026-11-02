@@ -83,16 +83,16 @@ function calcularFin(inicio, tipo, cantidad) {
 // Precio unitario del espacio para una tarifa (null si el arrendador no la ofrece)
 function precioUnitario(espacio, tipo) {
   const campo = { hora: 'precio_hora', dia: 'precio_dia', mes: 'precio_mes' }[tipo];
-  const valor = campo ? Number(espacio[campo]) : NaN;
+  const valor = campo ? Number(espacio[campo]) : Number.NaN;
   return Number.isFinite(valor) && valor > 0 ? valor : null;
 }
 
 // Lee un precio opcional (día/mes) que viene del formulario.
-// Vacío -> null (no ofrece esa tarifa) | número > 0 -> ese número | otra cosa -> NaN (inválido)
+// Vacío -> null (no ofrece esa tarifa) | número > 0 -> ese número | otra cosa -> Number.NaN (inválido)
 function leerPrecioOpcional(valor) {
   if (valor === undefined || valor === null || String(valor).trim() === '') return null;
   const n = Number(valor);
-  return Number.isFinite(n) && n > 0 ? n : NaN;
+  return Number.isFinite(n) && n > 0 ? n : Number.NaN;
 }
 
 // 1) Cancela las reservas que no se pagaron a tiempo (y marca su pago como fallido)
