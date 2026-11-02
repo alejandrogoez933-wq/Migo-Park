@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const pool = require('../db');
 const { verificarToken, requiereRol } = require('../middlewares/auth.middleware');
 const V = require('../utils/verificacion');
+const { leerPrecioOpcional } = require('../utils/reservas');
 
 const router = express.Router();
 
@@ -124,6 +125,8 @@ router.post('/publicar', verificarToken, requiereRol('cliente'), subirDocsYFotos
     const lat = Number(b.latitud);
     const lng = Number(b.longitud);
     const precio = Number(b.precio_hora);
+    const precioDia = leerPrecioOpcional(b.precio_dia);
+    const precioMes = leerPrecioOpcional(b.precio_mes);
     const capacidad = Number(b.capacidad_vehiculos);
     const largo = Number(b.largo_metros);
     const ancho = Number(b.ancho_metros);
@@ -136,6 +139,12 @@ router.post('/publicar', verificarToken, requiereRol('cliente'), subirDocsYFotos
     }
     if (Number.isNaN(precio) || precio <= 0) {
       return res.status(400).json({ error: 'El precio por hora debe ser mayor a 0' });
+    }
+    if (Number.isNaN(precioDia)) {
+      return res.status(400).json({ error: 'El precio por día debe ser mayor a 0 (o déjalo vacío si no arriendas por día)' });
+    }
+    if (Number.isNaN(precioMes)) {
+      return res.status(400).json({ error: 'El precio por mes debe ser mayor a 0 (o déjalo vacío si no arriendas por mes)' });
     }
     if (b.capacidad_vehiculos === undefined || b.capacidad_vehiculos === '' || !Number.isInteger(capacidad) || capacidad <= 0) {
       return res.status(400).json({ error: 'La capacidad de vehículos debe ser un número entero mayor a 0' });
@@ -178,11 +187,13 @@ router.post('/publicar', verificarToken, requiereRol('cliente'), subirDocsYFotos
     const nuevo = await client.query(
       `INSERT INTO espacios_parqueo
          (arrendador_id, titulo, descripcion, direccion, latitud, longitud, precio_hora,
+          precio_dia, precio_mes,
           capacidad_vehiculos, largo_metros, ancho_metros,
           tiene_camara, tiene_porton, tiene_iluminacion, relacion_propietario)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING *`,
       [req.usuario.id, titulo, (b.descripcion || '').trim() || null, direccion, lat, lng, precio,
+       precioDia, precioMes,
        capacidad, largo, ancho,
        esVerdadero(b.tiene_camara), esVerdadero(b.tiene_porton), esVerdadero(b.tiene_iluminacion), relacion]
     );
@@ -360,6 +371,7 @@ router.get('/espacio/:id/revision', verificarToken, requiereRol('administrador',
       espacio: {
         id: e.id, titulo: e.titulo, descripcion: e.descripcion, direccion: e.direccion,
         latitud: e.latitud, longitud: e.longitud, precio_hora: e.precio_hora,
+        precio_dia: e.precio_dia, precio_mes: e.precio_mes,
         capacidad_vehiculos: e.capacidad_vehiculos, largo_metros: e.largo_metros, ancho_metros: e.ancho_metros,
         tiene_camara: e.tiene_camara, tiene_porton: e.tiene_porton, tiene_iluminacion: e.tiene_iluminacion,
         verificado: e.verificado, motivo_rechazo: e.motivo_rechazo,

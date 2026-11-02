@@ -206,8 +206,11 @@ router.get('/:id/comprobante', verificarToken, async (req, res) => {
 
     doc.fontSize(13).fillColor('#2E9E4F').text('Montos');
     doc.moveDown(0.3);
-    fila('Subtotal:', dinero(pago.subtotal));
-    fila('Comisión de servicio:', dinero(pago.comision));
+    // Reservas nuevas: el conductor paga solo el precio (sin comisión). Las antiguas sí llevaban comisión sumada.
+    if (Number(pago.total) > Number(pago.subtotal)) {
+      fila('Subtotal:', dinero(pago.subtotal));
+      fila('Comisión de servicio:', dinero(pago.comision));
+    }
     doc.fontSize(12).fillColor('#111111').text(`Total pagado: ${dinero(pago.monto)}`, 50, doc.y, { underline: false });
     doc.moveDown(0.8);
 

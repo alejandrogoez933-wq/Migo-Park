@@ -72,11 +72,11 @@ router.get('/metricas', verificarToken, requiereRol('administrador'), async (req
 
         `SELECT
 
-           COALESCE((SELECT SUM(monto) FROM pagos WHERE estado = 'completado'), 0) AS ingresos_brutos,
-
            COALESCE((SELECT SUM(comision) FROM reservas WHERE estado IN ('confirmada', 'completada')), 0) AS comisiones,
 
-           COALESCE((SELECT SUM(monto_reembolso) FROM reservas WHERE estado = 'cancelada'), 0) AS reembolsos,
+           COALESCE((SELECT SUM(monto_reembolso) FROM reservas WHERE estado = 'cancelada' AND estado_reembolso = 'aprobado'), 0) AS reembolsos,
+
+           (SELECT COUNT(*)::int FROM reservas WHERE estado_reembolso = 'pendiente') AS reembolsos_pendientes,
 
            (SELECT COUNT(*)::int FROM reservas WHERE fecha_creacion >= NOW() - interval '30 days') AS reservas_30_dias`
 
@@ -591,9 +591,9 @@ router.get('/reservas', verificarToken, requiereRol('administrador', 'soporte'),
 
     const resultado = await pool.query(
 
-      `SELECT r.id, r.estado, r.fecha_inicio, r.fecha_fin, r.subtotal, r.comision, r.total,
+      `SELECT r.id, r.estado, r.fecha_inicio, r.fecha_fin, r.comision,
 
-              r.monto_reembolso, r.fecha_creacion,
+              r.monto_reembolso, r.estado_reembolso, r.fecha_creacion, r.fecha_cancelacion, r.motivo_cancelacion,
 
               e.titulo AS espacio_titulo,
 
@@ -646,5 +646,249 @@ router.get('/reservas', verificarToken, requiereRol('administrador', 'soporte'),
 });
 
 
+
+// ======================================================
+// GET /api/admin/rentabilidad?dias=30|90|365|0&q=texto   (solo administrador)
+// Ingresos y rentabilidad de cada espacio y de cada usuario (arrendador).
+// "Ingreso" = la comisión que gana Migo Park por las reservas pagadas de ese espacio.
+// NO muestra lo que pagaron los conductores ni lo que ganó cada arrendador.
+// dias = 0 -> todo el tiempo
+// ======================================================
+router.get('/rentabilidad', verificarToken, requiereRol('administrador'), async (req, res) => {
+  const DIAS_VALIDOS = [0, 30, 90, 365];
+  const diasPedidos = Number(req.query.dias);
+  const dias = DIAS_VALIDOS.includes(diasPedidos) ? diasPedidos : 30;
+  const q = String(req.query.q || '').trim().toLowerCase();
+
+  try {
+    await actualizarReservas(pool);
+
+    const resultado = await pool.query(
+      `WITH periodo AS (
+         SELECT CASE WHEN $1::int > 0 THEN NOW() - make_interval(days => $1::int) END AS desde
+       )
+       SELECT e.id, e.titulo, e.direccion, e.arrendador_id,
+              u.nombre AS arrendador_nombre, u.correo AS arrendador_correo,
+              COALESCE(ing.reservas, 0)::int AS reservas,
+              COALESCE(ing.comision, 0)::float8 AS comision,
+              COALESCE(oc.horas, 0)::float8 AS horas_reservadas,
+              GREATEST(EXTRACT(EPOCH FROM (
+                NOW() - CASE WHEN p.desde IS NULL OR e.fecha_creacion >= p.desde THEN e.fecha_creacion ELSE p.desde END
+              )) / 3600, 0)::float8 AS horas_periodo
+       FROM espacios_parqueo e
+       JOIN usuarios u ON u.id = e.arrendador_id
+       CROSS JOIN periodo p
+       LEFT JOIN LATERAL (
+         -- reservas con pago completado dentro del periodo y la comisión que dejaron
+         SELECT COUNT(*) AS reservas, SUM(r.comision) AS comision
+         FROM reservas r
+         WHERE r.espacio_id = e.id
+           AND r.estado IN ('confirmada', 'completada')
+           AND EXISTS (
+             SELECT 1 FROM pagos pg
+             WHERE pg.reserva_id = r.id AND pg.estado = 'completado'
+               AND (p.desde IS NULL OR pg.fecha_pago >= p.desde)
+           )
+       ) ing ON TRUE
+       LEFT JOIN LATERAL (
+         -- horas que el espacio estuvo reservado dentro del periodo (hasta hoy)
+         SELECT SUM(EXTRACT(EPOCH FROM (
+                  LEAST(r.fecha_fin, NOW())
+                  - CASE WHEN p.desde IS NULL OR r.fecha_inicio >= p.desde THEN r.fecha_inicio ELSE p.desde END
+                )) / 3600) AS horas
+         FROM reservas r
+         WHERE r.espacio_id = e.id
+           AND r.estado IN ('confirmada', 'completada')
+           AND r.fecha_inicio < NOW()
+           AND (p.desde IS NULL OR r.fecha_fin > p.desde)
+       ) oc ON TRUE
+       WHERE e.verificado = TRUE OR COALESCE(ing.reservas, 0) > 0`,
+      [dias]
+    );
+
+    const filas = resultado.rows;
+    const comisionTotal = filas.reduce((t, f) => t + f.comision, 0);
+    const reservasTotal = filas.reduce((t, f) => t + f.reservas, 0);
+    const redondear = (n, d = 2) => Number(Number(n).toFixed(d));
+    const porcentaje = (parte, todo) => (todo > 0 ? redondear((parte / todo) * 100, 1) : 0);
+    const ocupacion = (horas, horasPeriodo) =>
+      (horasPeriodo >= 1 ? Math.min(100, redondear((horas / horasPeriodo) * 100, 1)) : null);
+
+    const espacios = filas.map((f) => ({
+      id: f.id,
+      titulo: f.titulo,
+      direccion: f.direccion,
+      arrendador_id: f.arrendador_id,
+      arrendador_nombre: f.arrendador_nombre,
+      arrendador_correo: f.arrendador_correo,
+      reservas: f.reservas,
+      comision: redondear(f.comision),
+      comision_promedio: f.reservas > 0 ? redondear(f.comision / f.reservas) : 0,
+      participacion: porcentaje(f.comision, comisionTotal),
+      ocupacion: ocupacion(f.horas_reservadas, f.horas_periodo),
+      horas_reservadas: f.horas_reservadas,
+      horas_periodo: f.horas_periodo,
+    }));
+
+    // Agrupado por usuario (arrendador)
+    const mapa = new Map();
+    for (const e of espacios) {
+      if (!mapa.has(e.arrendador_id)) {
+        mapa.set(e.arrendador_id, {
+          id: e.arrendador_id,
+          nombre: e.arrendador_nombre,
+          correo: e.arrendador_correo,
+          reservas: 0,
+          comision: 0,
+          horas_reservadas: 0,
+          horas_periodo: 0,
+          espacios: [],
+        });
+      }
+      const u = mapa.get(e.arrendador_id);
+      u.reservas += e.reservas;
+      u.comision += e.comision;
+      u.horas_reservadas += e.horas_reservadas;
+      u.horas_periodo += e.horas_periodo;
+      u.espacios.push({ id: e.id, titulo: e.titulo, reservas: e.reservas, comision: e.comision });
+    }
+    const ordenar = (a, b) => b.comision - a.comision || b.reservas - a.reservas;
+    const usuarios = [...mapa.values()].map((u) => ({
+      id: u.id,
+      nombre: u.nombre,
+      correo: u.correo,
+      cantidad_espacios: u.espacios.length,
+      reservas: u.reservas,
+      comision: redondear(u.comision),
+      comision_promedio: u.reservas > 0 ? redondear(u.comision / u.reservas) : 0,
+      participacion: porcentaje(u.comision, comisionTotal),
+      ocupacion: ocupacion(u.horas_reservadas, u.horas_periodo),
+      espacios: u.espacios.sort(ordenar),
+    }));
+
+    const coincide = (...campos) => !q || campos.some((c) => String(c || '').toLowerCase().includes(q));
+
+    res.json({
+      periodo: { dias },
+      resumen: {
+        comision_total: redondear(comisionTotal),
+        reservas: reservasTotal,
+        comision_promedio: reservasTotal > 0 ? redondear(comisionTotal / reservasTotal) : 0,
+        espacios_con_ingresos: filas.filter((f) => f.reservas > 0).length,
+        espacios_total: filas.length,
+        usuarios_con_ingresos: usuarios.filter((u) => u.reservas > 0).length,
+      },
+      espacios: espacios
+        .filter((e) => coincide(e.titulo, e.direccion, e.arrendador_nombre, e.arrendador_correo))
+        .sort(ordenar)
+        .map(({ horas_reservadas, horas_periodo, ...resto }) => resto),
+      usuarios: usuarios
+        .filter((u) => coincide(u.nombre, u.correo) || u.espacios.some((e) => coincide(e.titulo)))
+        .sort(ordenar),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al calcular ingresos y rentabilidad' });
+  }
+});
+
+
+// ======================================================
+// Reembolsos por cancelación: administrador y soporte los autorizan o rechazan
+//   GET /api/admin/reembolsos?estado=pendiente|aprobado|rechazado
+//   PUT /api/admin/reembolsos/:id/decision   body: { decision: 'aprobar' | 'rechazar', nota }
+// ======================================================
+const dineroCOP = (n) => '$' + Number(n).toLocaleString('es-CO');
+
+router.get('/reembolsos', verificarToken, requiereRol('administrador', 'soporte'), async (req, res) => {
+  const estado = ['pendiente', 'aprobado', 'rechazado'].includes(req.query.estado) ? req.query.estado : 'pendiente';
+
+  try {
+    const lista = await pool.query(
+      `SELECT r.id, r.estado_reembolso, r.monto_reembolso, r.total, r.fecha_inicio, r.fecha_fin,
+              r.fecha_cancelacion, r.motivo_cancelacion, r.fecha_decision_reembolso, r.nota_decision_reembolso,
+              r.tipo_tarifa, r.cantidad,
+              e.titulo AS espacio_titulo,
+              uc.nombre AS conductor_nombre, uc.correo AS conductor_correo,
+              ua.nombre AS arrendador_nombre,
+              ud.nombre AS decidido_por_nombre,
+              (SELECT pg.metodo_pago FROM pagos pg
+                WHERE pg.reserva_id = r.id AND pg.estado = 'completado' ORDER BY pg.id DESC LIMIT 1) AS metodo_pago
+       FROM reservas r
+       JOIN espacios_parqueo e ON e.id = r.espacio_id
+       JOIN usuarios uc ON uc.id = r.conductor_id
+       JOIN usuarios ua ON ua.id = e.arrendador_id
+       LEFT JOIN usuarios ud ON ud.id = r.reembolso_decidido_por
+       WHERE r.estado_reembolso = $1::text
+       ORDER BY CASE WHEN $1::text = 'pendiente' THEN r.fecha_cancelacion END ASC,
+                r.fecha_decision_reembolso DESC NULLS LAST, r.id DESC
+       LIMIT 200`,
+      [estado]
+    );
+    const pendientes = await pool.query(`SELECT COUNT(*)::int AS n FROM reservas WHERE estado_reembolso = 'pendiente'`);
+    res.json({ pendientes: pendientes.rows[0].n, reembolsos: lista.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener los reembolsos' });
+  }
+});
+
+router.put('/reembolsos/:id/decision', verificarToken, requiereRol('administrador', 'soporte'), async (req, res) => {
+  const id = Number(req.params.id);
+  const decision = req.body && req.body.decision;
+  const nota = String((req.body && req.body.nota) || '').replace(/\s+/g, ' ').trim();
+
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'Reserva inválida' });
+  if (!['aprobar', 'rechazar'].includes(decision)) {
+    return res.status(400).json({ error: 'La decisión debe ser aprobar o rechazar' });
+  }
+  if (decision === 'rechazar' && nota.length < 10) {
+    return res.status(400).json({ error: 'Escribe el motivo del rechazo (mínimo 10 caracteres); se le envía al conductor.' });
+  }
+  if (nota.length > 500) return res.status(400).json({ error: 'La nota no puede superar los 500 caracteres' });
+
+  const nuevoEstado = decision === 'aprobar' ? 'aprobado' : 'rechazado';
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Solo se decide una vez: si otro ya la resolvió, no actualiza nada
+    const actualizada = await client.query(
+      `UPDATE reservas
+       SET estado_reembolso = $1::varchar,
+           monto_reembolso = CASE WHEN $1::varchar = 'aprobado' THEN monto_reembolso ELSE 0 END,
+           reembolso_decidido_por = $2,
+           fecha_decision_reembolso = NOW(),
+           nota_decision_reembolso = $3
+       WHERE id = $4 AND estado = 'cancelada' AND estado_reembolso = 'pendiente'
+       RETURNING id, conductor_id, monto_reembolso,
+                 (SELECT titulo FROM espacios_parqueo WHERE id = reservas.espacio_id) AS espacio_titulo`,
+      [nuevoEstado, req.usuario.id, nota || null, id]
+    );
+    if (actualizada.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'Esta solicitud no existe o ya fue resuelta por otra persona' });
+    }
+    const r = actualizada.rows[0];
+
+    const mensaje = decision === 'aprobar'
+      ? `Tu reembolso de ${dineroCOP(r.monto_reembolso)} por la reserva #${r.id} en "${r.espacio_titulo}" fue autorizado.` +
+        (nota ? ` Nota: ${nota}` : '')
+      : `Tu solicitud de reembolso por la reserva #${r.id} en "${r.espacio_titulo}" fue rechazada. Motivo: ${nota}`;
+    await client.query(
+      `INSERT INTO notificaciones (usuario_id, tipo, mensaje) VALUES ($1, $2, $3)`,
+      [r.conductor_id, decision === 'aprobar' ? 'reembolso_aprobado' : 'reembolso_rechazado', mensaje]
+    );
+
+    await client.query('COMMIT');
+    res.json({ id: r.id, estado_reembolso: nuevoEstado, monto_reembolso: Number(r.monto_reembolso) });
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error(err);
+    res.status(500).json({ error: 'Error al registrar la decisión' });
+  } finally {
+    client.release();
+  }
+});
 
 module.exports = router;

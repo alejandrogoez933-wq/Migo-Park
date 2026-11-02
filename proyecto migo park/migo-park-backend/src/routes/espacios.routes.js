@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 const pool = require('../db');
 const { verificarToken, requiereRol } = require('../middlewares/auth.middleware');
+const { leerPrecioOpcional } = require('../utils/reservas');
 
 const router = express.Router();
 
@@ -154,6 +155,8 @@ router.post(
   latitud,
   longitud,
   precio_hora,
+  precio_dia,
+  precio_mes,
   capacidad_vehiculos,
   largo_metros,
   ancho_metros,
@@ -181,10 +184,24 @@ router.post(
     const lat = Number(latitud);
     const lng = Number(longitud);
     const precio = Number(precio_hora);
+    const precioDia = leerPrecioOpcional(precio_dia);
+    const precioMes = leerPrecioOpcional(precio_mes);
 
     const capacidad = Number(capacidad_vehiculos);
     const largo = Number(largo_metros);
     const ancho = Number(ancho_metros);
+
+    if (Number.isNaN(precioDia)) {
+      return res.status(400).json({
+        error: 'El precio por día debe ser mayor a 0 (o déjalo vacío si no arriendas por día)'
+      });
+    }
+
+    if (Number.isNaN(precioMes)) {
+      return res.status(400).json({
+        error: 'El precio por mes debe ser mayor a 0 (o déjalo vacío si no arriendas por mes)'
+      });
+    }
 
     if (
       Number.isNaN(lat) ||
@@ -241,6 +258,8 @@ if (
   latitud,
   longitud,
   precio_hora,
+  precio_dia,
+  precio_mes,
   capacidad_vehiculos,
   largo_metros,
   ancho_metros,
@@ -263,7 +282,9 @@ if (
   $10,
   $11,
   $12,
-  $13
+  $13,
+  $14,
+  $15
 )
 
         RETURNING *
@@ -276,6 +297,8 @@ if (
   lat,
   lng,
   precio,
+  precioDia,
+  precioMes,
   capacidad,
   largo,
   ancho,
@@ -631,6 +654,8 @@ router.put(
         latitud,
         longitud,
         precio_hora,
+        precio_dia,
+        precio_mes,
         capacidad_vehiculos,
         largo_metros,
         ancho_metros,
@@ -657,6 +682,8 @@ router.put(
       const lat = Number(latitud);
       const lng = Number(longitud);
       const precio = Number(precio_hora);
+      const precioDia = leerPrecioOpcional(precio_dia);
+      const precioMes = leerPrecioOpcional(precio_mes);
       const capacidad = Number(capacidad_vehiculos);
       const largo = Number(largo_metros);
       const ancho = Number(ancho_metros);
@@ -677,6 +704,18 @@ router.put(
       if (Number.isNaN(precio) || precio <= 0) {
         return res.status(400).json({
           error: 'El precio por hora debe ser mayor a 0'
+        });
+      }
+
+      if (Number.isNaN(precioDia)) {
+        return res.status(400).json({
+          error: 'El precio por día debe ser mayor a 0 (o déjalo vacío si no arriendas por día)'
+        });
+      }
+
+      if (Number.isNaN(precioMes)) {
+        return res.status(400).json({
+          error: 'El precio por mes debe ser mayor a 0 (o déjalo vacío si no arriendas por mes)'
         });
       }
 
@@ -730,21 +769,23 @@ router.put(
           latitud = $4,
           longitud = $5,
           precio_hora = $6,
-          capacidad_vehiculos = $7,
-          largo_metros = $8,
-          ancho_metros = $9,
-          tiene_camara = $10,
-          tiene_porton = $11,
-          tiene_iluminacion = $12,
+          precio_dia = $7,
+          precio_mes = $8,
+          capacidad_vehiculos = $9,
+          largo_metros = $10,
+          ancho_metros = $11,
+          tiene_camara = $12,
+          tiene_porton = $13,
+          tiene_iluminacion = $14,
           motivo_rechazo = NULL,
           fecha_rechazo = NULL
-        WHERE id = $13 AND arrendador_id = $14
+        WHERE id = $15 AND arrendador_id = $16
         RETURNING *
         `,
         [
           titulo.trim(),
           descripcion ? descripcion.trim() : null,
-          direccion.trim(), lat, lng, precio, capacidad, largo, ancho,
+          direccion.trim(), lat, lng, precio, precioDia, precioMes, capacidad, largo, ancho,
           !!tiene_camara, !!tiene_porton, !!tiene_iluminacion,
           espacioId, usuarioId
         ]
@@ -758,6 +799,8 @@ router.put(
         ['Latitud', 'latitud', anterior.latitud, actualizado.latitud],
         ['Longitud', 'longitud', anterior.longitud, actualizado.longitud],
         ['Precio por hora', 'precio_hora', anterior.precio_hora, actualizado.precio_hora],
+        ['Precio por día', 'precio_dia', anterior.precio_dia, actualizado.precio_dia],
+        ['Precio por mes', 'precio_mes', anterior.precio_mes, actualizado.precio_mes],
         ['Capacidad', 'capacidad_vehiculos', anterior.capacidad_vehiculos, actualizado.capacidad_vehiculos],
         ['Largo (m)', 'largo_metros', anterior.largo_metros, actualizado.largo_metros],
         ['Ancho (m)', 'ancho_metros', anterior.ancho_metros, actualizado.ancho_metros],

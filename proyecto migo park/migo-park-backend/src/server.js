@@ -1,3 +1,6 @@
+// Zona horaria de Colombia: debe ir antes de todo para que el servidor y la base de datos usen la misma hora
+process.env.TZ = 'America/Bogota';
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -37,18 +40,22 @@ app.use('/api/auth/registro', exigirContrasenaSegura);
 app.use('/api/auth/crear-staff', exigirContrasenaSegura);
 app.use('/api/auth/restablecer-contrasena', exigirContrasenaSegura);
 
-// Máx. 10 intentos por 15 min en login, registro y recuperación de contraseña
-const limiteAuth = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Demasiados intentos. Espera 15 minutos e inténtalo de nuevo.' }
-});
-app.use('/api/auth/login', limiteAuth);
-app.use('/api/auth/registro', limiteAuth);
-app.use('/api/auth/olvide-contrasena', limiteAuth);
-app.use('/api/auth/restablecer-contrasena', limiteAuth);
+// Límites de intentos (cada ruta tiene su PROPIO contador; antes compartían uno solo y se llenaba rápido).
+// skipSuccessfulRequests: los intentos que salen bien NO cuentan, solo los fallidos.
+function limitar(max) {
+    return rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max,
+        skipSuccessfulRequests: true,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: { error: 'Demasiados intentos. Espera 15 minutos e inténtalo de nuevo.' }
+    });
+}
+app.use('/api/auth/login', limitar(10));
+app.use('/api/auth/registro', limitar(30));
+app.use('/api/auth/olvide-contrasena', limitar(10));
+app.use('/api/auth/restablecer-contrasena', limitar(10));
 
 // Límite propio para el 2FA (además, cada cuenta se bloquea 15 min tras 5 códigos fallidos)
 app.use('/api/auth/2fa', rateLimit({

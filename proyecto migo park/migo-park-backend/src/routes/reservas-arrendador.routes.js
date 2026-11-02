@@ -6,6 +6,8 @@ const {
     requiereRol
 } = require('../middlewares/auth.middleware');
 
+const { comisionDelArrendador } = require('../utils/reservas');
+
 const router = express.Router();
 
 
@@ -46,6 +48,9 @@ router.get(
                         ) / 3600,
                         2
                     ) AS horas,
+
+                    r.tipo_tarifa,
+                    r.cantidad,
 
                     r.subtotal,
                     r.comision,
@@ -106,9 +111,16 @@ router.get(
 
                 horas: Number(r.horas || 0),
 
+                tipo_tarifa: r.tipo_tarifa || 'hora',
+
+                cantidad: r.cantidad == null ? null : Number(r.cantidad),
+
                 subtotal: Number(r.subtotal || 0),
 
                 comision: Number(r.comision || 0),
+
+                // Comisión de Migo Park que se descuenta al arrendador en esta reserva
+                comision_arrendador: comisionDelArrendador(r),
 
                 total: Number(r.total || 0),
 
@@ -124,8 +136,8 @@ router.get(
 
                 fecha_pago: r.fecha_pago || null,
 
-                // Lo que recibe el arrendador
-                ganancia: Number(r.subtotal || 0)
+                // Lo que recibe el arrendador: lo que pagó el conductor menos la comisión
+                ganancia: Number(r.subtotal || 0) - comisionDelArrendador(r)
 
             }));
 
@@ -145,6 +157,11 @@ router.get(
 
                 total_ganado: reservasPagadas.reduce(
                     (total, r) => total + r.ganancia,
+                    0
+                ),
+
+                total_comision: reservasPagadas.reduce(
+                    (total, r) => total + r.comision_arrendador,
                     0
                 )
 
