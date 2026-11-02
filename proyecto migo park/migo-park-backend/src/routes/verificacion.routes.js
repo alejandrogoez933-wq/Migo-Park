@@ -17,7 +17,7 @@ const router = express.Router();
 // ---------- subida de archivos (en memoria: se validan ANTES de escribir nada en disco) ----------
 const subida = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024, files: V.TIPOS.length },
+  limits: { fileSize: 7 * 1024 * 1024, files: V.TIPOS.length }, // 7 MB por documento (menos de 8 MB: límite seguro)
 }).fields(V.TIPOS.map((t) => ({ name: t, maxCount: 1 })));
 
 // ---------- fotos del espacio al publicar (misma carpeta pública que en "Mis espacios") ----------
@@ -29,7 +29,7 @@ fs.mkdirSync(DIR_FOTOS, { recursive: true });
 // Documentos + fotos del espacio en una sola solicitud (solo para /publicar)
 const subidaConFotos = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024, files: V.TIPOS.length + MAX_FOTOS },
+  limits: { fileSize: 7 * 1024 * 1024, files: V.TIPOS.length + MAX_FOTOS }, // 7 MB por documento (menos de 8 MB: límite seguro)
 }).fields([
   ...V.TIPOS.map((t) => ({ name: t, maxCount: 1 })),
   { name: 'fotos', maxCount: MAX_FOTOS },
@@ -39,7 +39,7 @@ function subirDocsYFotos(req, res, next) {
   subidaConFotos(req, res, (err) => {
     if (!err) return next();
     const mensaje = err.code === 'LIMIT_FILE_SIZE'
-      ? 'Cada archivo puede pesar máximo 8 MB (las fotos, máximo 5 MB).'
+      ? 'Cada archivo puede pesar máximo 7 MB (las fotos, máximo 5 MB).'
       : err.code === 'LIMIT_UNEXPECTED_FILE'
         ? `Puedes subir máximo ${MAX_FOTOS} fotos del espacio.`
         : 'No se pudieron recibir los archivos.';
@@ -82,7 +82,7 @@ function subirDocs(req, res, next) {
   subida(req, res, (err) => {
     if (!err) return next();
     const mensaje = err.code === 'LIMIT_FILE_SIZE'
-      ? 'Cada archivo puede pesar máximo 8 MB.'
+      ? 'Cada archivo puede pesar máximo 7 MB.'
       : 'No se pudieron recibir los archivos.';
     res.status(400).json({ error: mensaje });
   });
