@@ -1,0 +1,9 @@
+   node_modules
+   .env
+   .git
+   .vscode
+   uploads
+   documentos-privados
+   desktop.ini
+   prueba-smtp.js
+   npm-debug.log
