@@ -1,4 +1,7 @@
-FROM nginx:alpine
-COPY . /usr/share/nginx/html
-RUN rm -f /usr/share/nginx/html/Dockerfile /usr/share/nginx/html/.dockerignore /usr/share/nginx/html/desktop.ini
-EXPOSE 80
+FROM nginxinc/nginx-unprivileged:alpine
+
+# Solo los archivos del sitio (sin copiar toda la carpeta)
+COPY index.html home.html admin.html 2fa.js contrasena.js revision.js verificacion.js /usr/share/nginx/html/
+
+# Esta imagen corre sin root y escucha en el puerto 8080
+EXPOSE 8080
