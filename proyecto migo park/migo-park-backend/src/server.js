@@ -19,11 +19,13 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // Solo tu frontend puede llamar a la API (agrega aquí otros orígenes si los necesitas)
 // Permite cualquier puerto de localhost / 127.0.0.1 (y archivos abiertos con file://, solo para desarrollo)
+// En producción: define FRONTEND_URL con la(s) URL(s) del frontend, separadas por coma
 app.use(cors({
     origin: (origin, callback) => {
         if (
             !origin ||
             origin === 'null' ||
+            (process.env.FRONTEND_URL || '').split(',').includes(origin) ||
             /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
         ) {
             return callback(null, true);
