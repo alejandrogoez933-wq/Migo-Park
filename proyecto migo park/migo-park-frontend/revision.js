@@ -14,7 +14,7 @@
     ['direccion_coincide', 'La dirección del documento coincide con la dirección del espacio'],
   ];
 
-  const APIBASE = () => (typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:4000/api');
+  const APIBASE = () => (typeof API_URL !== 'undefined' ? API_URL : 'https://migo-park.onrender.com/api');
   const FILEBASE = () => APIBASE().replace(/\/api\/?$/, '');
   const escapar = (t) => (typeof esc === 'function'
     ? esc(t)

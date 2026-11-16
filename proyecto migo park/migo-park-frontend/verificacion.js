@@ -23,7 +23,7 @@
     ],
   };
 
-  const api = () => (typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:4000/api');
+  const api = () => (typeof API_URL !== 'undefined' ? API_URL : 'https://migo-park.onrender.com/api');
   const tokenActual = () => sessionStorage.getItem('token');
   const aviso = (el, texto, error) => {
     if (typeof mostrar === 'function') return mostrar(el, texto, error);
